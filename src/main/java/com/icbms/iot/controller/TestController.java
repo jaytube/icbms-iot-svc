@@ -1,5 +1,6 @@
 package com.icbms.iot.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.icbms.iot.client.MqttPushClient;
 import com.icbms.iot.entity.DeviceAlarmInfoLog;
 import com.icbms.iot.mapper.DeviceAlarmInfoLogMapper;
@@ -31,7 +32,8 @@ public class TestController {
     @GetMapping("/publishTopic")
     public String publishTopic() {
         String topicString = "test";
-        mqttPushClient.publish(0, false, topicString, "Test posting");
+        DeviceAlarmInfoLog alarmInfoLog = findById("01a4350c9d6a4f46a8f3026abfdc06d8");
+        mqttPushClient.publish(0, false, topicString, JSON.toJSONString(alarmInfoLog));
         return "ok";
     }
     // Send custom message content (using default theme)
