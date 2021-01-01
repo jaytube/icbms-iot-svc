@@ -1,14 +1,11 @@
 package com.icbms.iot.inbound;
 
-import com.icbms.iot.config.MqttConfig;
 import com.icbms.iot.client.MqttPushClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,18 +13,10 @@ public class PushCallback implements MqttCallback {
 
     private static final Logger logger = LoggerFactory.getLogger(MqttPushClient.class);
 
-    @Autowired
-    private MqttConfig mqttConfig;
-
-    private static MqttClient client;
-
     @Override
     public void connectionLost(Throwable throwable) {
         // After the connection is lost, it is usually reconnected here
         logger.info("Disconnected, can be reconnected");
-        if (null != client) {
-            mqttConfig.getMqttPushClient();
-        }
     }
 
     @Override
