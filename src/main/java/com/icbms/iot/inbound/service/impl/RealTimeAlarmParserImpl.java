@@ -18,8 +18,8 @@ public class RealTimeAlarmParserImpl implements RealTimeAlarmParser {
 
     @Override
     public void parseRealTimeData(byte[] payload) {
-        this.logger.info("实时数据处理============>解析实时数据start!!!!");
-        this.logger.info("]收到的数据域=============>[" + CommonUtil.bytesToHex(payload) + "]");
+        logger.info("实时数据处理============>解析实时数据start!!!!");
+        logger.info("]收到的数据域=============>[" + CommonUtil.bytesToHex(payload) + "]");
         int index = 0;
         Integer header = CommonUtil.getInt(payload, index);
         if(header == 14344)
@@ -91,6 +91,6 @@ public class RealTimeAlarmParserImpl implements RealTimeAlarmParser {
         if(end != 8198)
             throw new IotException(ErrorCodeEnum.IOT_MESSAGE_END_INCORRECT);
 
-        this.logger.info("实时数据处理============>解析实时数据end!!!!index应该等于"+index/2+"个字节");
+        logger.info("实时数据处理============>解析实时数据end!!!!index应该等于"+index/2+"个字节");
     }
 }

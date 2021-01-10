@@ -1,12 +1,15 @@
 package com.icbms.iot.inbound;
 
 import com.icbms.iot.client.MqttPushClient;
+import com.icbms.iot.util.CommonUtil;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import java.util.Base64;
 
 @Component
 public class PushCallback implements MqttCallback {

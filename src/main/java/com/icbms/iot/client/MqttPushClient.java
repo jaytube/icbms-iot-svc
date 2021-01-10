@@ -47,14 +47,11 @@ public class MqttPushClient {
             options.setConnectionTimeout(timeout);
             options.setKeepAliveInterval(keepAlive);
             MqttPushClient.setClient(client);
-            try {
-                client.setCallback(pushCallback);
-                client.connect(options);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            client.setCallback(pushCallback);
+            client.connect(options);
+            logger.info("mqtt 连接成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("mqtt: 连接失败", e);
         }
     }
 
@@ -97,6 +94,7 @@ public class MqttPushClient {
         try {
             MqttPushClient.getClient().subscribe(topic, qos);
         } catch (MqttException e) {
+            logger.error("subscribe topic");
             e.printStackTrace();
         }
     }
