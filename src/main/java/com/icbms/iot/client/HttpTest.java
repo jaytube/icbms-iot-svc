@@ -87,7 +87,8 @@ public class HttpTest {
         DownLink link = new DownLink();
         link.confirmed = false;
         link.data = new String(encoder.encodeToString(commondBytes));
-        String deviceid = "393235306537910b";
+        //String deviceid = "393235306537910b";
+        String deviceid = "393235305c378d03";
         link.devEUI = deviceid;
         link.fPort = 4;
         link.reference = "reference";
