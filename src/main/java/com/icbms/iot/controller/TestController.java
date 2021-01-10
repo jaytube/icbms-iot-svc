@@ -49,6 +49,11 @@ public class TestController {
         return "ok";
     }
 
+    @GetMapping("/http")
+    public void test() {
+
+    }
+
 
     // Send custom message content (using default theme)
     @GetMapping("/publishTopic/{data}")

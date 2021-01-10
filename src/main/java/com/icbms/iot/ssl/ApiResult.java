@@ -7,9 +7,9 @@ package com.icbms.iot.ssl;
  */
 public class ApiResult {
 
-    private int code;
-    private String message;
-    private boolean success;
+    public int code;
+    public String message;
+    public boolean success;
 
     public int getCode() {
         return code;

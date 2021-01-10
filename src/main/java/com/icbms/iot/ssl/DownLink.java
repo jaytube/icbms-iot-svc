@@ -6,11 +6,11 @@ package com.icbms.iot.ssl;
  * @Desc: DownLink
  */
 public class DownLink {
-    private boolean confirmed;
-    private String data;
-    private String devEUI;
-    private int fPort;
-    String reference;
+    public boolean confirmed;
+    public String data;
+    public String devEUI;
+    public int fPort;
+    public String reference;
 
     public boolean isConfirmed() {
         return confirmed;
