@@ -35,7 +35,7 @@ public class RealTimeMessageProcessMaster extends AbstractMessageProcessor {
     private RealTimeMessageParser realTimeMessageParser;
 
     @Autowired
-    private RedisTemplate<String, List<RealTimeMessage>> redisTemplate;
+    private RedisTemplate<String, RealTimeMessage> redisTemplate;
 
     @Override
     public void setParameter(MqttMessage message) {
@@ -62,11 +62,12 @@ public class RealTimeMessageProcessMaster extends AbstractMessageProcessor {
     @Override
     public void execute() {
         RealTimeMessage realTimeMessage = realTimeMsgThreadLocal.get();
-        List<RealTimeMessage> realData = redisTemplate.opsForValue().get("REAL_DATA");
+        /*List<RealTimeMessage> realData = redisTemplate.opsForValue().get("REAL_DATA");
         if(CollectionUtils.isEmpty(realData))
             realData = new ArrayList<>();
         realData.add(realTimeMessage);
-        redisTemplate.opsForValue().set("REAL_DATA", realData);
+        redisTemplate.opsForValue().set("REAL_DATA", realData);*/
+        redisTemplate.opsForList().rightPush("REAL_MESSAGE", realTimeMessage);
     }
 
     @Override
