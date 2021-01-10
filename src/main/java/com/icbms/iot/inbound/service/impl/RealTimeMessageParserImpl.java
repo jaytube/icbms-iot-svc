@@ -62,15 +62,14 @@ public class RealTimeMessageParserImpl implements RealTimeMessageParser {
         index += 2;
         message.setAlarmType(type);
 
-        int ram7 = CommonUtil.getShort(payload, index);
+        byte[] elecByteArr = new byte[4];
+        System.arraycopy(payload, index, elecByteArr, 0, 2);
         index += 2;
-        double lowEle = ram7 * 0.001;
-        message.setLowElectric(lowEle);
-
-        int ram8 = CommonUtil.getShort(payload, index);
+        System.arraycopy(payload, index, elecByteArr, 2, 2);
         index += 2;
-        double highEle = ram8 * 0.001;
-        message.setHighElectric(highEle);
+        int val = CommonUtil.bytesToInt(elecByteArr);
+        double ele = val * 0.001;
+        message.setElectric(ele);
 
         int ram9 = CommonUtil.getShort(payload, index);
         index += 2;

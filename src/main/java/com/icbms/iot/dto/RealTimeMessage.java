@@ -14,8 +14,7 @@ public class RealTimeMessage {
     private Double modTemp;
     private Double circuitCurrent;
     private AlarmType alarmType;
-    private Double highElectric;
-    private Double lowElectric;
+    private Double electric;
     private Integer aVoltage;
     private Integer bVoltage;
     private Integer cVoltage;
