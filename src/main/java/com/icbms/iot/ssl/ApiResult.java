@@ -1,37 +1,17 @@
 package com.icbms.iot.ssl;
 
+import lombok.Data;
+
 /**
  * @Author: Cherry
  * @Date: 2021/1/10
  * @Desc: ApiResult
  */
+@Data
 public class ApiResult {
 
     public int code;
     public String message;
     public boolean success;
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
+    public Object data;
 }
