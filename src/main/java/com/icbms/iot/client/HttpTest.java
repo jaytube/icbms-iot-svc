@@ -128,6 +128,7 @@ public class HttpTest {
             //apiResult.Error(ex);
             apiResult.code = 1;
             apiResult.message = ex.getMessage();
+            logger.error("请求失败" + "code = " + apiResult.code + ", message = " + apiResult.message , ex);
         }
         return apiResult;
     }
@@ -154,12 +155,13 @@ public class HttpTest {
             httpPost.setEntity(stringEntity);
             logger.info("httppost: " + JSON.toJSONString(httpPost));
             response = httpclient.execute(httpPost);
-            logger.info("response: " + JSON.toJSONString(response));
+            //logger.info("response: " + JSON.toJSONString(response));
             int statusCode = response.getStatusLine().getStatusCode();
             logger.info("status code: " + statusCode);
+            logger.info("entity: " + JSON.toJSONString(response.getEntity()));
             if (statusCode != HttpStatus.SC_OK) {
                 out = EntityUtils.toString(response.getEntity(), "utf-8");
-                System.out.println(out + ",url: " + url + "params: " + params); //打印错误信息
+                logger.info(out + ",url: " + url + " params: " + params); //打印错误信息
             } else {
                 out = EntityUtils.toString(response.getEntity(), "utf-8");
             }

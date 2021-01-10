@@ -1,6 +1,7 @@
 package com.icbms.iot.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.icbms.iot.client.HttpTest;
 import com.icbms.iot.client.MqttPushClient;
 import com.icbms.iot.config.MqttConfig;
 import com.icbms.iot.entity.DeviceAlarmInfoLog;
@@ -50,8 +51,8 @@ public class TestController {
     }
 
     @GetMapping("/http")
-    public void test() {
-
+    public void test() throws Exception {
+        HttpTest.test();
     }
 
 
