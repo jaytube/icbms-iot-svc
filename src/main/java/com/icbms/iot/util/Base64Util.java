@@ -12,11 +12,11 @@ public class Base64Util {
 
     private static final Logger logger = LoggerFactory.getLogger(MqttPushClient.class);
 
-    private static String encrypt(byte[] bytes){
+    public static String encrypt(byte[] bytes){
         return (new BASE64Encoder()).encodeBuffer(bytes);
     }
 
-    private static byte[] decrypt(String key) {
+    public static byte[] decrypt(String key) {
         try {
             return (new BASE64Decoder()).decodeBuffer(key);
         } catch (IOException e) {
