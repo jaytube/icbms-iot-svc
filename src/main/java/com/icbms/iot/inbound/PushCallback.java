@@ -4,12 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.icbms.iot.client.MqttPushClient;
-import com.icbms.iot.util.CommonUtil;
+import com.icbms.iot.inbound.service.RealTimeAlarmProcessor;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Base64;
@@ -18,6 +19,9 @@ import java.util.Base64;
 public class PushCallback implements MqttCallback {
 
     private static final Logger logger = LoggerFactory.getLogger(MqttPushClient.class);
+
+    @Autowired
+    private RealTimeAlarmProcessor realTimeAlarmProcessor;
 
     @Override
     public void connectionLost(Throwable throwable) {
@@ -31,6 +35,7 @@ public class PushCallback implements MqttCallback {
         logger.info("Receive message subject : " + topic);
         logger.info("receive messages Qos : " + mqttMessage.getQos());
         logger.info("Receive message content : " + new String(mqttMessage.getPayload()));
+        realTimeAlarmProcessor.resolveParameter(mqttMessage);
     }
 
     @Override
