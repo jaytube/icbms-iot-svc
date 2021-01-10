@@ -5,6 +5,9 @@ import com.icbms.iot.client.MqttPushClient;
 import com.icbms.iot.config.MqttConfig;
 import com.icbms.iot.entity.DeviceAlarmInfoLog;
 import com.icbms.iot.mapper.DeviceAlarmInfoLogMapper;
+import com.icbms.iot.ssl.ApiResult;
+import com.icbms.iot.ssl.SSLConnectionSocketUtil;
+import io.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/test")
+@Api(tags = "测试接口")
 public class TestController {
 
     private static final Logger logger = LoggerFactory.getLogger(MqttPushClient.class);
@@ -58,5 +62,18 @@ public class TestController {
     public String test2(@PathVariable("topic") String topic, @PathVariable("data") String data) {
         mqttPushClient.publish(0, false, mqttConfig.getTopic(), data);
         return "ok";
+    }
+
+    @PostMapping("/doPost")
+    @ResponseBody
+    public ApiResult testSendMessage(@RequestBody TestModel model) {
+        try {
+            return SSLConnectionSocketUtil.doGet(model.getUrl(), model.getJson(), model.getCode());
+        } catch (Exception e) {
+            logger.error("send error", e);
+        }
+        ApiResult apiResult = new ApiResult();
+        apiResult.setSuccess(false);
+        return apiResult;
     }
 }
