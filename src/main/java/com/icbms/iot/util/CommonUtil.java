@@ -18,12 +18,12 @@ public class CommonUtil {
     private static final Logger logger = LoggerFactory.getLogger(MqttPushClient.class);
 
     public static byte[] intToBytes(int value) {
-        byte[] byte_src = new byte[]{(byte)(value & 255), (byte)((value & '\uff00') >> 8), (byte)((value & 16711680) >> 16), (byte)((value & -16777216) >> 24)};
+        byte[] byte_src = new byte[]{(byte) (value & 255), (byte) ((value & '\uff00') >> 8), (byte) ((value & 16711680) >> 16), (byte) ((value & -16777216) >> 24)};
         return byte_src;
     }
 
     public static byte[] short2Byte(short a) {
-        byte[] b = new byte[]{(byte)(a >> 8), (byte)a};
+        byte[] b = new byte[]{(byte) (a >> 8), (byte) a};
         return b;
     }
 
@@ -44,8 +44,8 @@ public class CommonUtil {
         String formatedStr = pattern;
         Iterator var4 = arguments.keySet().iterator();
 
-        while(var4.hasNext()) {
-            String key = (String)var4.next();
+        while (var4.hasNext()) {
+            String key = (String) var4.next();
             String replacement = "\\{:" + key + "\\}";
             formatedStr = formatedStr.replaceAll(replacement, arguments.get(key).toString());
             System.out.println(replacement + arguments.get(key).toString());
@@ -84,7 +84,7 @@ public class CommonUtil {
             long nice2 = Long.parseLong(token.nextToken());
             long sys2 = Long.parseLong(token.nextToken());
             long idle2 = Long.parseLong(token.nextToken());
-            float var20 = (float)(user2 + sys2 + nice2 - (user1 + sys1 + nice1)) / (float)(user2 + nice2 + sys2 + idle2 - (user1 + nice1 + sys1 + idle1));
+            float var20 = (float) (user2 + sys2 + nice2 - (user1 + sys1 + nice1)) / (float) (user2 + nice2 + sys2 + idle2 - (user1 + nice1 + sys1 + idle1));
             return var20;
         } catch (FileNotFoundException var32) {
             var32.printStackTrace();
@@ -114,12 +114,12 @@ public class CommonUtil {
             InetAddress ip = null;
             boolean finded = false;
 
-            while(netInterfaces.hasMoreElements() && !finded) {
-                NetworkInterface ni = (NetworkInterface)netInterfaces.nextElement();
+            while (netInterfaces.hasMoreElements() && !finded) {
+                NetworkInterface ni = (NetworkInterface) netInterfaces.nextElement();
                 Enumeration address = ni.getInetAddresses();
 
-                while(address.hasMoreElements()) {
-                    ip = (InetAddress)address.nextElement();
+                while (address.hasMoreElements()) {
+                    ip = (InetAddress) address.nextElement();
                     if (ip.isSiteLocalAddress() && !ip.isLoopbackAddress() && ip.getHostAddress().indexOf(":") == -1) {
                         localip = ip.getHostAddress();
                     }
@@ -133,7 +133,7 @@ public class CommonUtil {
     }
 
     public static Date dateMulti(Date date, int milliseconds) {
-        Date newdate = new Date(date.getTime() + (long)milliseconds);
+        Date newdate = new Date(date.getTime() + (long) milliseconds);
         return newdate;
     }
 
@@ -218,7 +218,7 @@ public class CommonUtil {
         SimpleDateFormat formatter2 = new SimpleDateFormat("mm");
         int hh = Integer.parseInt(formatter1.format(date));
         int mm = Integer.parseInt(formatter2.format(date));
-        between = (long)((hour - hh) * 60 * 60 + (minute - mm) * 60);
+        between = (long) ((hour - hh) * 60 * 60 + (minute - mm) * 60);
         if (between <= 0L) {
             between += 86400L;
         }
@@ -232,7 +232,7 @@ public class CommonUtil {
         SimpleDateFormat formatter2 = new SimpleDateFormat("ss");
         int mm = Integer.parseInt(formatter1.format(date));
         int ss = Integer.parseInt(formatter2.format(date));
-        second = (long)(3600 - mm * 60 - ss);
+        second = (long) (3600 - mm * 60 - ss);
         return second;
     }
 
@@ -305,26 +305,26 @@ public class CommonUtil {
 
     public static long getLatestGameStartTime(long l1, long l2, int nCycle, int nBigCycle) {
         long cur = System.currentTimeMillis();
-        int n = (int)(cur - l1) / nCycle;
-        int dist = nCycle - (int)(cur - l1) % nCycle;
+        int n = (int) (cur - l1) / nCycle;
+        int dist = nCycle - (int) (cur - l1) % nCycle;
         long latest = l1;
         System.out.println(dist);
         if (cur > l2) {
-            return l1 + (long)nBigCycle;
+            return l1 + (long) nBigCycle;
         } else if (cur < l1) {
             return l1;
         } else {
             if (dist >= 120000) {
-                if (l2 - cur > (long)nCycle) {
-                    latest = l1 + (long)((n + 1) * nCycle);
+                if (l2 - cur > (long) nCycle) {
+                    latest = l1 + (long) ((n + 1) * nCycle);
                 } else {
                     System.out.println(1);
                     latest = l2;
                 }
-            } else if (l2 - cur >= (long)nCycle) {
-                latest = l1 + (long)((n + 2) * nCycle);
-            } else if (l2 - cur > 0L && l2 - cur < (long)nCycle) {
-                latest = l1 + (long)((n + 2) * nCycle);
+            } else if (l2 - cur >= (long) nCycle) {
+                latest = l1 + (long) ((n + 2) * nCycle);
+            } else if (l2 - cur > 0L && l2 - cur < (long) nCycle) {
+                latest = l1 + (long) ((n + 2) * nCycle);
             }
 
             return latest;
@@ -411,8 +411,8 @@ public class CommonUtil {
         int byteNum = (40 - Integer.numberOfLeadingZeros(integer < 0 ? ~integer : integer)) / 8;
         byte[] byteArray = new byte[4];
 
-        for(int n = 0; n < byteNum; ++n) {
-            byteArray[3 - n] = (byte)(integer >>> n * 8);
+        for (int n = 0; n < byteNum; ++n) {
+            byteArray[3 - n] = (byte) (integer >>> n * 8);
         }
 
         return byteArray;
@@ -444,7 +444,7 @@ public class CommonUtil {
 
     public static int parseInt(String s) {
         try {
-            return s != null && !"".equals(s) ? (int)Double.parseDouble(s) : 0;
+            return s != null && !"".equals(s) ? (int) Double.parseDouble(s) : 0;
         } catch (Exception var2) {
             return 0;
         }
@@ -468,7 +468,7 @@ public class CommonUtil {
 
     public static short parseShort(String s) {
         try {
-            return s != null && !"".equals(s) ? (short)((int)Double.parseDouble(s)) : 0;
+            return s != null && !"".equals(s) ? (short) ((int) Double.parseDouble(s)) : 0;
         } catch (Exception var2) {
             return 0;
         }
@@ -476,7 +476,7 @@ public class CommonUtil {
 
     public static byte parseByte(String s) {
         try {
-            return s != null && !"".equals(s) ? (byte)((int)Double.parseDouble(s)) : 0;
+            return s != null && !"".equals(s) ? (byte) ((int) Double.parseDouble(s)) : 0;
         } catch (Exception var2) {
             return 0;
         }
@@ -484,7 +484,7 @@ public class CommonUtil {
 
     public static long parseLong(String s) {
         try {
-            return s != null && !"".equals(s) ? (long)Double.parseDouble(s) : 0L;
+            return s != null && !"".equals(s) ? (long) Double.parseDouble(s) : 0L;
         } catch (Exception var2) {
             return 0L;
         }
@@ -502,8 +502,8 @@ public class CommonUtil {
         int min = 0;
         int max = 0;
 
-        for(Iterator iterator = probability.iterator(); iterator.hasNext(); min += max) {
-            Integer integer = (Integer)iterator.next();
+        for (Iterator iterator = probability.iterator(); iterator.hasNext(); min += max) {
+            Integer integer = (Integer) iterator.next();
             max += integer;
             if (min <= ran && ran < max) {
                 return integer;
@@ -527,12 +527,12 @@ public class CommonUtil {
             Field[] var7 = fatherFields;
             int var6 = fatherFields.length;
 
-            for(int var5 = 0; var5 < var6; ++var5) {
+            for (int var5 = 0; var5 < var6; ++var5) {
                 Field fatherField = var7[var5];
                 Field[] var11 = childFields;
                 int var10 = childFields.length;
 
-                for(int var9 = 0; var9 < var10; ++var9) {
+                for (int var9 = 0; var9 < var10; ++var9) {
                     Field childField = var11[var9];
                     if (childField.getName().equalsIgnoreCase(fatherField.getName())) {
                         childField.set(childObj, fatherField.get(fatherObj));
@@ -557,7 +557,7 @@ public class CommonUtil {
         } else {
             int zeroCnt = 0;
 
-            for(int i = 0; i < strLen; ++i) {
+            for (int i = 0; i < strLen; ++i) {
                 int n = Integer.parseInt(strNum.substring(i, i + 1));
                 if (strLen - i > 0) {
                     if (n == 0) {
@@ -626,7 +626,7 @@ public class CommonUtil {
     public static int[] byteArray2IntArray(byte[] ab) {
         int[] an = new int[ab.length];
 
-        for(int i = 0; i < an.length; ++i) {
+        for (int i = 0; i < an.length; ++i) {
             an[i] = ab[i];
         }
 
@@ -636,8 +636,8 @@ public class CommonUtil {
     public static byte[] intArray2ByteArray(int[] an) {
         byte[] ab = new byte[an.length];
 
-        for(int i = 0; i < an.length; ++i) {
-            ab[i] = (byte)an[i];
+        for (int i = 0; i < an.length; ++i) {
+            ab[i] = (byte) an[i];
         }
 
         return ab;
@@ -649,7 +649,7 @@ public class CommonUtil {
             String[] versionNumArray = versionStr.split("_");
             int[] codeArr = new int[versionNumArray.length];
 
-            for(int i = 0; i < versionNumArray.length; ++i) {
+            for (int i = 0; i < versionNumArray.length; ++i) {
                 codeArr[i] = Integer.parseInt(versionNumArray[i]);
             }
 
@@ -688,7 +688,7 @@ public class CommonUtil {
     }
 
     public static short getShort(byte[] b, int index) {
-        return (short)(b[index + 1] & 255 | b[index + 0] << 8);
+        return (short) (b[index + 1] & 255 | b[index + 0] << 8);
     }
 
     public static int getInt(byte[] bb, int index) {
@@ -696,41 +696,41 @@ public class CommonUtil {
     }
 
     public static long getLong(byte[] bb, int index) {
-        return ((long)bb[index + 7] & 255L) << 56 | ((long)bb[index + 6] & 255L) << 48 | ((long)bb[index + 5] & 255L) << 40 | ((long)bb[index + 4] & 255L) << 32 | ((long)bb[index + 3] & 255L) << 24 | ((long)bb[index + 2] & 255L) << 16 | ((long)bb[index + 1] & 255L) << 8 | ((long)bb[index + 0] & 255L) << 0;
+        return ((long) bb[index + 7] & 255L) << 56 | ((long) bb[index + 6] & 255L) << 48 | ((long) bb[index + 5] & 255L) << 40 | ((long) bb[index + 4] & 255L) << 32 | ((long) bb[index + 3] & 255L) << 24 | ((long) bb[index + 2] & 255L) << 16 | ((long) bb[index + 1] & 255L) << 8 | ((long) bb[index + 0] & 255L) << 0;
     }
 
     public static float getFloat(byte[] b, int index) {
         int l = b[index + 0];
         l = l & 255;
-        l = (int)((long)l | (long)b[index + 1] << 8);
+        l = (int) ((long) l | (long) b[index + 1] << 8);
         l &= 65535;
-        l = (int)((long)l | (long)b[index + 2] << 16);
+        l = (int) ((long) l | (long) b[index + 2] << 16);
         l &= 16777215;
-        l = (int)((long)l | (long)b[index + 3] << 24);
+        l = (int) ((long) l | (long) b[index + 3] << 24);
         return Float.intBitsToFloat(l);
     }
 
     public static double getDouble(byte[] b, int index) {
-        long l = (long)b[0];
+        long l = (long) b[0];
         l &= 255L;
-        l |= (long)b[1] << 8;
+        l |= (long) b[1] << 8;
         l &= 65535L;
-        l |= (long)b[2] << 16;
+        l |= (long) b[2] << 16;
         l &= 16777215L;
-        l |= (long)b[3] << 24;
+        l |= (long) b[3] << 24;
         l &= 4294967295L;
-        l |= (long)b[4] << 32;
+        l |= (long) b[4] << 32;
         l &= 1099511627775L;
-        l |= (long)b[5] << 40;
+        l |= (long) b[5] << 40;
         l &= 281474976710655L;
-        l |= (long)b[6] << 48;
+        l |= (long) b[6] << 48;
         l &= 72057594037927935L;
-        l |= (long)b[7] << 56;
+        l |= (long) b[7] << 56;
         return Double.longBitsToDouble(l);
     }
 
     public static String byteToBit(byte b) {
-        return "" + (byte)(b >> 7 & 1) + (byte)(b >> 6 & 1) + (byte)(b >> 5 & 1) + (byte)(b >> 4 & 1) + (byte)(b >> 3 & 1) + (byte)(b >> 2 & 1) + (byte)(b >> 1 & 1) + (byte)(b >> 0 & 1);
+        return "" + (byte) (b >> 7 & 1) + (byte) (b >> 6 & 1) + (byte) (b >> 5 & 1) + (byte) (b >> 4 & 1) + (byte) (b >> 3 & 1) + (byte) (b >> 2 & 1) + (byte) (b >> 1 & 1) + (byte) (b >> 0 & 1);
     }
 
     public static int bytesToInt(byte[] src, int offset) {
@@ -752,7 +752,7 @@ public class CommonUtil {
         int temp = number;
         byte[] b = new byte[2];
 
-        for(int i = 0; i < b.length; ++i) {
+        for (int i = 0; i < b.length; ++i) {
             b[i] = (new Integer(temp & 255)).byteValue();
             temp >>= 8;
         }
@@ -767,13 +767,33 @@ public class CommonUtil {
     public static String bytesToHex(byte[] bytes) {
         StringBuffer sb = new StringBuffer();
 
-        for(int i = 0; i < bytes.length; ++i) {
+        for (int i = 0; i < bytes.length; ++i) {
             sb.append("0123456789ABCDEF".charAt(bytes[i] >> 4 & 15));
             sb.append("0123456789ABCDEF".charAt(bytes[i] & 15)).append(" ");
         }
 
         return sb.toString().trim();
     }
+
+    public static byte[] hexStringToBytes(String hexString) {
+        if (hexString == null || hexString.equals("")) {
+            return null;
+        }
+        hexString = hexString.toUpperCase();
+        int length = hexString.length() / 2;
+        char[] hexChars = hexString.toCharArray();
+        byte[] d = new byte[length];
+        for (int i = 0; i < length; i++) {
+            int pos = i * 2;
+            d[i] = (byte) (charToByte(hexChars[pos]) << 4 | charToByte(hexChars[pos + 1]));
+        }
+        return d;
+    }
+
+    private static byte charToByte(char c) {
+        return (byte) "0123456789ABCDEF".indexOf(c);
+    }
+
 
     public static void main(String[] args) {
         int a = highAndLowAddressSwap(469762048);
