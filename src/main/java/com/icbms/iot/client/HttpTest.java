@@ -32,6 +32,7 @@ import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
+import java.util.Map;
 
 public class HttpTest {
 
@@ -42,7 +43,9 @@ public class HttpTest {
     private static Base64.Decoder decoder = Base64.getDecoder();
     private static Base64.Encoder encoder = Base64.getEncoder();
 
-    /**JWT TOKEN值*/
+    /**
+     * JWT TOKEN值
+     */
     private static final String _jwt_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJsb3JhLWFwcC1zZXJ2ZXIiLCJhdWQiOiJ" +
             "sb3JhLWFwcC1zZXJ2ZXIiLCJuYmYiOjE1Mzc0MDgzMDMsImV4cCI6MzMwOTQzMTcxMDMsInN1YiI6I" +
             "nVzZXIiLCJ1c2VybmFtZSI6ImFkbWluIn0.14eVliflc5oG5FJXIphEfcWbc5A4DxzTk-u5AMaIsJc";
@@ -51,9 +54,9 @@ public class HttpTest {
 
     private static final int timeOut = 60;
 
-    private static String convertObjectToJson(DownLink link) throws IOException {
+    public static String convertObjectToJson(Object data) throws IOException {
         ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String json = objectWriter.writeValueAsString(link); //error on this line
+        String json = objectWriter.writeValueAsString(data); //error on this line
         return json;
 
     }
@@ -80,7 +83,6 @@ public class HttpTest {
     }
 
 
-
     public static void test() throws Exception {
         //String hexContent = "000010E1010001020008";// 四层闪烁
         String hexContent = "000003EE00001E";// 四层闪烁
@@ -97,42 +99,48 @@ public class HttpTest {
 
         String action = "nodes/" + deviceid + "/queue";
 
-        HttpPost(url + action,convertObjectToJson(link));
+        HttpPost(url + action, convertObjectToJson(link));
 
     }
 
     /**
      * 发起Post请求
-     * @param apiUrl    API地址
-     * @param param     Json串
+     *
+     * @param apiUrl API地址
+     * @param param  Json串
      * @return
      */
-    public static ApiResult HttpPost(String apiUrl, String param) throws Exception{
+    public static ApiResult HttpPost(String apiUrl, String param) throws Exception {
         ApiResult apiResult = new ApiResult();
         try {
-            logger.info("【Post】 URL = "+apiUrl);
-            logger.info("入参="+param);
+            logger.info("【Post】 URL = " + apiUrl);
+            logger.info("入参=" + param);
             JSONObject result = doPost(apiUrl, param, _jwt_token);
-            logger.info("出参="+JSONObject.toJSONString(result));
+            logger.info("出参=" + JSONObject.toJSONString(result));
 
-            if(result != null && result.size() > 0){
-                Object code =  result.get("code");
-                if(code != null ){
+            if (result != null && result.size() > 0) {
+                Object code = result.get("code");
+                if (code != null) {
                     apiResult.code = Integer.parseInt(code.toString());
                 }
                 Object error = result.get("error");
-                if(error != null){
-                    apiResult.message = (String)error;
+                if (error != null) {
+                    apiResult.message = (String) error;
                 }
                 apiResult.message = JSONObject.toJSONString(result);
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
             //apiResult.Error(ex);
             apiResult.code = 1;
             apiResult.message = ex.getMessage();
-            logger.error("请求失败" + "code = " + apiResult.code + ", message = " + apiResult.message , ex);
+            logger.error("请求失败" + "code = " + apiResult.code + ", message = " + apiResult.message, ex);
         }
         return apiResult;
+    }
+
+
+    public static JSONObject doPost(String url, Map<String, Object> params) throws Exception {
+        return doPost(url, convertObjectToJson(params), _jwt_token);
     }
 
     /**

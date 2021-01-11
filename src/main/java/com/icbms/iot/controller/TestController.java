@@ -7,7 +7,6 @@ import com.icbms.iot.config.MqttConfig;
 import com.icbms.iot.entity.DeviceAlarmInfoLog;
 import com.icbms.iot.mapper.DeviceAlarmInfoLogMapper;
 import com.icbms.iot.ssl.ApiResult;
-import com.icbms.iot.ssl.SSLConnectionSocketUtil;
 import io.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,12 +72,15 @@ public class TestController {
     @PostMapping("/doPost")
     @ResponseBody
     public ApiResult testSendMessage(@RequestBody TestModel model) {
+        ApiResult apiResult = new ApiResult();
         try {
-            return SSLConnectionSocketUtil.doGet(model.getUrl(), model.getJson(), model.getCode());
+            apiResult.setData(HttpTest.doPost(model.getUrl(), model.getJson()));
+            apiResult.setSuccess(true);
+            return apiResult;
         } catch (Exception e) {
             logger.error("send error", e);
         }
-        ApiResult apiResult = new ApiResult();
+
         apiResult.setSuccess(false);
         return apiResult;
     }
