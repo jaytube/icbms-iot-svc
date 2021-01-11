@@ -82,7 +82,8 @@ public class HttpTest {
 
 
     public static void test() throws Exception {
-        String hexContent = "000010E1010001020008";// 四层闪烁
+        //String hexContent = "000010E1010001020008";// 四层闪烁
+        String hexContent = "000003EE00001E";// 四层闪烁
         byte[] commondBytes = hexStringToBytes(hexContent);
         DownLink link = new DownLink();
         link.confirmed = false;
