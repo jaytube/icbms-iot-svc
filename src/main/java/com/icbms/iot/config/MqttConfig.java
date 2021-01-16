@@ -31,6 +31,8 @@ public class MqttConfig {
 
     private int keepAlive;
 
+    private String clientId;
+
     @Bean
     public MqttPushClient getMqttPushClient() {
         log.info("hostUrl: " + hostUrl);
@@ -39,8 +41,12 @@ public class MqttConfig {
         log.info("timeout: " + timeout);
         log.info("topic: " + topic);
         log.info("keepalive: " + keepAlive);
-        String clientID = UUID.randomUUID().toString();
-        mqttPushClient.connect(hostUrl, clientID, username, password, timeout, keepAlive);
+        log.info("clientId: " + clientId);
+        try {
+            mqttPushClient.connect(hostUrl, clientId, username, password, timeout, keepAlive);
+        } catch (Exception e) {
+            log.error("连接mqtt server 失败！", e);
+        }
         // End with / / to subscribe to all topics starting with test
         mqttPushClient.subscribe(topic, 0);
         return mqttPushClient;

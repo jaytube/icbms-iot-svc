@@ -18,7 +18,7 @@ public class MqttPushClient {
     @Autowired
     private PushCallback pushCallback;
 
-    private static MqttClient client;
+    public static MqttClient client;
 
     /**
      * Client connection
@@ -30,7 +30,8 @@ public class MqttPushClient {
      * @param timeout   Timeout time
      * @param keepAlive Retention number
      */
-    public void connect(String host, String clientID, String username, String password, int timeout, int keepAlive) {
+    public void connect(String host, String clientID, String username, String password, int timeout, int keepAlive) throws Exception{
+        logger.info("mqtt client 开始连接 ");
         try {
             if(client == null) {
                 client = new MqttClient(host, clientID, new MemoryPersistence());
@@ -38,23 +39,20 @@ public class MqttPushClient {
                 logger.info("pushcallback: " + pushCallback);
             }
             MqttConnectOptions options = new MqttConnectOptions();
-            options.setCleanSession(true);
+            options.setCleanSession(false);
             options.setUserName(username);
             options.setPassword(password.toCharArray());
             options.setConnectionTimeout(timeout);
             options.setKeepAliveInterval(keepAlive);
-            if(!client.isConnected()) {
-                client.connect(options);
-                logger.info("连接成功！");
-            } else {
-                client.disconnect();
-                client.connect(options);
-                logger.info("断开后连接成功!");
-            }
+            options.setAutomaticReconnect(true);
+            client.connect(options);
+            logger.info("连接成功！");
         } catch (Exception e) {
             logger.error("mqtt: 连接失败", e);
+            throw e;
         }
     }
+
 
     /**
      * Release
@@ -91,7 +89,7 @@ public class MqttPushClient {
      * @param qos   Connection mode
      */
     public void subscribe(String topic, int qos) {
-        logger.info("Start subscribing to topics" + topic);
+        logger.info("Start subscribing to topics " + topic);
         try {
             client.subscribe(topic, qos);
         } catch (MqttException e) {

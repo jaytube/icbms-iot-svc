@@ -3,9 +3,12 @@ package com.icbms.iot.inbound.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.icbms.iot.dto.LoraMessage;
 import com.icbms.iot.dto.RealTimeMessage;
+import com.icbms.iot.exception.ErrorCodeEnum;
+import com.icbms.iot.exception.IotException;
 import com.icbms.iot.inbound.service.AbstractMessageProcessor;
 import com.icbms.iot.inbound.service.RealTimeMessageParser;
 import com.icbms.iot.util.Base64Util;
+import com.icbms.iot.util.CommonUtil;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +48,17 @@ public class RealTimeMessageProcessMaster extends AbstractMessageProcessor {
         String messageJson = new String(message.getPayload());
         LoraMessage loraMessage = JSON.parseObject(messageJson, LoraMessage.class);
         loraMsgThreadLocal.set(loraMessage);
+    }
+
+    @Override
+    public void validate() {
+        LoraMessage message = loraMsgThreadLocal.get();
+        String dataStr = message.getData();
+        byte[] data = Base64Util.decrypt(dataStr);
+        Integer header = CommonUtil.getInt(data, 0);
+        logger.info("data header: " + Integer.toHexString(header));
+        if(header != 82748)
+            throw new IotException(ErrorCodeEnum.IOT_MESSAGE_HEAD_INCORRECT);
     }
 
     @Override
