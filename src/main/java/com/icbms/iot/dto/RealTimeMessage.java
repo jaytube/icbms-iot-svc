@@ -4,6 +4,8 @@ import com.icbms.iot.enums.AlarmType;
 import com.icbms.iot.enums.BoxAlarmType;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class RealTimeMessage {
 
@@ -13,7 +15,7 @@ public class RealTimeMessage {
     private Integer circuitPower;
     private Double modTemp;
     private Double circuitCurrent;
-    private AlarmType alarmType;
+    private List<AlarmType> alarmTypes;
     private Double electric;
     private Integer aVoltage;
     private Integer bVoltage;
@@ -25,11 +27,11 @@ public class RealTimeMessage {
     private Integer aPower;
     private Integer bPower;
     private Integer cPower;
-    private BoxAlarmType aAlarmType;
-    private BoxAlarmType bAlarmType;
-    private BoxAlarmType cAlarmType;
+    private List<BoxAlarmType> aAlarmTypes;
+    private List<BoxAlarmType> bAlarmTypes;
+    private List<BoxAlarmType> cAlarmTypes;
     private String net380;
-    private boolean on;
+    private Boolean switchFlag;
     private Integer aPowerFactor;
     private Integer bPowerFactor;
     private Integer cPowerFactor;

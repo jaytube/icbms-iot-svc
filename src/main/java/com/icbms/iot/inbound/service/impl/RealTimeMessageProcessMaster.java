@@ -1,7 +1,6 @@
 package com.icbms.iot.inbound.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.icbms.iot.client.MqttPushClient;
 import com.icbms.iot.dto.LoraMessage;
 import com.icbms.iot.dto.RealTimeMessage;
 import com.icbms.iot.inbound.service.AbstractMessageProcessor;
@@ -15,11 +14,13 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.invoke.MethodHandles;
+
 @Service("realTimeMessageProcessMaster")
 @Transactional
 public class RealTimeMessageProcessMaster extends AbstractMessageProcessor {
 
-    private static final Logger logger = LoggerFactory.getLogger(MqttPushClient.class);
+    private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private ThreadLocal<MqttMessage> msgThreadLocal = new ThreadLocal<>();
 

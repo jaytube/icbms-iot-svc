@@ -5,10 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.icbms.iot.ssl.ApiResult;
-import com.icbms.iot.ssl.DownLink;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -33,13 +33,14 @@ import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
 
-public class HttpTest {
+public class HttpTestStop {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private static String url = "https://10.0.210.41:8080/api/";
+    private static String url = "https://10.0.1.70:9900/api-sdm/";
 
     private static Base64.Decoder decoder = Base64.getDecoder();
     private static Base64.Encoder encoder = Base64.getEncoder();
@@ -84,24 +85,50 @@ public class HttpTest {
     }
 
 
-    public static void test(String command) throws Exception {
+    public static void test() throws Exception {
         //String hexContent = "000010E1010001020008";// 四层闪烁
-        //String hexContent = "000003EE00001E";// 四层闪烁
-        byte[] commondBytes = hexStringToBytes(command);
-        DownLink link = new DownLink();
-        link.confirmed = false;
-        link.data = new String(encoder.encodeToString(commondBytes));
-        //String deviceid = "393235306537910b";
-        String deviceid = "393235305c378d03";
-        link.devEUI = deviceid;
-        link.fPort = 4;
-        link.reference = "reference";
-        System.out.println(convertObjectToJson(link));
+        Map<String, String> param = new HashMap<>();
+        param.put("tenant", "cluing");
 
-        String action = "nodes/" + deviceid + "/queue";
+        String action = url + "v1/stpp";
 
-        HttpPost(url + action, convertObjectToJson(link));
+        HttpPost(action, convertObjectToJson(param));
+    }
 
+    public static JSONObject doGet(String url, String jwtToken) throws Exception {
+        CloseableHttpClient httpclient = HttpClients.custom().setConnectionManager(connMgr).setDefaultRequestConfig(requestConfig).build();
+        HttpGet httpGet = new HttpGet(url);
+        CloseableHttpResponse response = null;
+        String out = null;
+        JSONObject jsonObject = new JSONObject();//接收结果
+        try {
+            httpGet.setConfig(requestConfig);
+            httpGet.setHeader("grpc-metadata-authorization", jwtToken);
+            logger.info("httppost: " + JSON.toJSONString(httpGet));
+            response = httpclient.execute(httpGet);
+            //logger.info("response: " + JSON.toJSONString(response));
+            int statusCode = response.getStatusLine().getStatusCode();
+            logger.info("status code: " + statusCode);
+            logger.info("entity: " + JSON.toJSONString(response.getEntity()));
+            if (statusCode != HttpStatus.SC_OK) {
+                out = EntityUtils.toString(response.getEntity(), "utf-8");
+                logger.info(out + ",url: " + url); //打印错误信息
+            } else {
+                out = EntityUtils.toString(response.getEntity(), "utf-8");
+            }
+            jsonObject = JSONObject.parseObject(out);
+            logger.info("response: " + JSON.toJSONString(jsonObject));
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage() + ",url: " + url); //打印错误信息
+            jsonObject.put("code", "1");
+            jsonObject.put("message", e.getMessage());
+        } finally {
+            if (httpGet != null) {
+                httpGet.releaseConnection();
+            }
+        }
+        return jsonObject;
     }
 
     /**

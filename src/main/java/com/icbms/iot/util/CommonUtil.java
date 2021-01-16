@@ -698,6 +698,10 @@ public class CommonUtil {
         return (short) (b[index + 1] & 255 | b[index + 0] << 8);
     }
 
+    public static byte getByte(byte[] b, int index) {
+        return (byte) (b[index] & 255);
+    }
+
     public static int getInt(byte[] bb, int index) {
         return (bb[index + 3] & 255) << 24 | (bb[index + 2] & 255) << 16 | (bb[index + 1] & 255) << 8 | (bb[index + 0] & 255) << 0;
     }

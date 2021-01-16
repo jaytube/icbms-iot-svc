@@ -5,6 +5,7 @@ public abstract class AbstractMessageProcessor implements IBaseMessageProcessor,
     @Override
     public void performExecute() {
         decode();
+
         parse();
         execute();
         postExecute();

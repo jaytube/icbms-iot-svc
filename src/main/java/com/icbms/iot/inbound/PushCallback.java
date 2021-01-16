@@ -1,9 +1,5 @@
 package com.icbms.iot.inbound;
 
-import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.icbms.iot.client.MqttPushClient;
 import com.icbms.iot.inbound.service.InBoundMessageMaster;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -14,10 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.lang.invoke.MethodHandles;
+
 @Component
 public class PushCallback implements MqttCallback {
 
-    private static final Logger logger = LoggerFactory.getLogger(MqttPushClient.class);
+    private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
     @Qualifier("realTimeMessageProcessMaster")
@@ -26,6 +24,7 @@ public class PushCallback implements MqttCallback {
     @Override
     public void connectionLost(Throwable throwable) {
         // After the connection is lost, it is usually reconnected here
+        logger.info(throwable.getMessage());
         logger.info("Disconnected, can be reconnected");
     }
 

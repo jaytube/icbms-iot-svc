@@ -2,6 +2,8 @@ package com.icbms.iot.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.icbms.iot.client.HttpTest;
+import com.icbms.iot.client.HttpTestStart;
+import com.icbms.iot.client.HttpTestStop;
 import com.icbms.iot.client.MqttPushClient;
 import com.icbms.iot.config.MqttConfig;
 import com.icbms.iot.entity.DeviceAlarmInfoLog;
@@ -13,12 +15,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.invoke.MethodHandles;
+
 @RestController
 @RequestMapping("/test")
 @Api(tags = "测试接口")
 public class TestController {
 
-    private static final Logger logger = LoggerFactory.getLogger(MqttPushClient.class);
+    private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
     private MqttPushClient mqttPushClient;
@@ -44,14 +48,24 @@ public class TestController {
 
     @PostMapping("/testconn")
     public String testConn(@RequestBody MqttConfig config) {
-        mqttPushClient.connect(config.getHostUrl(), config.getClientID(), config.getUsername(), config.getPassword(), 100, 100);
+        mqttPushClient.connect(config.getHostUrl(), System.currentTimeMillis() + "", config.getUsername(), config.getPassword(), 100, 100);
         mqttPushClient.subscribe("mqttPushClient", 0);
         return "ok";
     }
 
-    @GetMapping("/http")
-    public void test() throws Exception {
-        HttpTest.test();
+    @GetMapping("/http/{command}")
+    public void test(@PathVariable("command") String command) throws Exception {
+        HttpTest.test(command);
+    }
+
+    @GetMapping("/stop")
+    public void test2() throws Exception {
+        HttpTestStop.test();
+    }
+
+    @GetMapping("/start")
+    public void test3() throws Exception {
+        HttpTestStart.test();
     }
 
 

@@ -8,22 +8,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.lang.invoke.MethodHandles;
+
 @Component
 public class MqttPushClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(MqttPushClient.class);
+    private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
     private PushCallback pushCallback;
 
-    private static MqttClient client;
+    private MqttClient client;
 
-    private static MqttClient getClient() {
+    private MqttClient getClient() {
         return client;
     }
 
-    private static void setClient(MqttClient client) {
-        MqttPushClient.client = client;
+    private void setClient(MqttClient client) {
+        this.client = client;
     }
 
     /**
@@ -46,10 +48,13 @@ public class MqttPushClient {
             options.setPassword(password.toCharArray());
             options.setConnectionTimeout(timeout);
             options.setKeepAliveInterval(keepAlive);
-            MqttPushClient.setClient(client);
+            this.setClient(client);
             client.setCallback(pushCallback);
+            logger.info("pushcallback: " + pushCallback);
             client.connect(options);
             logger.info("mqtt 连接成功");
+            /*client.subscribe(new String[] {topic}, new int[] {1});
+            logger.info("mqtt topic " + topic + " 订阅成功！");*/
         } catch (Exception e) {
             logger.error("mqtt: 连接失败", e);
         }
@@ -68,7 +73,7 @@ public class MqttPushClient {
         message.setQos(qos);
         message.setRetained(retained);
         message.setPayload(pushMessage.getBytes());
-        MqttTopic mTopic = MqttPushClient.getClient().getTopic(topic);
+        MqttTopic mTopic = this.getClient().getTopic(topic);
         if (null == mTopic) {
             logger.error("topic not exist");
         }
@@ -92,7 +97,7 @@ public class MqttPushClient {
     public void subscribe(String topic, int qos) {
         logger.info("Start subscribing to topics" + topic);
         try {
-            MqttPushClient.getClient().subscribe(topic, qos);
+            this.getClient().subscribe(topic, qos);
         } catch (MqttException e) {
             logger.error("subscribe topic");
             e.printStackTrace();
