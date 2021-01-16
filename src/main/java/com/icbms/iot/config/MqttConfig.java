@@ -8,6 +8,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.UUID;
+
 @Configuration
 @ConfigurationProperties("mqtt")
 @Data
@@ -23,8 +25,6 @@ public class MqttConfig {
 
     private String hostUrl;
 
-    //private String clientID;
-
     private String topic;
 
     private int timeout;
@@ -34,13 +34,12 @@ public class MqttConfig {
     @Bean
     public MqttPushClient getMqttPushClient() {
         log.info("hostUrl: " + hostUrl);
-        //log.info("clientID: " + clientID);
         log.info("username: " + username);
         log.info("password: " + password);
         log.info("timeout: " + timeout);
         log.info("topic: " + topic);
         log.info("keepalive: " + keepAlive);
-        String clientID = System.currentTimeMillis() + "";
+        String clientID = UUID.randomUUID().toString();
         mqttPushClient.connect(hostUrl, clientID, username, password, timeout, keepAlive);
         // End with / / to subscribe to all topics starting with test
         mqttPushClient.subscribe(topic, 0);

@@ -18,15 +18,7 @@ public class MqttPushClient {
     @Autowired
     private PushCallback pushCallback;
 
-    private MqttClient client;
-
-    private MqttClient getClient() {
-        return client;
-    }
-
-    private void setClient(MqttClient client) {
-        this.client = client;
-    }
+    private static MqttClient client;
 
     /**
      * Client connection
@@ -39,22 +31,26 @@ public class MqttPushClient {
      * @param keepAlive Retention number
      */
     public void connect(String host, String clientID, String username, String password, int timeout, int keepAlive) {
-        MqttClient client;
         try {
-            client = new MqttClient(host, clientID, new MemoryPersistence());
+            if(client == null) {
+                client = new MqttClient(host, clientID, new MemoryPersistence());
+                client.setCallback(pushCallback);
+                logger.info("pushcallback: " + pushCallback);
+            }
             MqttConnectOptions options = new MqttConnectOptions();
             options.setCleanSession(true);
             options.setUserName(username);
             options.setPassword(password.toCharArray());
             options.setConnectionTimeout(timeout);
             options.setKeepAliveInterval(keepAlive);
-            this.setClient(client);
-            client.setCallback(pushCallback);
-            logger.info("pushcallback: " + pushCallback);
-            client.connect(options);
-            logger.info("mqtt 连接成功");
-            /*client.subscribe(new String[] {topic}, new int[] {1});
-            logger.info("mqtt topic " + topic + " 订阅成功！");*/
+            if(!client.isConnected()) {
+                client.connect(options);
+                logger.info("连接成功！");
+            } else {
+                client.disconnect();
+                client.connect(options);
+                logger.info("断开后连接成功!");
+            }
         } catch (Exception e) {
             logger.error("mqtt: 连接失败", e);
         }
@@ -73,7 +69,7 @@ public class MqttPushClient {
         message.setQos(qos);
         message.setRetained(retained);
         message.setPayload(pushMessage.getBytes());
-        MqttTopic mTopic = this.getClient().getTopic(topic);
+        MqttTopic mTopic = client.getTopic(topic);
         if (null == mTopic) {
             logger.error("topic not exist");
         }
@@ -97,7 +93,7 @@ public class MqttPushClient {
     public void subscribe(String topic, int qos) {
         logger.info("Start subscribing to topics" + topic);
         try {
-            this.getClient().subscribe(topic, qos);
+            client.subscribe(topic, qos);
         } catch (MqttException e) {
             logger.error("subscribe topic");
             e.printStackTrace();
