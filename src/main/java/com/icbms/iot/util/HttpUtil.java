@@ -1,10 +1,10 @@
-package com.icbms.iot.client;
+package com.icbms.iot.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.icbms.iot.ssl.ApiResult;
+import com.icbms.iot.common.CommonResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -23,6 +23,8 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -32,18 +34,19 @@ import java.lang.invoke.MethodHandles;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
 
-public class HttpTestStop {
+/**
+ * @Author: Cherry
+ * @Date: 2021/1/17
+ * @Desc: HttpUtil
+ */
+public class HttpUtil {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private static String url = "https://10.0.1.70:9900/api-sdm/";
-
-    private static Base64.Decoder decoder = Base64.getDecoder();
-    private static Base64.Encoder encoder = Base64.getEncoder();
+    @Autowired
+    private RestTemplate restTemplate;
 
     /**
      * JWT TOKEN值
@@ -52,55 +55,46 @@ public class HttpTestStop {
             "sb3JhLWFwcC1zZXJ2ZXIiLCJuYmYiOjE1Mzc0MDgzMDMsImV4cCI6MzMwOTQzMTcxMDMsInN1YiI6I" +
             "nVzZXIiLCJ1c2VybmFtZSI6ImFkbWluIn0.14eVliflc5oG5FJXIphEfcWbc5A4DxzTk-u5AMaIsJc";
 
-    private static final String contentType = "application/json; charset=utf-8";
-
-    private static final int timeOut = 60;
-
-    public static String convertObjectToJson(Object data) throws IOException {
-        ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String json = objectWriter.writeValueAsString(data); //error on this line
-        return json;
-
-    }
-
-    public static byte[] hexStringToBytes(String hexString) {
-        if (hexString == null || hexString.equals("")) {
-            return null;
+    /**
+     * 发送 POST 请求
+     *
+     * @param url    API接口URL
+     * @param params 参数map
+     * @return
+     */
+    public static CommonResponse doPost(String url, Map<String, Object> params) {
+        try {
+            return doPost(url, convertObjectToJson(params), _jwt_token);
+        } catch (IOException e) {
+            logger.error("doPost error", e);
+            return CommonResponse.faild(e.getMessage());
         }
-        // toUpperCase将字符串中的所有字符转换为大写
-        hexString = hexString.toUpperCase();
-        int length = hexString.length() / 2;
-        // toCharArray将此字符串转换为一个新的字符数组。
-        char[] hexChars = hexString.toCharArray();
-        byte[] d = new byte[length];
-        for (int i = 0; i < length; i++) {
-            int pos = i * 2;
-            d[i] = (byte) (charToByte(hexChars[pos]) << 4 | charToByte(hexChars[pos + 1]));
+    }
+
+    public static CommonResponse doPost(String url, Map<String, Object> params, String jwtToken) {
+        try {
+            return doPost(url, convertObjectToJson(params), _jwt_token);
+        } catch (IOException e) {
+            logger.error("doPost error", e);
+            return CommonResponse.faild(e.getMessage());
         }
-        return d;
     }
 
-    public static byte charToByte(char c) {
-        return (byte) "0123456789ABCDEF".indexOf(c);
+    public static CommonResponse doPost(String apiUrl, String param) {
+        return doPost(apiUrl, param, _jwt_token);
     }
 
-
-    public static void test() throws Exception {
-        //String hexContent = "000010E1010001020008";// 四层闪烁
-        Map<String, String> param = new HashMap<>();
-        param.put("tenant", "cluing");
-
-        String action = url + "v1/stpp";
-
-        HttpPost(action, convertObjectToJson(param));
+    public static CommonResponse doGet(String url) {
+        return doGet(url, _jwt_token);
     }
 
-    public static JSONObject doGet(String url, String jwtToken) throws Exception {
-        CloseableHttpClient httpclient = HttpClients.custom().setConnectionManager(connMgr).setDefaultRequestConfig(requestConfig).build();
+    public static CommonResponse doGet(String url, String jwtToken) {
+        CloseableHttpClient httpclient = createHttpClient();
         HttpGet httpGet = new HttpGet(url);
         CloseableHttpResponse response = null;
         String out = null;
         JSONObject jsonObject = new JSONObject();//接收结果
+        CommonResponse<JSONObject> responseData = new CommonResponse<>();
         try {
             httpGet.setConfig(requestConfig);
             httpGet.setHeader("grpc-metadata-authorization", jwtToken);
@@ -118,72 +112,28 @@ public class HttpTestStop {
             }
             jsonObject = JSONObject.parseObject(out);
             logger.info("response: " + JSON.toJSONString(jsonObject));
+            responseData.setCode(200);
+            responseData.setData(jsonObject);
         } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage() + ",url: " + url); //打印错误信息
-            jsonObject.put("code", "1");
+            logger.error(e.getMessage() + ",url: " + url, e);
             jsonObject.put("message", e.getMessage());
+            responseData.setCode(500);
+            responseData.setData(jsonObject);
         } finally {
             if (httpGet != null) {
                 httpGet.releaseConnection();
             }
         }
-        return jsonObject;
+        return responseData;
     }
 
-    /**
-     * 发起Post请求
-     *
-     * @param apiUrl API地址
-     * @param param  Json串
-     * @return
-     */
-    public static ApiResult HttpPost(String apiUrl, String param) throws Exception {
-        ApiResult apiResult = new ApiResult();
-        try {
-            logger.info("【Post】 URL = " + apiUrl);
-            logger.info("入参=" + param);
-            JSONObject result = doPost(apiUrl, param, _jwt_token);
-            logger.info("出参=" + JSONObject.toJSONString(result));
-
-            if (result != null && result.size() > 0) {
-                Object code = result.get("code");
-                if (code != null) {
-                    apiResult.code = Integer.parseInt(code.toString());
-                }
-                Object error = result.get("error");
-                if (error != null) {
-                    apiResult.message = (String) error;
-                }
-                apiResult.message = JSONObject.toJSONString(result);
-            }
-        } catch (Exception ex) {
-            //apiResult.Error(ex);
-            apiResult.code = 1;
-            apiResult.message = ex.getMessage();
-            logger.error("请求失败" + "code = " + apiResult.code + ", message = " + apiResult.message, ex);
-        }
-        return apiResult;
-    }
-
-
-    public static JSONObject doPost(String url, Map<String, Object> params) throws Exception {
-        return doPost(url, convertObjectToJson(params), _jwt_token);
-    }
-
-    /**
-     * 发送 POST 请求
-     *
-     * @param url    API接口URL
-     * @param params 参数map
-     * @return
-     */
-    public static JSONObject doPost(String url, String params, String jwtToken) throws Exception {
-        CloseableHttpClient httpclient = HttpClients.custom().setConnectionManager(connMgr).setDefaultRequestConfig(requestConfig).build();
+    private static CommonResponse doPost(String url, String params, String jwtToken) {
+        CloseableHttpClient httpclient = createHttpClient();
         HttpPost httpPost = new HttpPost(url);
         CloseableHttpResponse response = null;
         String out = null;
         JSONObject jsonObject = new JSONObject();//接收结果
+        CommonResponse<JSONObject> responseData = new CommonResponse<>();
         try {
             httpPost.setConfig(requestConfig);
             httpPost.setHeader("grpc-metadata-authorization", jwtToken);
@@ -193,7 +143,6 @@ public class HttpTestStop {
             httpPost.setEntity(stringEntity);
             logger.info("httppost: " + JSON.toJSONString(httpPost));
             response = httpclient.execute(httpPost);
-            //logger.info("response: " + JSON.toJSONString(response));
             int statusCode = response.getStatusLine().getStatusCode();
             logger.info("status code: " + statusCode);
             logger.info("entity: " + JSON.toJSONString(response.getEntity()));
@@ -205,17 +154,29 @@ public class HttpTestStop {
             }
             jsonObject = JSONObject.parseObject(out);
             logger.info("response: " + JSON.toJSONString(jsonObject));
+            responseData.setCode(200);
+            responseData.setData(jsonObject);
         } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage() + ",url: " + url + "params: " + params); //打印错误信息
-            jsonObject.put("code", "1");
+            logger.error(e.getMessage() + ",url: " + url, e);
             jsonObject.put("message", e.getMessage());
+            responseData.setCode(500);
+            responseData.setData(jsonObject);
         } finally {
             if (httpPost != null) {
                 httpPost.releaseConnection();
             }
         }
-        return jsonObject;
+        return responseData;
+    }
+
+    public static String convertObjectToJson(Object data) throws IOException {
+        ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = objectWriter.writeValueAsString(data);
+        return json;
+    }
+
+    private static CloseableHttpClient createHttpClient() {
+        return HttpClients.custom().setConnectionManager(connMgr).setDefaultRequestConfig(requestConfig).build();
     }
 
     private static PoolingHttpClientConnectionManager connMgr;
@@ -254,14 +215,17 @@ public class HttpTestStop {
         try {
             SSLContext ctx = SSLContext.getInstance("SSL");
             X509TrustManager tm = new X509TrustManager() {
+                @Override
                 public void checkClientTrusted(X509Certificate[] chain,
                                                String authType) throws CertificateException {
                 }
 
+                @Override
                 public void checkServerTrusted(X509Certificate[] chain,
                                                String authType) throws CertificateException {
                 }
 
+                @Override
                 public X509Certificate[] getAcceptedIssuers() {
                     return null;
                 }

@@ -5,7 +5,6 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandles;
@@ -15,7 +14,6 @@ public class MqttPushClient {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    @Autowired
     private PushCallback pushCallback;
 
     public static MqttClient client;
@@ -30,10 +28,10 @@ public class MqttPushClient {
      * @param timeout   Timeout time
      * @param keepAlive Retention number
      */
-    public void connect(String host, String clientID, String username, String password, int timeout, int keepAlive) throws Exception{
+    public void connect(String host, String clientID, String username, String password, int timeout, int keepAlive) throws Exception {
         logger.info("mqtt client 开始连接 ");
         try {
-            if(client == null) {
+            if (client == null) {
                 client = new MqttClient(host, clientID, new MemoryPersistence());
                 client.setCallback(pushCallback);
                 logger.info("pushcallback: " + pushCallback);
@@ -98,4 +96,7 @@ public class MqttPushClient {
         }
     }
 
+    public void setPushCallback(PushCallback pushCallback) {
+        this.pushCallback = pushCallback;
+    }
 }

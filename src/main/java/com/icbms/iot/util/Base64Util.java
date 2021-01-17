@@ -1,18 +1,22 @@
 package com.icbms.iot.util;
 
-import com.icbms.iot.client.MqttPushClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
 import java.io.IOException;
+import java.util.Base64;
 
 public class Base64Util {
 
-    private static final Logger logger = LoggerFactory.getLogger(MqttPushClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(Base64Util.class);
 
-    public static String encrypt(byte[] bytes){
+    private static Base64.Decoder decoder = Base64.getDecoder();
+
+    private static Base64.Encoder encoder = Base64.getEncoder();
+
+    public static String encrypt(byte[] bytes) {
         return (new BASE64Encoder()).encodeBuffer(bytes);
     }
 
@@ -25,5 +29,9 @@ public class Base64Util {
         }
 
         return null;
+    }
+
+    public static String encodeToString(byte[] bytes) {
+        return encoder.encodeToString(bytes);
     }
 }

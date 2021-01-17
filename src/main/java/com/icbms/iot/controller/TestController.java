@@ -1,14 +1,10 @@
 package com.icbms.iot.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.icbms.iot.client.HttpTest;
-import com.icbms.iot.client.HttpTestStart;
-import com.icbms.iot.client.HttpTestStop;
 import com.icbms.iot.client.MqttPushClient;
 import com.icbms.iot.config.MqttConfig;
 import com.icbms.iot.entity.DeviceAlarmInfoLog;
 import com.icbms.iot.mapper.DeviceAlarmInfoLogMapper;
-import com.icbms.iot.ssl.ApiResult;
 import io.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,23 +48,7 @@ public class TestController {
         mqttPushClient.subscribe("mqttPushClient", 0);
         return "ok";
     }
-
-    @GetMapping("/http/{command}/{deviceid}")
-    public void test(@PathVariable("command") String command, @PathVariable("deviceid") String deviceid) throws Exception {
-        HttpTest.test(command, deviceid);
-    }
-
-    @GetMapping("/stop")
-    public void test2() throws Exception {
-        HttpTestStop.test();
-    }
-
-    @GetMapping("/start")
-    public void test3() throws Exception {
-        HttpTestStart.test();
-    }
-
-
+    
     // Send custom message content (using default theme)
     @GetMapping("/publishTopic/{data}")
     public String test1(@PathVariable("data") String data) {
@@ -83,19 +63,4 @@ public class TestController {
         return "ok";
     }
 
-    @PostMapping("/doPost")
-    @ResponseBody
-    public ApiResult testSendMessage(@RequestBody TestModel model) {
-        ApiResult apiResult = new ApiResult();
-        try {
-            apiResult.setData(HttpTest.doPost(model.getUrl(), model.getJson()));
-            apiResult.setSuccess(true);
-            return apiResult;
-        } catch (Exception e) {
-            logger.error("send error", e);
-        }
-
-        apiResult.setSuccess(false);
-        return apiResult;
-    }
 }
