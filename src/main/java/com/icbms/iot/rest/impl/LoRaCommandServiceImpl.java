@@ -5,10 +5,11 @@ import com.icbms.iot.enums.LoRaCommand;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.Base64Util;
 import com.icbms.iot.util.HttpUtil;
+import com.icbms.iot.util.RestUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,26 +24,30 @@ import static com.icbms.iot.util.CommonUtil.hexStringToBytes;
 @Slf4j
 public class LoRaCommandServiceImpl implements LoRaCommandService {
 
-    private static String URL = "http://10.0.1.70:9900/api-sdm/";
+    @Autowired
+    private RestUtil restUtil;
 
-    private static String URL_QUERY = "https://10.0.210.41:8080/api/";
+    private static final String startRoundRobin = "http://10.0.1.70:9900/api-sdm/v1/pUI";
+
+    private static final String stopRoundRobin = "http://10.0.1.70:9900/api-sdm/v1/stpp";
+
+    private static final String executeCmd = "https://10.0.1.70:8080/api/";
 
     @Override
     public CommonResponse startRoundRobin() {
-        Map<String, Object> param = new HashMap<>();
-        param.put("tenant", "cluing");
-        param.put("type", "S08");
-        param.put("time", "100");
-        String action = URL + "v1/pUI";
-        return HttpUtil.doPost(action, param);
+        Map<String, Object> params = new HashMap<>();
+        params.put("tenant", "cluing");
+        params.put("type", "S08");
+        params.put("time", "100");
+        Map result = restUtil.doPost(startRoundRobin, params);
+        return CommonResponse.success(result);
     }
 
     @Override
     public CommonResponse stopRoundRobin() {
         Map<String, Object> param = new HashMap<>();
         param.put("tenant", "cluing");
-        String action = URL + "v1/stpp";
-        return HttpUtil.doPost(action, param);
+        return HttpUtil.doPost(stopRoundRobin, param);
     }
 
     @Override
@@ -55,6 +60,7 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
         map.put("fPort", 4);
         map.put("reference", "reference");
         String action = "nodes/" + deviceId + "/queue";
-        return HttpUtil.doPost(URL_QUERY + action, map);
+        Map result = restUtil.doPost(executeCmd + action, map);
+        return CommonResponse.success(result);
     }
 }
