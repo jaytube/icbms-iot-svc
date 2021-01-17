@@ -12,6 +12,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -29,7 +30,18 @@ import java.security.NoSuchAlgorithmException;
  * @Desc: RestTemplateConfig
  */
 @Configuration
+@ConfigurationProperties("spring.rest")
 public class RestTemplateConfig {
+
+    private int maxTotal;
+
+    private int maxPerRoute;
+
+    private int socketTimeout;
+
+    private int connectTimeout;
+
+    private int connectionRequestTimeout;
 
     @Bean
     public RestTemplate restTemplate() {
@@ -62,13 +74,13 @@ public class RestTemplateConfig {
                 .build();
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(registry);
         //设置整个连接池最大连接数 根据自己的场景决定
-        connectionManager.setMaxTotal(200);
+        connectionManager.setMaxTotal(maxTotal);
         //路由是对maxTotal的细分
-        connectionManager.setDefaultMaxPerRoute(100);
+        connectionManager.setDefaultMaxPerRoute(maxPerRoute);
         RequestConfig requestConfig = RequestConfig.custom()
-                .setSocketTimeout(10000) //服务器返回数据(response)的时间，超过该时间抛出read timeout
-                .setConnectTimeout(5000)//连接上服务器(握手成功)的时间，超出该时间抛出connect timeout
-                .setConnectionRequestTimeout(1000)//从连接池中获取连接的超时时间，超过该时间未拿到可用连接，会抛出org.apache.http.conn.ConnectionPoolTimeoutException: Timeout waiting for connection from pool
+                .setSocketTimeout(socketTimeout) //服务器返回数据(response)的时间，超过该时间抛出read timeout
+                .setConnectTimeout(connectTimeout)//连接上服务器(握手成功)的时间，超出该时间抛出connect timeout
+                .setConnectionRequestTimeout(connectionRequestTimeout)//从连接池中获取连接的超时时间，超过该时间未拿到可用连接，会抛出org.apache.http.conn.ConnectionPoolTimeoutException: Timeout waiting for connection from pool
                 .build();
         return HttpClientBuilder.create()
                 .setDefaultRequestConfig(requestConfig)
