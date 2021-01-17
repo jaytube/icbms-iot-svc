@@ -49,7 +49,6 @@ public class TestController {
         return "ok";
     }
 
-
     // Send custom message content (using default theme)
     @GetMapping("/publishTopic/{data}")
     public String test1(@PathVariable("data") String data) {

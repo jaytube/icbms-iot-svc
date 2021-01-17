@@ -32,7 +32,7 @@ public class LoRaCommandController {
 
     private static String URL = "http://10.0.1.70:9900/api-sdm/";
 
-    private static String URL_QUERY = "https://10.0.210.41:8080/api/";
+    private static String URL_QUERY = "https://10.0.1.70:8080/api/";
 
     @GetMapping("/cmd/{deviceId}/{command}")
     @ResponseBody

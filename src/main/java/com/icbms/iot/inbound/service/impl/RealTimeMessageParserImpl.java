@@ -226,7 +226,7 @@ public class RealTimeMessageParserImpl implements RealTimeMessageParser {
     private List<AlarmType> parseAlarmTypes(short alarmValue) {
         String alarmStr = Integer.toBinaryString(alarmValue);
         List<AlarmType> result = new ArrayList<>();
-        if(StringUtils.isNotBlank(alarmStr))
+        if(StringUtils.isBlank(alarmStr))
             return result;
 
         char[] chars = alarmStr.toCharArray();
@@ -245,7 +245,7 @@ public class RealTimeMessageParserImpl implements RealTimeMessageParser {
     public List<BoxAlarmType> parseBoxAlarmTypes(short boxAlarmValue) {
         String alarmStr = Integer.toBinaryString(boxAlarmValue);
         List<BoxAlarmType> result = new ArrayList<>();
-        if(StringUtils.isNotBlank(alarmStr))
+        if(StringUtils.isBlank(alarmStr))
             return result;
 
         char[] chars = alarmStr.toCharArray();

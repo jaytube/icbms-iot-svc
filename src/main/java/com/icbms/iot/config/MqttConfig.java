@@ -9,6 +9,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.UUID;
+
 @Configuration
 @ConfigurationProperties("mqtt")
 @Data
@@ -27,7 +29,7 @@ public class MqttConfig {
 
     private int keepAlive;
 
-    private String clientId;
+    //private String clientId;
 
     @Autowired
     private PushCallback pushCallback;
@@ -40,6 +42,7 @@ public class MqttConfig {
         log.info("timeout: " + timeout);
         log.info("topic: " + topic);
         log.info("keepalive: " + keepAlive);
+        String clientId = UUID.randomUUID().toString();
         log.info("clientId: " + clientId);
         MqttPushClient mqttPushClient = new MqttPushClient();
         try {
