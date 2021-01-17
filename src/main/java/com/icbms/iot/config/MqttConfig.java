@@ -31,7 +31,7 @@ public class MqttConfig {
 
     private int keepAlive;
 
-    private String clientId;
+    //private String clientId;
 
     @Bean
     public MqttPushClient getMqttPushClient() {
@@ -41,6 +41,7 @@ public class MqttConfig {
         log.info("timeout: " + timeout);
         log.info("topic: " + topic);
         log.info("keepalive: " + keepAlive);
+        String clientId = UUID.randomUUID().toString();
         log.info("clientId: " + clientId);
         try {
             mqttPushClient.connect(hostUrl, clientId, username, password, timeout, keepAlive);

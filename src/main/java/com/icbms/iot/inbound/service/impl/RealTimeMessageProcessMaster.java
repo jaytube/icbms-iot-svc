@@ -55,9 +55,11 @@ public class RealTimeMessageProcessMaster extends AbstractMessageProcessor {
         LoraMessage message = loraMsgThreadLocal.get();
         String dataStr = message.getData();
         byte[] data = Base64Util.decrypt(dataStr);
+        logger.info("实时告警数据长度：" + data.length);
         Integer header = CommonUtil.getInt(data, 0);
-        logger.info("data header: " + Integer.toHexString(header));
-        if(header != 82748)
+        String hexHeader = Integer.toHexString(header);
+        logger.info("data header: " + hexHeader);
+        if(!"3c430100".equalsIgnoreCase(hexHeader))
             throw new IotException(ErrorCodeEnum.IOT_MESSAGE_HEAD_INCORRECT);
     }
 

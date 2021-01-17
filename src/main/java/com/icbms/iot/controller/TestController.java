@@ -53,9 +53,9 @@ public class TestController {
         return "ok";
     }
 
-    @GetMapping("/http/{command}")
-    public void test(@PathVariable("command") String command) throws Exception {
-        HttpTest.test(command);
+    @GetMapping("/http/{command}/{deviceid}")
+    public void test(@PathVariable("command") String command, @PathVariable("deviceid") String deviceid) throws Exception {
+        HttpTest.test(command, deviceid);
     }
 
     @GetMapping("/stop")

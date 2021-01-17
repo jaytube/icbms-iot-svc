@@ -39,7 +39,8 @@ public class HttpTest {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private static String url = "https://10.0.210.41:8080/api/";
+    //private static String url = "https://10.0.210.41:8080/api/";
+    private static String url = "https://10.0.1.70:8080/api/";
 
     private static Base64.Decoder decoder = Base64.getDecoder();
     private static Base64.Encoder encoder = Base64.getEncoder();
@@ -84,7 +85,7 @@ public class HttpTest {
     }
 
 
-    public static void test(String command) throws Exception {
+    public static void test(String command, String deviceid) throws Exception {
         //String hexContent = "000010E1010001020008";// 四层闪烁
         //String hexContent = "000003EE00001E";// 四层闪烁
         byte[] commondBytes = hexStringToBytes(command);
@@ -92,7 +93,8 @@ public class HttpTest {
         link.confirmed = false;
         link.data = new String(encoder.encodeToString(commondBytes));
         //String deviceid = "393235306537910b";
-        String deviceid = "393235305c378d03";
+        //String deviceid = "393235305c378d03";
+        //String deviceid = "393235307d377a04";
         link.devEUI = deviceid;
         link.fPort = 4;
         link.reference = "reference";

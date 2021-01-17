@@ -2,6 +2,7 @@ package com.icbms.iot.inbound;
 
 import com.icbms.iot.client.MqttPushClient;
 import com.icbms.iot.config.MqttConfig;
+import com.icbms.iot.exception.IotException;
 import com.icbms.iot.inbound.service.InBoundMessageMaster;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -34,10 +35,10 @@ public class PushCallback implements MqttCallback {
     public void connectionLost(Throwable throwable) {
         // After the connection is lost, it is usually reconnected here
         logger.info(throwable.getMessage());
-        logger.info("[MQTT] 连接断开，15S之后尝试重连...");
+        logger.info("[MQTT] 连接断开，5S之后尝试重连...");
         while(true) {
             try {
-                Thread.sleep(15000);
+                Thread.sleep(5000);
                 reconnect();
                 logger.info("[MQTT] 重连成功!");
                 break;
@@ -63,8 +64,10 @@ public class PushCallback implements MqttCallback {
         try {
             realTimeProcessMaster.setParameter(mqttMessage);
             realTimeProcessMaster.performExecute();
-        } catch (Exception e){
-            logger.error("message arrive process error: ", e);
+        } catch (IotException e){
+            logger.info("data format not correct ...");
+        } catch (Exception ex) {
+            logger.error("message process error: ", ex);
         }
     }
 
