@@ -43,7 +43,7 @@ public class TestController {
     }
 
     @PostMapping("/testconn")
-    public String testConn(@RequestBody MqttConfig config) {
+    public String testConn(@RequestBody MqttConfig config) throws Exception{
         mqttPushClient.connect(config.getHostUrl(), System.currentTimeMillis() + "", config.getUsername(), config.getPassword(), 100, 100);
         mqttPushClient.subscribe("mqttPushClient", 0);
         return "ok";

@@ -47,9 +47,6 @@ public class RealTimeMessageParserImpl implements RealTimeMessageParser {
         int index = 0;
         Integer header = CommonUtil.getInt(payload, index);
         index += 4;
-        logger.info("data header: " + Integer.toHexString(header));
-        if(header != 82748)
-            return null;
 
         RealTimeMessage message = new RealTimeMessage();
         int boxNumber = CommonUtil.getShort(payload, index);
