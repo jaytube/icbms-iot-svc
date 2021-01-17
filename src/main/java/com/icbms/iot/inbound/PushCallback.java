@@ -24,7 +24,7 @@ public class PushCallback implements MqttCallback {
     @Qualifier("realTimeMessageProcessMaster")
     private InBoundMessageMaster realTimeProcessMaster;
 
-    @Autowired
+//    @Autowired
     private MqttPushClient mqttPushClient;
 
     @Autowired
@@ -73,4 +73,7 @@ public class PushCallback implements MqttCallback {
         logger.info("deliveryComplete---------" + iMqttDeliveryToken.isComplete());
     }
 
+    public void setMqttPushClient(MqttPushClient mqttPushClient) {
+        this.mqttPushClient = mqttPushClient;
+    }
 }
