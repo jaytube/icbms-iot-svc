@@ -80,7 +80,7 @@ public class RealTimeMessageProcessMaster extends AbstractMessageProcessor {
             realData = new ArrayList<>();
         realData.add(realTimeMessage);
         redisTemplate.opsForValue().set("REAL_DATA", realData);*/
-        redisTemplate.opsForList().rightPush("REAL_MESSAGE", realTimeMessage);
+        //redisTemplate.opsForList().rightPush("REAL_MESSAGE", realTimeMessage);
     }
 
     @Override

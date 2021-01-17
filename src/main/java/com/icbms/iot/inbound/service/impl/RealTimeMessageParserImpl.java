@@ -15,10 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -172,50 +169,55 @@ public class RealTimeMessageParserImpl implements RealTimeMessageParser {
         logger.info("C箱告警类型：" + cAlarmTypes.stream().map(BoxAlarmType::toString).collect(Collectors.joining(", ")));
         message.setCAlarmTypes(cAlarmTypes);
 
+        byte ram22 = CommonUtil.getByte(payload, index);
+        index += 1;
         CommonUtil.getByte(payload, index);
         index += 1;
-        int ram22 = CommonUtil.getByte(payload, index);
-        index += 1;
-        Boolean switchFlag = ram22 == 90 ? true : ram22 == 165 ? false : null;
-        logger.info("开关分合：" + switchFlag);
-        message.setSwitchFlag(switchFlag);
+        if(ram22 == 90)
+            message.setSwitchFlag(true);
+        else if(ram22 == -91)
+            message.setSwitchFlag(false);
+        logger.info("开关分合：" + Objects.toString(message.getSwitchFlag(), null));
 
         int ram23 = CommonUtil.getShort(payload, index);
         index += 2;
-        logger.info("A箱功率因数：" + ram23);
-        message.setAPowerFactor(ram23 == 32767 ? 1 : 0);
+        int aFactor = ram23 == 32767 ? 1 : 0;
+        logger.info("A相功率因数：" + aFactor);
+        message.setAPowerFactor(aFactor);
 
         int ram24 = CommonUtil.getShort(payload, index);
         index += 2;
-        logger.info("B箱功率因数：" + ram24);
-        message.setBPowerFactor(ram24 == 32767 ? 1 : 0);
+        int bFactor = ram24 == 32767 ? 1 : 0;
+        logger.info("B相功率因数：" + bFactor);
+        message.setBPowerFactor(bFactor);
 
         int ram25 = CommonUtil.getShort(payload, index);
         index += 2;
-        logger.info("C箱功率因数：" + ram25);
-        message.setCPowerFactor(ram25 == 32767 ? 1 : 0);
+        int cFactor = ram25 == 32767 ? 1 : 0;
+        logger.info("C相功率因数：" + cFactor);
+        message.setCPowerFactor(cFactor);
 
         int ram3A = CommonUtil.getShort(payload, index);
         index += 2;
         double aTemp = ram3A * 0.1;
-        logger.info("A箱功率：" + aTemp);
+        logger.info("A相温度：" + aTemp);
         message.setATemp(aTemp);
 
         int ram3F = CommonUtil.getShort(payload, index);
         index += 2;
         double bTemp = ram3F * 0.1;
-        logger.info("B箱功率：" + bTemp);
+        logger.info("B相温度：" + bTemp);
         message.setBTemp(bTemp);
 
         int ram44 = CommonUtil.getShort(payload, index);
         index += 2;
         double cTemp = ram44 * 0.1;
-        logger.info("C箱功率：" + cTemp);
+        logger.info("C相温度：" + cTemp);
         message.setCTemp(cTemp);
 
         int end = CommonUtil.getShort(payload, index);
         index += 2;
-        logger.info("结束符：" + cTemp);
+        logger.info("结束符：" + end);
         if(end != 8198)
             throw new IotException(ErrorCodeEnum.IOT_MESSAGE_END_INCORRECT);
 
