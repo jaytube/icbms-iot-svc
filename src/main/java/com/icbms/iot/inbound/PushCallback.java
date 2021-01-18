@@ -1,9 +1,12 @@
 package com.icbms.iot.inbound;
 
+import com.alibaba.fastjson.JSON;
 import com.icbms.iot.client.MqttPushClient;
 import com.icbms.iot.config.MqttConfig;
+import com.icbms.iot.dto.LoraMessage;
 import com.icbms.iot.exception.IotException;
 import com.icbms.iot.inbound.service.InBoundMessageMaster;
+import com.icbms.iot.util.MqttEnvUtil;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -30,6 +33,9 @@ public class PushCallback implements MqttCallback {
 
     @Autowired
     private MqttConfig mqttConfig;
+
+    @Autowired
+    private MqttEnvUtil mqttEnvUtil;
 
     @Override
     public void connectionLost(Throwable throwable) {
@@ -58,16 +64,22 @@ public class PushCallback implements MqttCallback {
     @Override
     public void messageArrived(String topic, MqttMessage mqttMessage) {
         // The message you get after you subscribe will be executed here
-        logger.info("Receive message subject : " + topic);
-        logger.info("receive messages Qos : " + mqttMessage.getQos());
-        logger.info("Receive message content : " + new String(mqttMessage.getPayload()));
-        try {
-            realTimeProcessMaster.setParameter(mqttMessage);
-            realTimeProcessMaster.performExecute();
-        } catch (IotException e){
-            logger.info("data format not correct ...");
-        } catch (Exception ex) {
-            logger.error("message process error: ", ex);
+        if(!mqttEnvUtil.isMqttSwitchOff()) {
+            logger.info("Receive message subject : " + topic);
+            logger.info("receive messages Qos : " + mqttMessage.getQos());
+            //logger.info("Receive message content : " + new String(mqttMessage.getPayload()));
+            LoraMessage loraMessage = JSON.parseObject(new String(mqttMessage.getPayload()), LoraMessage.class);
+            mqttEnvUtil.addEle(loraMessage.getDevEUI());
+            logger.info(loraMessage.getDevEUI());
+            try {
+                mqttEnvUtil.increment();
+                //realTimeProcessMaster.setParameter(mqttMessage);
+                //realTimeProcessMaster.performExecute();
+            } catch (IotException e) {
+                logger.info("data format not correct ...");
+            } catch (Exception ex) {
+                logger.error("message process error: ", ex);
+            }
         }
     }
 

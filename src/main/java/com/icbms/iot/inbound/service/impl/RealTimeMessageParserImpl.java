@@ -221,7 +221,7 @@ public class RealTimeMessageParserImpl implements RealTimeMessageParser {
         if(end != 8198)
             throw new IotException(ErrorCodeEnum.IOT_MESSAGE_END_INCORRECT);
 
-        logger.info("实时数据处理============>解析实时数据end!!!!index应该等于"+index/2+"个字节");
+        logger.info("实时数据处理============>解析实时数据end!!!!一共"+index+"个字节");
         return message;
     }
 

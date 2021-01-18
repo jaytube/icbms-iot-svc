@@ -5,11 +5,10 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandles;
 
-@Component
+//@Component
 public class MqttPushClient {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -31,11 +30,9 @@ public class MqttPushClient {
     public void connect(String host, String clientID, String username, String password, int timeout, int keepAlive) throws Exception {
         logger.info("mqtt client 开始连接 ");
         try {
-            if (client == null) {
-                client = new MqttClient(host, clientID, new MemoryPersistence());
-                client.setCallback(pushCallback);
-                logger.info("pushcallback: " + pushCallback);
-            }
+            client = new MqttClient(host, clientID, new MemoryPersistence());
+            client.setCallback(pushCallback);
+            logger.info("pushcallback: " + pushCallback);
             MqttConnectOptions options = new MqttConnectOptions();
             options.setCleanSession(false);
             options.setUserName(username);

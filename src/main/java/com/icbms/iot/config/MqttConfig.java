@@ -2,6 +2,8 @@ package com.icbms.iot.config;
 
 import com.icbms.iot.client.MqttPushClient;
 import com.icbms.iot.inbound.PushCallback;
+import com.icbms.iot.server.IotServer;
+import com.sun.media.jfxmedia.track.AudioTrack;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,5 +57,14 @@ public class MqttConfig {
         // End with / / to subscribe to all topics starting with test
         mqttPushClient.subscribe(topic, 0);
         return mqttPushClient;
+    }
+
+    @Bean
+    public IotServer getIotServer() {
+        IotServer iotServer = new IotServer();
+        Thread serverThread = new Thread(iotServer);
+        serverThread.start();
+
+        return iotServer;
     }
 }

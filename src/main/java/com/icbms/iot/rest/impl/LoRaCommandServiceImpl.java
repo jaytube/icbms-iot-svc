@@ -45,9 +45,10 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
 
     @Override
     public CommonResponse stopRoundRobin() {
-        Map<String, Object> param = new HashMap<>();
-        param.put("tenant", "cluing");
-        return HttpUtil.doPost(stopRoundRobin, param);
+        Map<String, Object> params = new HashMap<>();
+        params.put("tenant", "cluing");
+        Map result = restUtil.doPost(stopRoundRobin, params);
+        return CommonResponse.success(result);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
         byte[] commandBytes = hexStringToBytes(command.getCmd());
         Map<String, Object> map = new HashMap<>();
         map.put("confirmed", false);
-        map.put("data", new String(Base64Util.encodeToString(commandBytes)));
+        map.put("data", Base64Util.encodeToString(commandBytes));
         map.put("devEUI", deviceId);
         map.put("fPort", 4);
         map.put("reference", "reference");

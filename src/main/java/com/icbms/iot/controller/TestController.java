@@ -20,10 +20,10 @@ public class TestController {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    @Autowired
+    //@Autowired
     private MqttPushClient mqttPushClient;
 
-    @Autowired
+    //@Autowired
     private MqttConfig mqttConfig;
 
     @Autowired
