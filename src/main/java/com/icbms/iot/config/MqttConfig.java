@@ -2,7 +2,6 @@ package com.icbms.iot.config;
 
 import com.icbms.iot.client.MqttPushClient;
 import com.icbms.iot.inbound.PushCallback;
-import com.icbms.iot.async.IotServerThread;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,12 +57,4 @@ public class MqttConfig {
         return mqttPushClient;
     }
 
-    /*@Bean
-    public IotServerThread getIotServer() {
-        IotServerThread iotServerThread = new IotServerThread();
-        Thread serverThread = new Thread(iotServerThread);
-        serverThread.start();
-
-        return iotServerThread;
-    }*/
 }
