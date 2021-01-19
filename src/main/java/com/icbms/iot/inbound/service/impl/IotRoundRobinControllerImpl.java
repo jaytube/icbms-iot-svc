@@ -1,26 +1,32 @@
-package com.icbms.iot.server;
+package com.icbms.iot.inbound.service.impl;
 
+import com.icbms.iot.inbound.service.IotRoundRobinController;
 import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.enums.LoRaCommand;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.MqttEnvUtil;
-import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.lang.invoke.MethodHandles;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class IotServer implements Runnable{
+@Service
+public class IotRoundRobinControllerImpl implements IotRoundRobinController {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
     private LoRaCommandService loRaCommandService;
+
+    @Autowired
+    private MqttEnvUtil mqttEnvUtil;
 
     private static final int DEVICE_COUNT = 10;
 
@@ -35,10 +41,9 @@ public class IotServer implements Runnable{
         gateWayDeviceMap.put("10.0.1.70", loraIds);
     }
 
-    @Autowired
-    private MqttEnvUtil mqttEnvUtil;
-
-    public void run() {
+    @Override
+    @Async
+    public void roundRobinControl() {
         logger.info("Iot 服务初始化 ...");
 
         try {
@@ -100,6 +105,5 @@ public class IotServer implements Runnable{
             }
 
         }
-
     }
 }

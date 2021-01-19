@@ -5,6 +5,7 @@ import com.icbms.iot.dto.LoraMessage;
 import com.icbms.iot.dto.RealTimeMessage;
 import com.icbms.iot.exception.ErrorCodeEnum;
 import com.icbms.iot.exception.IotException;
+import com.icbms.iot.inbound.component.ProcessedMsgQueue;
 import com.icbms.iot.inbound.service.AbstractMessageProcessor;
 import com.icbms.iot.inbound.service.RealTimeMessageParser;
 import com.icbms.iot.util.Base64Util;
@@ -35,7 +36,7 @@ public class RealTimeMessageProcessMaster extends AbstractMessageProcessor {
     private RealTimeMessageParser realTimeMessageParser;
 
     @Autowired
-    private RedisTemplate<String, RealTimeMessage> redisTemplate;
+    private ProcessedMsgQueue processedMsgQueue;
 
     @Override
     public void setParameter(MqttMessage message) {
@@ -81,6 +82,7 @@ public class RealTimeMessageProcessMaster extends AbstractMessageProcessor {
         realData.add(realTimeMessage);
         redisTemplate.opsForValue().set("REAL_DATA", realData);*/
         //redisTemplate.opsForList().rightPush("REAL_MESSAGE", realTimeMessage);
+        processedMsgQueue.offer(realTimeMessage);
     }
 
     @Override

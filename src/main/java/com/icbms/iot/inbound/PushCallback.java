@@ -5,6 +5,7 @@ import com.icbms.iot.client.MqttPushClient;
 import com.icbms.iot.config.MqttConfig;
 import com.icbms.iot.dto.LoraMessage;
 import com.icbms.iot.exception.IotException;
+import com.icbms.iot.inbound.component.InboundMsgQueue;
 import com.icbms.iot.inbound.service.InBoundMessageMaster;
 import com.icbms.iot.util.MqttEnvUtil;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -37,6 +38,9 @@ public class PushCallback implements MqttCallback {
     @Autowired
     private MqttEnvUtil mqttEnvUtil;
 
+    @Autowired
+    private InboundMsgQueue inboundMsgQueue;
+
     @Override
     public void connectionLost(Throwable throwable) {
         // After the connection is lost, it is usually reconnected here
@@ -67,14 +71,12 @@ public class PushCallback implements MqttCallback {
         if(!mqttEnvUtil.isMqttSwitchOff()) {
             logger.info("Receive message subject : " + topic);
             logger.info("receive messages Qos : " + mqttMessage.getQos());
-            //logger.info("Receive message content : " + new String(mqttMessage.getPayload()));
             LoraMessage loraMessage = JSON.parseObject(new String(mqttMessage.getPayload()), LoraMessage.class);
             mqttEnvUtil.addEle(loraMessage.getDevEUI());
             logger.info(loraMessage.getDevEUI());
             try {
                 mqttEnvUtil.increment();
-                //realTimeProcessMaster.setParameter(mqttMessage);
-                //realTimeProcessMaster.performExecute();
+                inboundMsgQueue.offer(mqttMessage);
             } catch (IotException e) {
                 logger.info("data format not correct ...");
             } catch (Exception ex) {
