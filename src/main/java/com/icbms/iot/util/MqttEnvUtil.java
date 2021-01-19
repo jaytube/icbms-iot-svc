@@ -10,13 +10,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class MqttEnvUtil {
 
-    private AtomicInteger messageProcessed = new AtomicInteger(0);
+    private volatile AtomicInteger messageProcessed = new AtomicInteger(0);
 
-    private AtomicBoolean mqttSwitchOff = new AtomicBoolean(false);
+    private volatile AtomicBoolean mqttSwitchOff = new AtomicBoolean(false);
 
     private List<String> processedDeviceList = new CopyOnWriteArrayList<>();
 
-    public synchronized int getMessageProcessed() {
+    public int getMessageProcessed() {
         return messageProcessed.get();
     }
 
