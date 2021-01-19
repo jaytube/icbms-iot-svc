@@ -36,6 +36,7 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
 
     @PostConstruct
     public void initGateWays() {
+        //TODO get devices from db;
         List<String> loraIds = Arrays.asList("3932353052376d03", "3932353073378903", "3932353069378e03", "393235306d378d03", "3932353060378d03",
                 "393235306a378a03", "3932353053378d03", "3932353078378e03");
         gateWayDeviceMap.put("10.0.1.70", loraIds);
