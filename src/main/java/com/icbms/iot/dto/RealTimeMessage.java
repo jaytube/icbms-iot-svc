@@ -39,4 +39,6 @@ public class RealTimeMessage {
     private Double bTemp;
     private Double cTemp;
 
+    private String gatewayId;
+
 }

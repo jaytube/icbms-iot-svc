@@ -16,6 +16,16 @@ public class MqttEnvUtil {
 
     private List<String> processedDeviceList = new CopyOnWriteArrayList<>();
 
+    private volatile String currentGatewayId;
+
+    public synchronized String getCurrentGatewayId() {
+        return currentGatewayId;
+    }
+
+    public synchronized void setCurrentGatewayId(String currentGatewayId) {
+        this.currentGatewayId = currentGatewayId;
+    }
+
     public int getMessageProcessed() {
         return messageProcessed.get();
     }
@@ -24,10 +34,11 @@ public class MqttEnvUtil {
         this.messageProcessed.incrementAndGet();
     }
 
-    public void reset() {
+    public synchronized void reset() {
         this.messageProcessed = new AtomicInteger(0);
         this.mqttSwitchOff = new AtomicBoolean(false);
         this.processedDeviceList.clear();
+        this.currentGatewayId = "";
     }
 
     public boolean isMqttSwitchOff() {
@@ -45,4 +56,6 @@ public class MqttEnvUtil {
     public List<String> getProcessedDeviceList() {
         return processedDeviceList;
     }
+
+
 }

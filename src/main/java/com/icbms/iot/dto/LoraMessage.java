@@ -16,5 +16,6 @@ public class LoraMessage {
     private Integer fCnt;
     private Integer fPort;
     private String data;
+    private String gatewayId;
 
 }

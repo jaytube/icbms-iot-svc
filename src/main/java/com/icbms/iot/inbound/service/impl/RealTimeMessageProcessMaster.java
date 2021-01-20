@@ -3,6 +3,7 @@ package com.icbms.iot.inbound.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.icbms.iot.dto.LoraMessage;
 import com.icbms.iot.dto.RealTimeMessage;
+import com.icbms.iot.dto.RichMqttMessage;
 import com.icbms.iot.exception.ErrorCodeEnum;
 import com.icbms.iot.exception.IotException;
 import com.icbms.iot.inbound.component.ProcessedMsgQueue;
@@ -10,11 +11,9 @@ import com.icbms.iot.inbound.service.AbstractMessageProcessor;
 import com.icbms.iot.inbound.service.RealTimeMessageParser;
 import com.icbms.iot.util.Base64Util;
 import com.icbms.iot.util.CommonUtil;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +25,7 @@ public class RealTimeMessageProcessMaster extends AbstractMessageProcessor {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private ThreadLocal<MqttMessage> msgThreadLocal = new ThreadLocal<>();
+    private ThreadLocal<RichMqttMessage> msgThreadLocal = new ThreadLocal<>();
 
     private ThreadLocal<LoraMessage> loraMsgThreadLocal = new ThreadLocal<>();
 
@@ -39,15 +38,17 @@ public class RealTimeMessageProcessMaster extends AbstractMessageProcessor {
     private ProcessedMsgQueue processedMsgQueue;
 
     @Override
-    public void setParameter(MqttMessage message) {
+    public void setParameter(RichMqttMessage message) {
         msgThreadLocal.set(message);
     }
 
     @Override
     public void decode() {
-        MqttMessage message = msgThreadLocal.get();
-        String messageJson = new String(message.getPayload());
+        RichMqttMessage message = msgThreadLocal.get();
+        String messageJson = new String(message.getMqttMsg().getPayload());
+        String gatewayId = message.getGatewayId();
         LoraMessage loraMessage = JSON.parseObject(messageJson, LoraMessage.class);
+        loraMessage.setGatewayId(gatewayId);
         loraMsgThreadLocal.set(loraMessage);
     }
 
@@ -70,6 +71,7 @@ public class RealTimeMessageProcessMaster extends AbstractMessageProcessor {
         String dataStr = loraMessage.getData();
         byte[] data = Base64Util.decrypt(dataStr);
         RealTimeMessage realTimeMessage = realTimeMessageParser.parseMessage(data);
+        realTimeMessage.setGatewayId(loraMessage.getGatewayId());
         realTimeMsgThreadLocal.set(realTimeMessage);
     }
 

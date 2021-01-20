@@ -67,9 +67,11 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
 
         while(true) {
             gateWayDeviceMap.entrySet().stream().forEach(e -> {
-                String gatewayIp = e.getKey();
-                List<String> loraIds = e.getValue();
                 mqttEnvUtil.reset();
+                String gatewayIp = e.getKey();
+                String gatewayId = "";
+                List<String> loraIds = e.getValue();
+                mqttEnvUtil.setCurrentGatewayId(gatewayId);
                 CommonResponse resp1 = loRaCommandService.startRoundRobin();
                 long start = System.currentTimeMillis();
                 logger.info("开启轮询网关" + gatewayIp + ", 响应：" + resp1.getData());

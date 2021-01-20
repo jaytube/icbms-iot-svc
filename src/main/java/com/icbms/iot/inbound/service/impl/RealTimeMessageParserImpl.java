@@ -226,7 +226,8 @@ public class RealTimeMessageParserImpl implements RealTimeMessageParser {
     }
 
     private List<AlarmType> parseAlarmTypes(short alarmValue) {
-        String alarmStr = Integer.toBinaryString(alarmValue);
+        String alarmStr = String.format("%16s", Integer.toBinaryString(alarmValue & 0xFFFF))
+                .replace(" ", "0");
         List<AlarmType> result = new ArrayList<>();
         if(StringUtils.isBlank(alarmStr))
             return result;

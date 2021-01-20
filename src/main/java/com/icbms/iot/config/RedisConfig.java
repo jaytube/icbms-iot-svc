@@ -10,11 +10,11 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 @Configuration
 public class RedisConfig {
 
-    @Bean
+    /*@Bean
     public RedisTemplate<String, RealTimeMessage> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, RealTimeMessage> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setDefaultSerializer(new GenericJackson2JsonRedisSerializer());
         return redisTemplate;
-    }
+    }*/
 }

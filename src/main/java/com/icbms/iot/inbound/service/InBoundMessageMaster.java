@@ -1,11 +1,11 @@
 package com.icbms.iot.inbound.service;
 
 
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import com.icbms.iot.dto.RichMqttMessage;
 
 public interface InBoundMessageMaster {
 
-    void setParameter(MqttMessage msg);
+    void setParameter(RichMqttMessage msg);
     void performExecute();
 
 }

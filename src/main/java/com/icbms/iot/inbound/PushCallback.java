@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.icbms.iot.client.MqttPushClient;
 import com.icbms.iot.config.MqttConfig;
 import com.icbms.iot.dto.LoraMessage;
+import com.icbms.iot.dto.RichMqttMessage;
 import com.icbms.iot.exception.IotException;
 import com.icbms.iot.inbound.component.InboundMsgQueue;
 import com.icbms.iot.inbound.service.InBoundMessageMaster;
@@ -76,7 +77,7 @@ public class PushCallback implements MqttCallback {
             logger.info(loraMessage.getDevEUI());
             try {
                 mqttEnvUtil.increment();
-                inboundMsgQueue.offer(mqttMessage);
+                inboundMsgQueue.offer(new RichMqttMessage(mqttEnvUtil.getCurrentGatewayId(), mqttMessage));
             } catch (IotException e) {
                 logger.info("data format not correct ...");
             } catch (Exception ex) {

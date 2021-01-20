@@ -1,6 +1,6 @@
 package com.icbms.iot.inbound.component;
 
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import com.icbms.iot.dto.RichMqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -13,14 +13,14 @@ public class InboundMsgQueue {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final ArrayBlockingQueue<MqttMessage> mqttMessageQueue = new ArrayBlockingQueue(1000);
+    private final ArrayBlockingQueue<RichMqttMessage> mqttMessageQueue = new ArrayBlockingQueue(1000);
 
-    public void offer(MqttMessage mqttMessage) {
+    public void offer(RichMqttMessage mqttMessage) {
         logger.info("入站队列长度: " + this.mqttMessageQueue.size());
         this.mqttMessageQueue.offer(mqttMessage);
     }
 
-    public MqttMessage poll() {
+    public RichMqttMessage poll() {
         logger.info("入站队列长度: " + this.mqttMessageQueue.size());
         return this.mqttMessageQueue.poll();
     }
