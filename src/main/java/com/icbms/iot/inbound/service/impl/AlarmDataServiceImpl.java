@@ -3,8 +3,12 @@ package com.icbms.iot.inbound.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.icbms.iot.dto.RealTimeMessage;
 import com.icbms.iot.entity.AlarmDataEntity;
+import com.icbms.iot.entity.DeviceAlarmInfoLog;
+import com.icbms.iot.entity.DeviceBoxInfo;
 import com.icbms.iot.enums.AlarmType;
 import com.icbms.iot.inbound.service.AlarmDataService;
+import com.icbms.iot.mapper.DeviceAlarmInfoLogMapper;
+import com.icbms.iot.mapper.DeviceBoxInfoMapper;
 import com.icbms.iot.service.GatewayConfigService;
 import com.icbms.iot.util.DateUtil;
 import org.apache.commons.collections4.CollectionUtils;
@@ -14,6 +18,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.icbms.iot.constant.IotConstant.*;
 
@@ -25,6 +30,12 @@ public class AlarmDataServiceImpl implements AlarmDataService {
 
     @Autowired
     private GatewayConfigService gatewayConfigService;
+
+    @Autowired
+    private DeviceBoxInfoMapper deviceBoxInfoMapper;
+
+    @Autowired
+    private DeviceAlarmInfoLogMapper deviceAlarmInfoLogMapper;
 
     public Map<String, Object> generateAlarmData(RealTimeMessage realTimeMessage) {
         List<AlarmDataEntity> list = new ArrayList<>();
@@ -101,6 +112,41 @@ public class AlarmDataServiceImpl implements AlarmDataService {
 
     @Override
     public void saveAlarmDataEntityList(List<AlarmDataEntity> list) {
+        if(CollectionUtils.isEmpty(list))
+            return;
 
+        List<String> projectIdList = list.stream().filter(Objects::nonNull).map(AlarmDataEntity::getProjectId)
+                .filter(StringUtils::isNotBlank)
+                .distinct()
+                .collect(Collectors.toList());
+        List<DeviceBoxInfo> deviceBoxes = deviceBoxInfoMapper.findByProjectIdList(projectIdList);
+        List<String> deviceBoxNums = list.stream().filter(Objects::nonNull).map(AlarmDataEntity::getTerminalId).collect(Collectors.toList());
+        deviceBoxes = deviceBoxes.stream().filter(l -> deviceBoxNums.contains(l.getDeviceBoxNum()))
+                .collect(Collectors.toList());
+        Map<String, DeviceBoxInfo> deviceBoxMap = new HashMap<>();
+        for (DeviceBoxInfo deviceBox : deviceBoxes) {
+            deviceBoxMap.put(deviceBox.getDeviceBoxNum(), deviceBox);
+        }
+        List<DeviceAlarmInfoLog> result = new ArrayList<>();
+        List<DeviceAlarmInfoLog> logs = list.stream().map(l -> {
+            DeviceAlarmInfoLog log = new DeviceAlarmInfoLog();
+            log.setId(UUID.randomUUID().toString());
+            log.setAlarmStatus(l.getAlarmStatus());
+            log.setAlarmLevel(l.getAlarmLevel());
+            log.setCreateTime(new Date());
+            log.setUpdateTime(new Date());
+            log.setRecordTime(DateUtil.parse(l.getReportTime(), "yyyy-MM-dd HH:mm:ss"));
+            log.setDeviceBoxId(l.getTerminalId());
+            DeviceBoxInfo info = deviceBoxMap.get(l.getTerminalId());
+            log.setDeviceBoxMac(info.getDeviceBoxNum());
+            log.setDeviceBoxId(info.getId());
+            log.setNode("");
+            log.setType(l.getAlarmType());
+            log.setRemark(l.getAlarmContent());
+            log.setInfo(l.getAlarmContent());
+            return log;
+        }).collect(Collectors.toList());
+        
+        deviceAlarmInfoLogMapper.batchInsert(logs);
     }
 }
