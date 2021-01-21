@@ -29,6 +29,10 @@ public class RestUtil {
     @Autowired
     private LoRaCommandService loRaCommandService;
 
+    private static final String HTTP_HEADER_TENANT = "20190701_cluing";
+
+    private static final String HTTP_HEADER_CONTENT_TYPE = "application/json;charset=UTF-8";
+
     /**
      * JWT TOKEN值
      */
@@ -125,9 +129,9 @@ public class RestUtil {
 
     private HttpHeaders createHeader() {
         HttpHeaders requestHeaders = new HttpHeaders();
-        requestHeaders.add("Content-Type", "application/json;charset=UTF-8");
+        requestHeaders.add("Content-Type", HTTP_HEADER_CONTENT_TYPE);
         requestHeaders.add("Authorization", loRaCommandService.getRedisToken());
-        requestHeaders.add("Tenant", "20190701_cluing");
+        requestHeaders.add("Tenant", HTTP_HEADER_TENANT);
         return requestHeaders;
     }
 

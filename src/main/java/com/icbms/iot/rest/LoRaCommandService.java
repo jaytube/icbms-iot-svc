@@ -21,7 +21,7 @@ public interface LoRaCommandService {
 
     String getRedisToken();
 
-    CommonResponse getDbInstance();
+    CommonResponse getDbInstance(String code);
 
     CommonResponse getGatewayList();
 
@@ -29,7 +29,7 @@ public interface LoRaCommandService {
 
     CommonResponse getTerminalType();
 
-    CommonResponse getTerminalByType();
+    CommonResponse getTerminalByType(String type);
 
     CommonResponse addDevice(AddDeviceDto addDeviceDto);
 

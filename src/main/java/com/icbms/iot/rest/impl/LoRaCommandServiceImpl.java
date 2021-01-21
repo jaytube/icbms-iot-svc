@@ -43,10 +43,6 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
 
     private static final String DEVICE_IP = "http://10.0.1.70:9900";
 
-    private static final String HTTP_HEADER_TENANT = "20190701_cluing";
-
-    private static final String HTTP_HEADER_CONTENT_TYPE = "application/json;charset=UTF-8";
-
     @Override
     public CommonResponse startRoundRobin() {
         Map<String, Object> params = new HashMap<>();
@@ -109,28 +105,42 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
     }
 
     @Override
-    public CommonResponse getDbInstance() {
-        return null;
+    public CommonResponse getDbInstance(String code) {
+        // code cluing
+        Map result = restUtil.doGetWithToken(DEVICE_IP + "/api-tms/pass/scptenant/" + code, null);
+        return CommonResponse.success(result);
     }
 
     @Override
     public CommonResponse getGatewayList() {
-        return null;
+        Map<String, Object> params = new HashMap<>();
+        params.put("page", 1);
+        params.put("limit", 99);
+        Map result = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmGateway", params);
+        return CommonResponse.success(result);
     }
 
     @Override
     public CommonResponse getGatewayApplication(String applicationId) {
-        return null;
+        Map result = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmGateway/" + applicationId, null);
+        return CommonResponse.success(result);
     }
 
     @Override
     public CommonResponse getTerminalType() {
-        return null;
+        Map<String, Object> params = new HashMap<>();
+        params.put("page", 1);
+        params.put("limit", 99);
+        Map result = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmTemplate", params);
+        return CommonResponse.success(result);
     }
 
     @Override
-    public CommonResponse getTerminalByType() {
-        return null;
+    public CommonResponse getTerminalByType(String type) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("type", type); // S08
+        Map result = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmDevice/getTemplatesByType", params);
+        return CommonResponse.success(result);
     }
 
     /**
