@@ -1,6 +1,7 @@
 package com.icbms.iot.controller;
 
 import com.icbms.iot.common.CommonResponse;
+import com.icbms.iot.dto.AddDeviceDto;
 import com.icbms.iot.enums.LoRaCommand;
 import com.icbms.iot.rest.LoRaCommandService;
 import io.swagger.annotations.Api;
@@ -36,6 +37,30 @@ public class LoRaCommandController {
     @ResponseBody
     public CommonResponse stop() {
         return loRaCommandService.stopRoundRobin();
+    }
+
+    @GetMapping("/getToken")
+    @ResponseBody
+    public CommonResponse getToken() {
+        return loRaCommandService.getToken();
+    }
+
+    @GetMapping("/getDevice")
+    @ResponseBody
+    public CommonResponse getDevice(String deviceSn) {
+        return loRaCommandService.getDevice(deviceSn);
+    }
+
+    @PostMapping("/addDevice")
+    @ResponseBody
+    public CommonResponse addDevice(@RequestBody AddDeviceDto addDeviceDto) {
+        return loRaCommandService.addDevice(addDeviceDto);
+    }
+
+    @GetMapping("/deleteDevice")
+    @ResponseBody
+    public CommonResponse deleteDevice(String deviceSn) {
+        return loRaCommandService.deleteDevice(deviceSn);
     }
 
 }
