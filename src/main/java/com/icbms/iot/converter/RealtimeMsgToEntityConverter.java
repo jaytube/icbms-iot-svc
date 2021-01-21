@@ -1,8 +1,10 @@
 package com.icbms.iot.converter;
 
-import com.icbms.iot.dto.RealTimeMessage;
+import com.icbms.iot.dto.RealtimeMessage;
 import com.icbms.iot.entity.RealDataEntity;
+import com.icbms.iot.service.GatewayConfigService;
 import com.icbms.iot.util.DateUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -10,31 +12,35 @@ import java.util.Objects;
 @Service
 public class RealtimeMsgToEntityConverter {
 
-    public RealDataEntity convert(RealTimeMessage realTimeMessage) {
+    @Autowired
+    private GatewayConfigService gatewayConfigService;
+
+    public RealDataEntity convert(RealtimeMessage realtimeMessage) {
         RealDataEntity entity = new RealDataEntity();
-        //entity.setProjectId();
-        //entity.setGatewayId();
-        entity.setTerminalId(Objects.toString(realTimeMessage.getBoxNo(), null));
-        //entity.setSwitchAddr(realTimeMessage.getSwitchFlag());
-        //entity.setControlFlag(realTimeMessage.getSwitchFlag());
-        entity.setVoltage(Objects.toString(realTimeMessage.getCircuitVoltage(), null));
-        entity.setLeakageCurrent(Objects.toString(realTimeMessage.getCurrentLeak(), null));
-        entity.setPower(Objects.toString(realTimeMessage.getCircuitPower(), null));
-        entity.setTemperature(Objects.toString(realTimeMessage.getModTemp()));
-        entity.setElectricCurrent(Objects.toString(realTimeMessage.getCircuitCurrent()));
-        entity.setElectricCnt(Objects.toString(realTimeMessage.getElectric()));
-        //entity.setLockStatus(Objects.toString(realTimeMessage.getSwitchFlag()));
+        String projectId = gatewayConfigService.getProjectIdByTerminalId(realtimeMessage.getBoxNo() + "");
+        entity.setProjectId(projectId);
+        entity.setGatewayId(realtimeMessage.getGatewayId());
+        entity.setTerminalId(Objects.toString(realtimeMessage.getBoxNo(), null));
+        entity.setSwitchAddr("");
+        entity.setControlFlag("");
+        entity.setVoltage(Objects.toString(realtimeMessage.getCircuitVoltage(), null));
+        entity.setLeakageCurrent(Objects.toString(realtimeMessage.getCurrentLeak(), null));
+        entity.setPower(Objects.toString(realtimeMessage.getCircuitPower(), null));
+        entity.setTemperature(Objects.toString(realtimeMessage.getModTemp()));
+        entity.setElectricCurrent(Objects.toString(realtimeMessage.getCircuitCurrent()));
+        entity.setElectricCnt(Objects.toString(realtimeMessage.getElectric()));
+        entity.setLockStatus("");
         entity.setReportTime(DateUtil.parseDate(System.currentTimeMillis()));
-        entity.setPhaseVoltageA(Objects.toString(realTimeMessage.getAVoltage()));
-        entity.setPhaseVoltageB(Objects.toString(realTimeMessage.getBVoltage()));
-        entity.setPhaseVoltageC(Objects.toString(realTimeMessage.getCVoltage()));
-        entity.setPhaseCurrentA(Objects.toString(realTimeMessage.getACurrent()));
-        entity.setPhaseCurrentB(Objects.toString(realTimeMessage.getBCurrent()));
-        entity.setPhaseCurrentC(Objects.toString(realTimeMessage.getCCurrent()));
-        entity.setPhaseCurrentN(Objects.toString(realTimeMessage.getNCurrent()));
-        entity.setPhasePowerA(Objects.toString(realTimeMessage.getAPower()));
-        entity.setPhasePowerB(Objects.toString(realTimeMessage.getBPower()));
-        entity.setPhasePowerC(Objects.toString(realTimeMessage.getCPower()));
+        entity.setPhaseVoltageA(Objects.toString(realtimeMessage.getAVoltage()));
+        entity.setPhaseVoltageB(Objects.toString(realtimeMessage.getBVoltage()));
+        entity.setPhaseVoltageC(Objects.toString(realtimeMessage.getCVoltage()));
+        entity.setPhaseCurrentA(Objects.toString(realtimeMessage.getACurrent()));
+        entity.setPhaseCurrentB(Objects.toString(realtimeMessage.getBCurrent()));
+        entity.setPhaseCurrentC(Objects.toString(realtimeMessage.getCCurrent()));
+        entity.setPhaseCurrentN(Objects.toString(realtimeMessage.getNCurrent()));
+        entity.setPhasePowerA(Objects.toString(realtimeMessage.getAPower()));
+        entity.setPhasePowerB(Objects.toString(realtimeMessage.getBPower()));
+        entity.setPhasePowerC(Objects.toString(realtimeMessage.getCPower()));
 
         return entity;
     }

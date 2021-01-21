@@ -1,6 +1,6 @@
 package com.icbms.iot.inbound.component;
 
-import com.icbms.iot.dto.RealTimeMessage;
+import com.icbms.iot.dto.RealtimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -13,14 +13,14 @@ public class ProcessedMsgQueue {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final ArrayBlockingQueue<RealTimeMessage> processedMsgQueue = new ArrayBlockingQueue(1000);
+    private final ArrayBlockingQueue<RealtimeMessage> processedMsgQueue = new ArrayBlockingQueue(1000);
 
-    public void offer(RealTimeMessage msg) {
+    public void offer(RealtimeMessage msg) {
         logger.info("处理队列长度: " + processedMsgQueue.size());
         this.processedMsgQueue.offer(msg);
     }
 
-    public RealTimeMessage poll() {
+    public RealtimeMessage poll() {
         logger.info("处理队列长度: " + processedMsgQueue.size());
         return this.processedMsgQueue.poll();
     }

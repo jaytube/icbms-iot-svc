@@ -7,7 +7,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class RealTimeMessage {
+public class RealtimeMessage {
 
     private Integer boxNo;
     private Integer circuitVoltage;

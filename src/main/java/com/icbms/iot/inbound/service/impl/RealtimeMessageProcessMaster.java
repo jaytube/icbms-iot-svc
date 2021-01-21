@@ -2,13 +2,13 @@ package com.icbms.iot.inbound.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.icbms.iot.dto.LoraMessage;
-import com.icbms.iot.dto.RealTimeMessage;
+import com.icbms.iot.dto.RealtimeMessage;
 import com.icbms.iot.dto.RichMqttMessage;
 import com.icbms.iot.exception.ErrorCodeEnum;
 import com.icbms.iot.exception.IotException;
 import com.icbms.iot.inbound.component.ProcessedMsgQueue;
 import com.icbms.iot.inbound.service.AbstractMessageProcessor;
-import com.icbms.iot.inbound.service.RealTimeMessageParser;
+import com.icbms.iot.inbound.service.RealtimeMessageParser;
 import com.icbms.iot.util.Base64Util;
 import com.icbms.iot.util.CommonUtil;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ import java.lang.invoke.MethodHandles;
 
 @Service("realTimeMessageProcessMaster")
 @Transactional
-public class RealTimeMessageProcessMaster extends AbstractMessageProcessor {
+public class RealtimeMessageProcessMaster extends AbstractMessageProcessor {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -29,10 +29,10 @@ public class RealTimeMessageProcessMaster extends AbstractMessageProcessor {
 
     private ThreadLocal<LoraMessage> loraMsgThreadLocal = new ThreadLocal<>();
 
-    private ThreadLocal<RealTimeMessage> realTimeMsgThreadLocal = new ThreadLocal<>();
+    private ThreadLocal<RealtimeMessage> realTimeMsgThreadLocal = new ThreadLocal<>();
 
     @Autowired
-    private RealTimeMessageParser realTimeMessageParser;
+    private RealtimeMessageParser realtimeMessageParser;
 
     @Autowired
     private ProcessedMsgQueue processedMsgQueue;
@@ -70,14 +70,14 @@ public class RealTimeMessageProcessMaster extends AbstractMessageProcessor {
         LoraMessage loraMessage = loraMsgThreadLocal.get();
         String dataStr = loraMessage.getData();
         byte[] data = Base64Util.decrypt(dataStr);
-        RealTimeMessage realTimeMessage = realTimeMessageParser.parseMessage(data);
+        RealtimeMessage realTimeMessage = realtimeMessageParser.parseMessage(data);
         realTimeMessage.setGatewayId(loraMessage.getGatewayId());
         realTimeMsgThreadLocal.set(realTimeMessage);
     }
 
     @Override
     public void execute() {
-        RealTimeMessage realTimeMessage = realTimeMsgThreadLocal.get();
+        RealtimeMessage realTimeMessage = realTimeMsgThreadLocal.get();
         /*List<RealTimeMessage> realData = redisTemplate.opsForValue().get("REAL_DATA");
         if(CollectionUtils.isEmpty(realData))
             realData = new ArrayList<>();

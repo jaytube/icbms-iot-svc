@@ -1,11 +1,11 @@
 package com.icbms.iot.inbound.service.impl;
 
-import com.icbms.iot.dto.RealTimeMessage;
+import com.icbms.iot.dto.RealtimeMessage;
 import com.icbms.iot.enums.AlarmType;
 import com.icbms.iot.enums.BoxAlarmType;
 import com.icbms.iot.exception.ErrorCodeEnum;
 import com.icbms.iot.exception.IotException;
-import com.icbms.iot.inbound.service.RealTimeMessageParser;
+import com.icbms.iot.inbound.service.RealtimeMessageParser;
 import com.icbms.iot.util.CommonUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class RealTimeMessageParserImpl implements RealTimeMessageParser {
+public class RealtimeMessageParserImpl implements RealtimeMessageParser {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -38,14 +38,14 @@ public class RealTimeMessageParserImpl implements RealTimeMessageParser {
     }
 
     @Override
-    public RealTimeMessage parseMessage(byte[] payload) {
+    public RealtimeMessage parseMessage(byte[] payload) {
         logger.info("实时数据处理============>解析实时数据start!!!!");
         logger.info("]收到的数据域=============>[" + CommonUtil.bytesToHex(payload) + "]");
         int index = 0;
         Integer header = CommonUtil.getInt(payload, index);
         index += 4;
 
-        RealTimeMessage message = new RealTimeMessage();
+        RealtimeMessage message = new RealtimeMessage();
         int boxNumber = CommonUtil.getShort(payload, index);
         index += 2;
         logger.info("Box No: " + boxNumber);
