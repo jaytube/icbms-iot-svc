@@ -42,7 +42,25 @@ public class LoRaCommandController {
     @GetMapping("/getToken")
     @ResponseBody
     public CommonResponse getToken() {
-        return loRaCommandService.getToken();
+        return CommonResponse.success(loRaCommandService.getToken());
+    }
+
+    @GetMapping("/getDbInstance")
+    @ResponseBody
+    public CommonResponse getDbInstance(String code) {
+        return CommonResponse.success(loRaCommandService.getDbInstance(code));
+    }
+
+    @GetMapping("/getGatewayList")
+    @ResponseBody
+    public CommonResponse getGatewayList() {
+        return CommonResponse.success(loRaCommandService.getGatewayList());
+    }
+
+    @GetMapping("/getGateWayById")
+    @ResponseBody
+    public CommonResponse getGateWayById(String id) {
+        return CommonResponse.success(loRaCommandService.getGateWayById(id));
     }
 
     @GetMapping("/getDevice")

@@ -2,21 +2,22 @@ package com.icbms.iot.rest.impl;
 
 import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.dto.AddDeviceDto;
+import com.icbms.iot.dto.GateWayInfoDto;
 import com.icbms.iot.enums.LoRaCommand;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.Base64Util;
 import com.icbms.iot.util.RestUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.icbms.iot.util.CommonUtil.hexStringToBytes;
 
@@ -76,7 +77,7 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
     }
 
     @Override
-    public CommonResponse getToken() {
+    public String getToken() {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "client_credentials");
         params.add("scope", "all");
@@ -86,12 +87,13 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
         Object token_type = result.get("token_type");
         Object access_token = result.get("access_token");
         Object expires_in = result.get("expires_in");
+        String bearer_token = null;
         if (token_type != null && access_token != null && expires_in != null) {
-            String bearer_token = Objects.toString(token_type) + Objects.toString(access_token);
+            bearer_token = Objects.toString(token_type) + " " + Objects.toString(access_token);
             redisTemplate.opsForValue().set("BEARER_TOKEN", bearer_token);
             redisTemplate.expire("BEARER_TOKEN", Long.parseLong(Objects.toString(expires_in)), TimeUnit.SECONDS);
         }
-        return CommonResponse.success(result);
+        return bearer_token;
     }
 
     @Override
@@ -105,25 +107,45 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
     }
 
     @Override
-    public CommonResponse getDbInstance(String code) {
+    public String getDbInstance(String code) {
         // code cluing
-        Map result = restUtil.doGetWithToken(DEVICE_IP + "/api-tms/pass/scptenant/" + code, null);
-        return CommonResponse.success(result);
+        Map result = restUtil.doGetNoToken(DEVICE_IP + "/api-tms/pass/scptenant/" + code + "_123");
+        Map datas = MapUtils.getMap(result, "datas");
+        String instance = MapUtils.getString(datas, "instance");
+        return instance;
     }
 
     @Override
-    public CommonResponse getGatewayList() {
+    public String getDbInstanceFromRedis(String code) {
+        Object db_instance_tenant = redisTemplate.opsForValue().get("DB_INSTANCE_TENANT");
+        if (db_instance_tenant != null) {
+            return Objects.toString(db_instance_tenant);
+        }
+        return getDbInstance(code);
+    }
+
+    @Override
+    public List<GateWayInfoDto> getGatewayList() {
         Map<String, Object> params = new HashMap<>();
         params.put("page", 1);
         params.put("limit", 99);
         Map result = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmGateway", params);
-        return CommonResponse.success(result);
+        List<Map<String, Object>> list = (List<Map<String, Object>>) MapUtils.getObject(result, "data");
+        if (list == null || list.size() == 0) {
+            return new ArrayList<>();
+        }
+        return list.stream().map(map -> convert(map)).collect(Collectors.toList());
     }
 
     @Override
-    public CommonResponse getGatewayApplication(String applicationId) {
-        Map result = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmGateway/" + applicationId, null);
-        return CommonResponse.success(result);
+    public GateWayInfoDto getGateWayById(String gateWayId) {
+        Map result = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmGateway/" + gateWayId, null);
+        Map data = MapUtils.getMap(result, "datas");
+        GateWayInfoDto gateWayInfoDto = new GateWayInfoDto();
+        if (data == null) {
+            return gateWayInfoDto;
+        }
+        return convert(data);
     }
 
     @Override
@@ -186,5 +208,28 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
     public CommonResponse deleteDevice(String deviceSn) {
         Map map = restUtil.doDeleteWithToken(DEVICE_IP + "/api-sdm/SdmDevice/" + deviceSn);
         return CommonResponse.success(map);
+    }
+
+    private GateWayInfoDto convert(Map<String, Object> map) {
+        GateWayInfoDto gateWayInfoDto = new GateWayInfoDto();
+        gateWayInfoDto.setId(MapUtils.getIntValue(map, "id"));
+        gateWayInfoDto.setCreateTime(MapUtils.getLongValue(map, "createTime"));
+        gateWayInfoDto.setUpdateTime(MapUtils.getLongValue(map, "updateTime"));
+        gateWayInfoDto.setLoraId(MapUtils.getObject(map, "loraId"));
+        gateWayInfoDto.setName(MapUtils.getString(map, "name"));
+        gateWayInfoDto.setApplicationId(MapUtils.getIntValue(map, "applicationId"));
+        gateWayInfoDto.setApplicationName(MapUtils.getString(map, "applicationName"));
+        gateWayInfoDto.setLoraApplicatonId(MapUtils.getObject(map, "loraApplicatonId"));
+        gateWayInfoDto.setSceneId(MapUtils.getIntValue(map, "sceneId"));
+        gateWayInfoDto.setSceneName(MapUtils.getString(map, "sceneName"));
+        gateWayInfoDto.setLoraSceneId(MapUtils.getIntValue(map, "loraSceneId"));
+        gateWayInfoDto.setMacAddress(MapUtils.getString(map, "macAddress"));
+        gateWayInfoDto.setDes(MapUtils.getString(map, "des"));
+        gateWayInfoDto.setMgrUrl(MapUtils.getString(map, "mgrUrl"));
+        gateWayInfoDto.setCreateUserId(MapUtils.getIntValue(map, "createUserId"));
+        gateWayInfoDto.setUpdateUserName(MapUtils.getString(map, "updateUserName"));
+        gateWayInfoDto.setUpdateUserId(MapUtils.getIntValue(map, "updateUserId"));
+        gateWayInfoDto.setIsDel(MapUtils.getIntValue(map, "isDel"));
+        return gateWayInfoDto;
     }
 }

@@ -69,6 +69,18 @@ public class RestUtil {
 
     @Retryable(value = RestClientException.class, maxAttempts = 2,
             backoff = @Backoff(delay = 5000L, multiplier = 2))
+    public Map doGetNoToken(String url) {
+        log.info("【doGetNoToken】【请求URL】：{}", url);
+        HttpHeaders requestHeaders = new HttpHeaders();
+        HttpEntity<String> requestEntity = new HttpEntity<String>(null, requestHeaders);
+        ResponseEntity<Map> exchange = restTemplate.exchange(url, HttpMethod.GET, requestEntity, Map.class);
+        Map response = exchange.getBody();
+        log.info("【doGetNoToken】【请求响应】：{}", response);
+        return response;
+    }
+
+    @Retryable(value = RestClientException.class, maxAttempts = 2,
+            backoff = @Backoff(delay = 5000L, multiplier = 2))
     public Map doPostFormDataNoToken(String url, MultiValueMap<String, String> params) {
         log.info("【doPostFormDataNoToken】【请求URL】：{}", url);
         log.info("【doPostFormDataNoToken】【请求入参】：{}", params);
@@ -131,7 +143,7 @@ public class RestUtil {
         HttpHeaders requestHeaders = new HttpHeaders();
         requestHeaders.add("Content-Type", HTTP_HEADER_CONTENT_TYPE);
         requestHeaders.add("Authorization", loRaCommandService.getRedisToken());
-        requestHeaders.add("Tenant", HTTP_HEADER_TENANT);
+        requestHeaders.add("Tenant", loRaCommandService.getDbInstanceFromRedis("cluing"));
         return requestHeaders;
     }
 

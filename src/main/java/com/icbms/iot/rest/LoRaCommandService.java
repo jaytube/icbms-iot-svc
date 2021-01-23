@@ -2,7 +2,11 @@ package com.icbms.iot.rest;
 
 import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.dto.AddDeviceDto;
+import com.icbms.iot.dto.ApplicationInfoDto;
+import com.icbms.iot.dto.GateWayInfoDto;
 import com.icbms.iot.enums.LoRaCommand;
+
+import java.util.List;
 
 /**
  * @Author: Cherry
@@ -17,15 +21,17 @@ public interface LoRaCommandService {
 
     CommonResponse executeCmd(LoRaCommand command, String deviceId);
 
-    CommonResponse getToken();
+    String getToken();
 
     String getRedisToken();
 
-    CommonResponse getDbInstance(String code);
+    String getDbInstance(String code);
 
-    CommonResponse getGatewayList();
+    String getDbInstanceFromRedis(String code);
 
-    CommonResponse getGatewayApplication(String applicationId);
+    List<GateWayInfoDto> getGatewayList();
+
+    GateWayInfoDto getGateWayById(String gateWayId);
 
     CommonResponse getTerminalType();
 
