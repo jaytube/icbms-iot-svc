@@ -83,9 +83,8 @@ public class RealtimeMessageProcessMaster extends AbstractMessageProcessor {
     @Override
     public void execute() {
         RealtimeMessage realTimeMessage = realTimeMsgThreadLocal.get();
-        if(realTimeMessage.getDataType() == DataType.REAL_DATA)
-            realtimeMsgQueue.offer(realTimeMessage);
-        else
+        realtimeMsgQueue.offer(realTimeMessage);
+        if(realTimeMessage.getDataType() == DataType.ALARM_DATA)
             alarmDataMsgQueue.offer(realTimeMessage);
     }
 
