@@ -22,4 +22,7 @@ public class IotConstant {
 
     public static final String REAL_DATA_REMARK = "网关上传到服务器通信运行数据主信息";
 
+    public static final Long REAL_DATA_SAVE_FREQUENCY = 600000L;
+
+    public static final int REAL_DATA_PROCESS_CAPACITY = 20;
 }

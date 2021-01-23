@@ -1,12 +1,14 @@
 package com.icbms.iot.inbound.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.icbms.iot.dto.DataType;
 import com.icbms.iot.dto.LoraMessage;
 import com.icbms.iot.dto.RealtimeMessage;
 import com.icbms.iot.dto.RichMqttMessage;
 import com.icbms.iot.exception.ErrorCodeEnum;
 import com.icbms.iot.exception.IotException;
-import com.icbms.iot.inbound.component.ProcessedMsgQueue;
+import com.icbms.iot.inbound.component.AlarmDataMsgQueue;
+import com.icbms.iot.inbound.component.ProcessedRealtimeMsgQueue;
 import com.icbms.iot.inbound.service.AbstractMessageProcessor;
 import com.icbms.iot.inbound.service.RealtimeMessageParser;
 import com.icbms.iot.util.Base64Util;
@@ -35,7 +37,10 @@ public class RealtimeMessageProcessMaster extends AbstractMessageProcessor {
     private RealtimeMessageParser realtimeMessageParser;
 
     @Autowired
-    private ProcessedMsgQueue processedMsgQueue;
+    private ProcessedRealtimeMsgQueue processedRealtimeMsgQueue;
+
+    @Autowired
+    private AlarmDataMsgQueue alarmDataMsgQueue;
 
     @Override
     public void setParameter(RichMqttMessage message) {
@@ -84,7 +89,10 @@ public class RealtimeMessageProcessMaster extends AbstractMessageProcessor {
         realData.add(realTimeMessage);
         redisTemplate.opsForValue().set("REAL_DATA", realData);*/
         //redisTemplate.opsForList().rightPush("REAL_MESSAGE", realTimeMessage);
-        processedMsgQueue.offer(realTimeMessage);
+        if(realTimeMessage.getDataType() == DataType.REAL_DATA)
+            processedRealtimeMsgQueue.offer(realTimeMessage);
+        else
+            alarmDataMsgQueue.offer(realTimeMessage);
     }
 
     @Override

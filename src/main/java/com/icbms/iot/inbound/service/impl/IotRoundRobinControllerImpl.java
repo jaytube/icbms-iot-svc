@@ -1,11 +1,9 @@
 package com.icbms.iot.inbound.service.impl;
 
-import com.icbms.iot.inbound.service.IotRoundRobinController;
 import com.icbms.iot.common.CommonResponse;
-import com.icbms.iot.enums.LoRaCommand;
+import com.icbms.iot.inbound.service.IotRoundRobinController;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.MqttEnvUtil;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +12,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.lang.invoke.MethodHandles;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class IotRoundRobinControllerImpl implements IotRoundRobinController {
@@ -72,17 +72,17 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
                 String gatewayId = "";
                 List<String> loraIds = e.getValue();
                 mqttEnvUtil.setCurrentGatewayId(gatewayId);
-                CommonResponse resp1 = loRaCommandService.startRoundRobin();
+                CommonResponse resp = loRaCommandService.startRoundRobin();
                 long start = System.currentTimeMillis();
-                logger.info("开启轮询网关" + gatewayIp + ", 响应：" + resp1.getData());
+                logger.info("开启轮询网关" + gatewayIp + ", 响应：" + resp.getData());
                 long timeCost = 0;
-                while(mqttEnvUtil.getMessageProcessed() < DEVICE_COUNT && timeCost < MAX_TIME) {
+                while(!mqttEnvUtil.isSingleGatewayStopped() && timeCost < MAX_TIME) {
                     timeCost = (System.currentTimeMillis() - start) / 1000;
                     continue;
                 }
-                mqttEnvUtil.setMqttSwitchOff(true);
-                CommonResponse resp2 = loRaCommandService.stopRoundRobin();
-                List<String> processedDeviceList = mqttEnvUtil.getProcessedDeviceList();
+                //mqttEnvUtil.setMqttSwitchOff(true);
+                //CommonResponse resp2 = loRaCommandService.stopRoundRobin();
+                /*List<String> processedDeviceList = mqttEnvUtil.getProcessedDeviceList();
                 ArrayList<String> newList = new ArrayList<>(loraIds);
                 newList.removeAll(processedDeviceList);
                 logger.info("未处理的设备: " + newList.stream().collect(Collectors.joining(", ")));
@@ -91,8 +91,8 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
                         loRaCommandService.executeCmd(LoRaCommand.QUERY_CMD, c);
                         logger.info("单个设备查询实时空开数据, id: " + c);
                     });
-                }
-                logger.info("停止轮询网关" + gatewayIp + ", 响应: " + resp2.getData());
+                }*/
+                //logger.info("停止轮询网关" + gatewayIp + ", 响应: " + resp2.getData());
                 logger.info("网关" + gatewayIp + " 轮询花费: " + timeCost + " seconds.");
                 try {
                     Thread.sleep(2000);

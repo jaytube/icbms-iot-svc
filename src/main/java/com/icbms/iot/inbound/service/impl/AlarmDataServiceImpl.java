@@ -155,17 +155,14 @@ public class AlarmDataServiceImpl implements AlarmDataService {
     }
 
     @Override
-    public void processAlarmData(List<RealtimeMessage> msgList) {
+    public void processAlarmData(RealtimeMessage msg) {
         Map<String, String> alarmDataMap = new HashMap<>();
         List<AlarmDataEntity> alarmDataList = new ArrayList<>();
-        for(RealtimeMessage msg : msgList) {
-            Map<String, Object> map = generateAlarmData(msg);
-            Map<String, String> redisMap = (Map<String, String>) map.get(REDIS_ALARM);
-            alarmDataMap.putAll(redisMap);
-            List<AlarmDataEntity> list = (List<AlarmDataEntity>) map.get(MYSQL_ALARM);
-            alarmDataList.addAll(list);
-        }
-
+        Map<String, Object> map = generateAlarmData(msg);
+        Map<String, String> redisMap = (Map<String, String>) map.get(REDIS_ALARM);
+        alarmDataMap.putAll(redisMap);
+        List<AlarmDataEntity> list = (List<AlarmDataEntity>) map.get(MYSQL_ALARM);
+        alarmDataList.addAll(list);
         redisTemplate.opsForHash().putAll(ALARM_DATA, alarmDataMap);
         saveAlarmDataEntityList(alarmDataList);
     }

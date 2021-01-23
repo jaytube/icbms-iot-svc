@@ -12,4 +12,6 @@ public interface GatewayConfigService {
 
     String getProjectIdByTerminalId(String terminalId);
 
+    String getGatewayIdByDevEUI(String devEui);
+
 }

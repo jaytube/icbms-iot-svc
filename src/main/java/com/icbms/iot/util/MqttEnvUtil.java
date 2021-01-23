@@ -10,13 +10,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class MqttEnvUtil {
 
-    private volatile AtomicInteger messageProcessed = new AtomicInteger(0);
+    private volatile AtomicInteger messageReceived = new AtomicInteger(0);
 
     private volatile AtomicBoolean mqttSwitchOff = new AtomicBoolean(false);
 
     private List<String> processedDeviceList = new CopyOnWriteArrayList<>();
 
     private volatile String currentGatewayId;
+
+    private volatile boolean singleGatewayStopped;
 
     public synchronized String getCurrentGatewayId() {
         return currentGatewayId;
@@ -26,16 +28,16 @@ public class MqttEnvUtil {
         this.currentGatewayId = currentGatewayId;
     }
 
-    public int getMessageProcessed() {
-        return messageProcessed.get();
+    public int getMessageReceived() {
+        return messageReceived.get();
     }
 
     public void increment() {
-        this.messageProcessed.incrementAndGet();
+        this.messageReceived.incrementAndGet();
     }
 
     public synchronized void reset() {
-        this.messageProcessed = new AtomicInteger(0);
+        this.messageReceived = new AtomicInteger(0);
         this.mqttSwitchOff = new AtomicBoolean(false);
         this.processedDeviceList.clear();
         this.currentGatewayId = "";
@@ -57,5 +59,11 @@ public class MqttEnvUtil {
         return processedDeviceList;
     }
 
+    public boolean isSingleGatewayStopped() {
+        return singleGatewayStopped;
+    }
 
+    public void setSingleGatewayStopped(boolean singleGatewayStopped) {
+        this.singleGatewayStopped = singleGatewayStopped;
+    }
 }
