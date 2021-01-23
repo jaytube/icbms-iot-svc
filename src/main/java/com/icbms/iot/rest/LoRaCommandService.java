@@ -2,11 +2,13 @@ package com.icbms.iot.rest;
 
 import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.dto.AddDeviceDto;
-import com.icbms.iot.dto.ApplicationInfoDto;
+import com.icbms.iot.dto.DeviceInfoDto;
 import com.icbms.iot.dto.GateWayInfoDto;
+import com.icbms.iot.dto.TerminalTypeDto;
 import com.icbms.iot.enums.LoRaCommand;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: Cherry
@@ -15,31 +17,31 @@ import java.util.List;
  */
 public interface LoRaCommandService {
 
-    CommonResponse startRoundRobin();
+    CommonResponse<Map> startRoundRobin();
 
-    CommonResponse stopRoundRobin();
+    CommonResponse<Map> stopRoundRobin();
 
-    CommonResponse executeCmd(LoRaCommand command, String deviceId);
+    CommonResponse<Map> executeCmd(LoRaCommand command, String deviceId);
 
-    String getToken();
+    CommonResponse<String> getToken();
 
     String getRedisToken();
 
-    String getDbInstance(String code);
+    CommonResponse<String> getDbInstance(String code);
 
     String getDbInstanceFromRedis(String code);
 
-    List<GateWayInfoDto> getGatewayList();
+    CommonResponse<List<GateWayInfoDto>> getGatewayList();
 
-    GateWayInfoDto getGateWayById(String gateWayId);
+    CommonResponse<GateWayInfoDto> getGateWayById(String gateWayId);
 
-    CommonResponse getTerminalType();
+    CommonResponse<List<TerminalTypeDto>> getTerminalTypes();
 
-    CommonResponse getTerminalByType(String type);
+    CommonResponse<List<TerminalTypeDto>> getTerminalByType(String type);
 
     CommonResponse addDevice(AddDeviceDto addDeviceDto);
 
-    CommonResponse getDevice(String deviceSn);
+    CommonResponse<List<DeviceInfoDto>> getDevices(String deviceKey);
 
     CommonResponse deleteDevice(String deviceSn);
 }
