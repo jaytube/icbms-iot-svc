@@ -1,6 +1,5 @@
 package com.icbms.iot.inbound.service.impl;
 
-import com.icbms.iot.dto.DataType;
 import com.icbms.iot.dto.RealtimeMessage;
 import com.icbms.iot.enums.AlarmType;
 import com.icbms.iot.enums.BoxAlarmType;
@@ -8,7 +7,6 @@ import com.icbms.iot.exception.ErrorCodeEnum;
 import com.icbms.iot.exception.IotException;
 import com.icbms.iot.inbound.service.RealtimeMessageParser;
 import com.icbms.iot.util.CommonUtil;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
