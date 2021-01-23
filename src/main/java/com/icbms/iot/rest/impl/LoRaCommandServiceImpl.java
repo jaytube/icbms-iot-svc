@@ -1,19 +1,21 @@
 package com.icbms.iot.rest.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.dto.AddDeviceDto;
+import com.icbms.iot.dto.DeviceInfoDto;
 import com.icbms.iot.dto.GateWayInfoDto;
+import com.icbms.iot.dto.TerminalTypeDto;
 import com.icbms.iot.enums.LoRaCommand;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.Base64Util;
 import com.icbms.iot.util.RestUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +36,7 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
     private RestUtil restUtil;
 
     @Autowired
-    private RedisTemplate redisTemplate;
+    private StringRedisTemplate redisTemplate;
 
     private static final String START_ROUND_ROBIN = "http://10.0.1.70:9900/api-sdm/v1/pUI";
 
@@ -45,25 +47,23 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
     private static final String DEVICE_IP = "http://10.0.1.70:9900";
 
     @Override
-    public CommonResponse startRoundRobin() {
+    public CommonResponse<Map> startRoundRobin() {
         Map<String, Object> params = new HashMap<>();
         params.put("tenant", "cluing");
         params.put("type", "S08");
         params.put("time", "100");
-        Map result = restUtil.doPost(START_ROUND_ROBIN, params);
-        return CommonResponse.success(result);
+        return restUtil.doPost(START_ROUND_ROBIN, params);
     }
 
     @Override
-    public CommonResponse stopRoundRobin() {
+    public CommonResponse<Map> stopRoundRobin() {
         Map<String, Object> params = new HashMap<>();
         params.put("tenant", "cluing");
-        Map result = restUtil.doPost(STOP_ROUND_ROBIN, params);
-        return CommonResponse.success(result);
+        return restUtil.doPost(STOP_ROUND_ROBIN, params);
     }
 
     @Override
-    public CommonResponse executeCmd(LoRaCommand command, String deviceId) {
+    public CommonResponse<Map> executeCmd(LoRaCommand command, String deviceId) {
         byte[] commandBytes = hexStringToBytes(command.getCmd());
         Map<String, Object> map = new HashMap<>();
         map.put("confirmed", false);
@@ -72,18 +72,21 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
         map.put("fPort", 4);
         map.put("reference", "reference");
         String action = "nodes/" + deviceId + "/queue";
-        Map result = restUtil.doPost(EXECUTE_CMD + action, map);
-        return CommonResponse.success(result);
+        return restUtil.doPost(EXECUTE_CMD + action, map);
     }
 
     @Override
-    public String getToken() {
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("grant_type", "client_credentials");
-        params.add("scope", "all");
-        params.add("client_id", "cluing");
-        params.add("client_secret", "CngWVDbTSn");
-        Map result = restUtil.doPostFormDataNoToken(DEVICE_IP + "/api-dca/oauth/token", params);
+    public CommonResponse<String> getToken() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("grant_type", "client_credentials");
+        params.put("scope", "all");
+        params.put("client_id", "cluing");
+        params.put("client_secret", "CngWVDbTSn");
+        CommonResponse<Map> response = restUtil.doPostFormDataNoToken(DEVICE_IP + "/api-dca/oauth/token", params);
+        if (response.getCode() != 200) {
+            return CommonResponse.faild(response.getMsg(), JSON.toJSONString(response.getData()));
+        }
+        Map result = response.getData();
         Object token_type = result.get("token_type");
         Object access_token = result.get("access_token");
         Object expires_in = result.get("expires_in");
@@ -93,7 +96,13 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
             redisTemplate.opsForValue().set("BEARER_TOKEN", bearer_token);
             redisTemplate.expire("BEARER_TOKEN", Long.parseLong(Objects.toString(expires_in)), TimeUnit.SECONDS);
         }
-        return bearer_token;
+
+        if (StringUtils.isNotBlank(bearer_token)) {
+            CommonResponse<String> success = CommonResponse.success();
+            return success.setData(bearer_token);
+        } else {
+            return CommonResponse.faild("GET TOKEN FAILED.");
+        }
     }
 
     @Override
@@ -107,12 +116,21 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
     }
 
     @Override
-    public String getDbInstance(String code) {
+    public CommonResponse<String> getDbInstance(String code) {
         // code cluing
-        Map result = restUtil.doGetNoToken(DEVICE_IP + "/api-tms/pass/scptenant/" + code + "_123");
+        CommonResponse<Map> response = restUtil.doGetNoToken(DEVICE_IP + "/api-tms/pass/scptenant/" + code + "_123");
+        if (response.getCode() != 200) {
+            return CommonResponse.faild(response.getMsg(), JSON.toJSONString(response.getData()));
+        }
+        Map result = response.getData();
         Map datas = MapUtils.getMap(result, "datas");
         String instance = MapUtils.getString(datas, "instance");
-        return instance;
+        if (StringUtils.isNotBlank(instance)) {
+            CommonResponse<String> success = CommonResponse.success();
+            return success.setData(instance);
+        } else {
+            return CommonResponse.faild("GET DbInstance FAILED.");
+        }
     }
 
     @Override
@@ -121,48 +139,69 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
         if (db_instance_tenant != null) {
             return Objects.toString(db_instance_tenant);
         }
-        return getDbInstance(code);
+        CommonResponse<String> dbInstance = getDbInstance(code);
+        if (dbInstance.getCode() == 200) {
+            return dbInstance.getData();
+        }
+        return null;
     }
 
     @Override
-    public List<GateWayInfoDto> getGatewayList() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("page", 1);
-        params.put("limit", 99);
-        Map result = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmGateway", params);
+    public CommonResponse<List<GateWayInfoDto>> getGatewayList() {
+        CommonResponse<Map> response = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmGateway?page=1&limit=99");
+        if (response.getCode() != 200) {
+            return CommonResponse.faild(response.getMsg(), null);
+        }
+        Map result = response.getData();
         List<Map<String, Object>> list = (List<Map<String, Object>>) MapUtils.getObject(result, "data");
         if (list == null || list.size() == 0) {
-            return new ArrayList<>();
+            return CommonResponse.success(new ArrayList<>());
         }
-        return list.stream().map(map -> convert(map)).collect(Collectors.toList());
+        return CommonResponse.success(list.stream().map(map -> convertGateWay(map)).collect(Collectors.toList()));
     }
 
     @Override
-    public GateWayInfoDto getGateWayById(String gateWayId) {
-        Map result = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmGateway/" + gateWayId, null);
+    public CommonResponse<GateWayInfoDto> getGateWayById(String gateWayId) {
+        CommonResponse<Map> response = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmGateway/" + gateWayId);
+        if (response.getCode() != 200) {
+            return CommonResponse.faild(response.getMsg(), null);
+        }
+        Map result = response.getData();
         Map data = MapUtils.getMap(result, "datas");
-        GateWayInfoDto gateWayInfoDto = new GateWayInfoDto();
         if (data == null) {
-            return gateWayInfoDto;
+            return CommonResponse.success(null);
         }
-        return convert(data);
+        return CommonResponse.success(convertGateWay(data));
     }
 
     @Override
-    public CommonResponse getTerminalType() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("page", 1);
-        params.put("limit", 99);
-        Map result = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmTemplate", params);
-        return CommonResponse.success(result);
+    public CommonResponse<List<TerminalTypeDto>> getTerminalTypes() {
+        CommonResponse<Map> response = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmTemplate?page=1&limit=99");
+        if (response.getCode() != 200) {
+            return CommonResponse.faild(response.getMsg(), null);
+        }
+        Map result = response.getData();
+        List<Map<String, Object>> list = (List<Map<String, Object>>) MapUtils.getObject(result, "data");
+        if (list == null || list.size() == 0) {
+            return CommonResponse.success(new ArrayList<>());
+        }
+        return CommonResponse.success(list.stream().map(map -> convertTerminalType(map)).collect(Collectors.toList()));
     }
 
     @Override
-    public CommonResponse getTerminalByType(String type) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("type", type); // S08
-        Map result = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmDevice/getTemplatesByType", params);
-        return CommonResponse.success(result);
+    public CommonResponse<List<TerminalTypeDto>> getTerminalByType(String type) {
+        // S08
+        CommonResponse<Map> response = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmDevice/getTemplatesByType?type=" + type);
+        if (response.getCode() != 200) {
+            return CommonResponse.faild(response.getMsg(), null);
+        }
+        Map result = response.getData();
+        Map<String, Object> datas = MapUtils.getMap(result, "datas");
+        List<Map<String, Object>> list = (List<Map<String, Object>>) MapUtils.getObject(datas, "templates");
+        if (list == null || list.size() == 0) {
+            return CommonResponse.success(new ArrayList<>());
+        }
+        return CommonResponse.success(list.stream().map(map -> convertTerminalType(map)).collect(Collectors.toList()));
     }
 
     /**
@@ -190,27 +229,29 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
         params.put("type", addDeviceDto.getType());
         params.put("toLora", addDeviceDto.getToLora());
         params.put("typeName", addDeviceDto.getTypeName());
-        Map map = restUtil.doPostWithToken(DEVICE_IP + "/api-sdm/SdmDevice", params);
-        return CommonResponse.success(map);
+        return restUtil.doPostWithToken(DEVICE_IP + "/api-sdm/SdmDevice", params);
     }
 
     @Override
-    public CommonResponse getDevice(String deviceSn) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("page", 1);
-        params.put("limit", 99);
-        params.put("keyWord", deviceSn);
-        Map map = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmDevice", params);
-        return CommonResponse.success(map);
+    public CommonResponse<List<DeviceInfoDto>> getDevices(String deviceKey) {
+        CommonResponse<Map> response = restUtil.doGetWithToken(DEVICE_IP + "/api-sdm/SdmDevice?page=1&limit=99&keyWord=" + deviceKey);
+        if (response.getCode() != 200) {
+            return CommonResponse.faild(response.getMsg(), null);
+        }
+        Map result = response.getData();
+        List<Map<String, Object>> list = (List<Map<String, Object>>) MapUtils.getObject(result, "data");
+        if (list == null || list.size() == 0) {
+            return CommonResponse.success(new ArrayList<>());
+        }
+        return CommonResponse.success(list.stream().map(map -> convertDeviceInfo(map)).collect(Collectors.toList()));
     }
 
     @Override
     public CommonResponse deleteDevice(String deviceSn) {
-        Map map = restUtil.doDeleteWithToken(DEVICE_IP + "/api-sdm/SdmDevice/" + deviceSn);
-        return CommonResponse.success(map);
+        return restUtil.doDeleteWithToken(DEVICE_IP + "/api-sdm/SdmDevice/" + deviceSn);
     }
 
-    private GateWayInfoDto convert(Map<String, Object> map) {
+    private GateWayInfoDto convertGateWay(Map<String, Object> map) {
         GateWayInfoDto gateWayInfoDto = new GateWayInfoDto();
         gateWayInfoDto.setId(MapUtils.getIntValue(map, "id"));
         gateWayInfoDto.setCreateTime(MapUtils.getLongValue(map, "createTime"));
@@ -231,5 +272,62 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
         gateWayInfoDto.setUpdateUserId(MapUtils.getIntValue(map, "updateUserId"));
         gateWayInfoDto.setIsDel(MapUtils.getIntValue(map, "isDel"));
         return gateWayInfoDto;
+    }
+
+    private TerminalTypeDto convertTerminalType(Map<String, Object> map) {
+        TerminalTypeDto terminalTypeDto = new TerminalTypeDto();
+        terminalTypeDto.setId(MapUtils.getIntValue(map, "id"));
+        terminalTypeDto.setCreateTime(MapUtils.getLongValue(map, "createTime"));
+        terminalTypeDto.setUpdateTime(MapUtils.getLongValue(map, "updateTime"));
+        terminalTypeDto.setType(MapUtils.getString(map, "type"));
+        terminalTypeDto.setProcessIsShow(MapUtils.getIntValue(map, "processIsShow"));
+        terminalTypeDto.setImgUrl(MapUtils.getString(map, "imgUrl"));
+        terminalTypeDto.setDes(MapUtils.getString(map, "des"));
+        terminalTypeDto.setTitle(MapUtils.getString(map, "title"));
+        terminalTypeDto.setTypeName(MapUtils.getString(map, "typeName"));
+        terminalTypeDto.setTypeColor(MapUtils.getString(map, "typeColor"));
+        terminalTypeDto.setVersion(MapUtils.getIntValue(map, "version"));
+        terminalTypeDto.setCreateUserId(MapUtils.getIntValue(map, "createUserId"));
+        terminalTypeDto.setUpdateUserName(MapUtils.getString(map, "updateUserName"));
+        terminalTypeDto.setUpdateUserId(MapUtils.getIntValue(map, "updateUserId"));
+        terminalTypeDto.setIsDel(MapUtils.getIntValue(map, "isDel"));
+        terminalTypeDto.setChildren((List<Object>) MapUtils.getObject(map, "children"));
+        return terminalTypeDto;
+    }
+
+    private DeviceInfoDto convertDeviceInfo(Map<String, Object> map) {
+        DeviceInfoDto deviceInfoDto = new DeviceInfoDto();
+        deviceInfoDto.setId(MapUtils.getIntValue(map, "id"));
+        deviceInfoDto.setCreateTime(MapUtils.getString(map, "createTime"));
+        deviceInfoDto.setUpdateTime(MapUtils.getString(map, "updateTime"));
+        deviceInfoDto.setLoraId(MapUtils.getIntValue(map, "loraId"));
+        deviceInfoDto.setApplicationId(MapUtils.getIntValue(map, "applicationId"));
+        deviceInfoDto.setApplicationName(MapUtils.getString(map, "applicationName"));
+        deviceInfoDto.setLoraAppId(MapUtils.getIntValue(map, "loraAppId"));
+        deviceInfoDto.setGatewayId(MapUtils.getIntValue(map, "gatewayId"));
+        deviceInfoDto.setGatewayName(MapUtils.getString(map, "gatewayName"));
+        deviceInfoDto.setType(MapUtils.getString(map, "type"));
+        deviceInfoDto.setDeviceSn(MapUtils.getString(map, "deviceSn"));
+        deviceInfoDto.setName(MapUtils.getString(map, "name"));
+        deviceInfoDto.setDes(MapUtils.getString(map, "des"));
+        deviceInfoDto.setLot(MapUtils.getString(map, "lot"));
+        deviceInfoDto.setLat(MapUtils.getString(map, "lat"));
+        deviceInfoDto.setGroups(MapUtils.getString(map, "groups"));
+        deviceInfoDto.setTemplateId(MapUtils.getIntValue(map, "templateId"));
+        deviceInfoDto.setTypeName(MapUtils.getString(map, "typeName"));
+        deviceInfoDto.setTypeColor(MapUtils.getString(map, "typeColor"));
+        deviceInfoDto.setCreateUserId(MapUtils.getIntValue(map, "createUserId"));
+        deviceInfoDto.setUpdateUserId(MapUtils.getIntValue(map, "updateUserId"));
+        deviceInfoDto.setUpdateUserName(MapUtils.getString(map, "updateUserName"));
+        deviceInfoDto.setIsDel(MapUtils.getIntValue(map, "isDel"));
+        deviceInfoDto.setPointNum(MapUtils.getIntValue(map, "pointNum"));
+        deviceInfoDto.setTemplateDes(MapUtils.getString(map, "templateDes"));
+        deviceInfoDto.setToLora(MapUtils.getIntValue(map, "toLora"));
+        deviceInfoDto.setImgUrl(MapUtils.getString(map, "imgUrl"));
+        deviceInfoDto.setMgrUrl(MapUtils.getString(map, "mgrUrl"));
+        deviceInfoDto.setSelected(MapUtils.getBooleanValue(map, "selected"));
+        deviceInfoDto.setCardId(MapUtils.getIntValue(map, "cardId"));
+        deviceInfoDto.setDeviceTemplateId(MapUtils.getIntValue(map, "deviceTemplateId"));
+        return deviceInfoDto;
     }
 }

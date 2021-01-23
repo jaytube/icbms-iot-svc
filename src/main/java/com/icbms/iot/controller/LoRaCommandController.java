@@ -4,6 +4,7 @@ import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.dto.AddDeviceDto;
 import com.icbms.iot.enums.LoRaCommand;
 import com.icbms.iot.rest.LoRaCommandService;
+import com.icbms.iot.util.RestUtil;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,9 @@ public class LoRaCommandController {
 
     @Autowired
     private LoRaCommandService loRaCommandService;
+
+    @Autowired
+    private RestUtil restUtil;
 
     @GetMapping("/cmd/{deviceId}/{command}")
     @ResponseBody
@@ -42,31 +46,55 @@ public class LoRaCommandController {
     @GetMapping("/getToken")
     @ResponseBody
     public CommonResponse getToken() {
-        return CommonResponse.success(loRaCommandService.getToken());
+        return loRaCommandService.getToken();
+    }
+
+    @GetMapping("/getRedisToken")
+    @ResponseBody
+    public CommonResponse getRedisToken() {
+        return CommonResponse.success(loRaCommandService.getRedisToken());
     }
 
     @GetMapping("/getDbInstance")
     @ResponseBody
     public CommonResponse getDbInstance(String code) {
-        return CommonResponse.success(loRaCommandService.getDbInstance(code));
+        return loRaCommandService.getDbInstance(code);
+    }
+
+    @GetMapping("/getDbInstanceFromRedis")
+    @ResponseBody
+    public CommonResponse getDbInstanceFromRedis(String code) {
+        return CommonResponse.success(loRaCommandService.getDbInstanceFromRedis(code));
     }
 
     @GetMapping("/getGatewayList")
     @ResponseBody
     public CommonResponse getGatewayList() {
-        return CommonResponse.success(loRaCommandService.getGatewayList());
+        return loRaCommandService.getGatewayList();
     }
 
     @GetMapping("/getGateWayById")
     @ResponseBody
     public CommonResponse getGateWayById(String id) {
-        return CommonResponse.success(loRaCommandService.getGateWayById(id));
+        return loRaCommandService.getGateWayById(id);
+    }
+
+    @GetMapping("/getTerminalTypes")
+    @ResponseBody
+    public CommonResponse getTerminalTypes() {
+        return loRaCommandService.getTerminalTypes();
+    }
+
+    @GetMapping("/getTerminalByType")
+    @ResponseBody
+    public CommonResponse getTerminalByType(String type) {
+        return loRaCommandService.getTerminalByType(type);
     }
 
     @GetMapping("/getDevice")
     @ResponseBody
     public CommonResponse getDevice(String deviceSn) {
-        return loRaCommandService.getDevice(deviceSn);
+        return loRaCommandService.getDevices(deviceSn);
     }
 
     @PostMapping("/addDevice")
@@ -79,6 +107,12 @@ public class LoRaCommandController {
     @ResponseBody
     public CommonResponse deleteDevice(String deviceSn) {
         return loRaCommandService.deleteDevice(deviceSn);
+    }
+
+    @GetMapping("/test")
+    @ResponseBody
+    public CommonResponse test(String URL) {
+        return restUtil.doGetNoToken(URL);
     }
 
 }
