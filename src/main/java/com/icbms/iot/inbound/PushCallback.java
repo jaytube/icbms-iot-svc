@@ -7,7 +7,6 @@ import com.icbms.iot.dto.LoraMessage;
 import com.icbms.iot.dto.RichMqttMessage;
 import com.icbms.iot.exception.IotException;
 import com.icbms.iot.inbound.component.InboundMsgQueue;
-import com.icbms.iot.inbound.service.InBoundMessageMaster;
 import com.icbms.iot.service.GatewayConfigService;
 import com.icbms.iot.util.MqttEnvUtil;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -16,7 +15,6 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandles;

@@ -4,7 +4,7 @@ import com.icbms.iot.dto.RealtimeMessage;
 import com.icbms.iot.dto.RichMqttMessage;
 import com.icbms.iot.inbound.component.AlarmDataMsgQueue;
 import com.icbms.iot.inbound.component.InboundMsgQueue;
-import com.icbms.iot.inbound.component.ProcessedRealtimeMsgQueue;
+import com.icbms.iot.inbound.component.RealtimeMsgQueue;
 import com.icbms.iot.inbound.service.AlarmDataService;
 import com.icbms.iot.inbound.service.InBoundMessageMaster;
 import com.icbms.iot.inbound.service.MqttMsgWorker;
@@ -32,7 +32,7 @@ public class MqttMsgWorkerImpl implements MqttMsgWorker {
     private InboundMsgQueue inboundMsgQueue;
 
     @Autowired
-    private ProcessedRealtimeMsgQueue processedRealtimeMsgQueue;
+    private RealtimeMsgQueue realtimeMsgQueue;
 
     @Autowired
     private AlarmDataMsgQueue alarmDataMsgQueue;
@@ -61,14 +61,16 @@ public class MqttMsgWorkerImpl implements MqttMsgWorker {
                     RealtimeMessage alarmData = alarmDataMsgQueue.poll();
                     alarmDataService.processAlarmData(alarmData);
                 }
-                if(processedRealtimeMsgQueue.size() >= REAL_DATA_PROCESS_CAPACITY) {
+                if(realtimeMsgQueue.size() >= REAL_DATA_PROCESS_CAPACITY) {
                     List<RealtimeMessage> msgList = new ArrayList<>();
-                    IntStream.rangeClosed(0, processedRealtimeMsgQueue.size())
-                            .forEach(i -> msgList.add(processedRealtimeMsgQueue.poll()));
+                    IntStream.rangeClosed(0, realtimeMsgQueue.size())
+                            .forEach(i -> msgList.add(realtimeMsgQueue.poll()));
 
                     realtimeDataService.processRealtimeData(msgList);
                 }
-            } catch(Exception e) {}
+            } catch(Exception e) {
+                logger.error("消息处理错误: {}", e);
+            }
         }
     }
 

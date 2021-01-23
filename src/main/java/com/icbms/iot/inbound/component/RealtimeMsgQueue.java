@@ -9,7 +9,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.concurrent.ArrayBlockingQueue;
 
 @Component
-public class ProcessedRealtimeMsgQueue {
+public class RealtimeMsgQueue {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 

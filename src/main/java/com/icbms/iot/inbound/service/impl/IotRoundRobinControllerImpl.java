@@ -95,14 +95,14 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
                 //logger.info("停止轮询网关" + gatewayIp + ", 响应: " + resp2.getData());
                 logger.info("网关" + gatewayIp + " 轮询花费: " + timeCost + " seconds.");
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(500);
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();
                 }
             });
 
             try {
-                Thread.sleep(10000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
