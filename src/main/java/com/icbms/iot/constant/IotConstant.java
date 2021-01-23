@@ -29,4 +29,6 @@ public class IotConstant {
     public static final int REAL_DATA_PROCESS_CAPACITY = 20;
 
     public static final int BOX_NO_START_INDEX = 8;
+
+    public static final String CIRCUIT = "线路";
 }

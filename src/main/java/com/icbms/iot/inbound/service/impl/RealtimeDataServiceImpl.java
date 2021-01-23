@@ -109,9 +109,9 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
             DeviceBoxInfo deviceBoxInfo = deviceBoxMap.get(l.getTerminalId());
             String deviceBoxId = deviceBoxInfo != null ? deviceBoxInfo.getDeviceBoxNum() : "";
             log.setDeviceBoxId(deviceBoxId);
-            log.setDeviceSwitchName("");
-            //TODO
-            log.setAddress("");
+            log.setAddress(l.getSwitchAddr());
+            int deviceSwithAddr = Integer.valueOf(l.getSwitchAddr()) + 1;
+            log.setDeviceSwitchName(CIRCUIT + deviceSwithAddr);
             log.setDeviceSwitchStatus(l.getSwitchOnoff());
             log.setSwitchElectric(l.getElectricCurrent());
             log.setSwitchElectriCnt(l.getElectricCnt());
@@ -131,7 +131,7 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
             detailLog.setDeviceSwitchInfoLogId(deviceSwitchLogInfoId);
             detailLog.setProjectId(l.getProjectId());
             detailLog.setDeviceBoxId(deviceBoxId);
-            detailLog.setAddress("");
+            detailLog.setAddress(l.getSwitchAddr());
             detailLog.setSwitchVoltageA(l.getPhaseVoltageA());
             detailLog.setSwitchVoltageB(l.getPhaseVoltageB());
             detailLog.setSwitchVoltageC(l.getPhaseVoltageC());
