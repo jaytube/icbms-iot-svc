@@ -12,5 +12,5 @@ public interface AlarmDataService {
 
     void saveAlarmDataEntityList(List<AlarmDataEntity> list);
 
-    void processAlarmData(List<RealtimeMessage> realTimeMessages);
+    void processAlarmData(RealtimeMessage realtimeMessage);
 }

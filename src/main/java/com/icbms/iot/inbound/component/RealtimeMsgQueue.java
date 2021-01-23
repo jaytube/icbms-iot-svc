@@ -9,19 +9,19 @@ import java.lang.invoke.MethodHandles;
 import java.util.concurrent.ArrayBlockingQueue;
 
 @Component
-public class ProcessedMsgQueue {
+public class RealtimeMsgQueue {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final ArrayBlockingQueue<RealtimeMessage> processedMsgQueue = new ArrayBlockingQueue(1000);
 
     public void offer(RealtimeMessage msg) {
-        logger.info("处理队列长度: " + processedMsgQueue.size());
+        logger.info("实时数据处理队列长度: " + processedMsgQueue.size());
         this.processedMsgQueue.offer(msg);
     }
 
     public RealtimeMessage poll() {
-        logger.info("处理队列长度: " + processedMsgQueue.size());
+        logger.info("实时数据处理队列长度: " + processedMsgQueue.size());
         return this.processedMsgQueue.poll();
     }
 

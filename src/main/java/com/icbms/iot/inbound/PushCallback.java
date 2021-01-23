@@ -7,7 +7,7 @@ import com.icbms.iot.dto.LoraMessage;
 import com.icbms.iot.dto.RichMqttMessage;
 import com.icbms.iot.exception.IotException;
 import com.icbms.iot.inbound.component.InboundMsgQueue;
-import com.icbms.iot.inbound.service.InBoundMessageMaster;
+import com.icbms.iot.service.GatewayConfigService;
 import com.icbms.iot.util.MqttEnvUtil;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -15,7 +15,6 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandles;
@@ -26,11 +25,6 @@ public class PushCallback implements MqttCallback {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    @Autowired
-    @Qualifier("realTimeMessageProcessMaster")
-    private InBoundMessageMaster realTimeProcessMaster;
-
-//    @Autowired
     private MqttPushClient mqttPushClient;
 
     @Autowired
@@ -41,6 +35,9 @@ public class PushCallback implements MqttCallback {
 
     @Autowired
     private InboundMsgQueue inboundMsgQueue;
+
+    @Autowired
+    private GatewayConfigService gatewayConfigService;
 
     @Override
     public void connectionLost(Throwable throwable) {
@@ -69,20 +66,20 @@ public class PushCallback implements MqttCallback {
     @Override
     public void messageArrived(String topic, MqttMessage mqttMessage) {
         // The message you get after you subscribe will be executed here
-        if(!mqttEnvUtil.isMqttSwitchOff()) {
-            logger.info("Receive message subject : " + topic);
-            logger.info("receive messages Qos : " + mqttMessage.getQos());
-            LoraMessage loraMessage = JSON.parseObject(new String(mqttMessage.getPayload()), LoraMessage.class);
-            mqttEnvUtil.addEle(loraMessage.getDevEUI());
-            logger.info(loraMessage.getDevEUI());
-            try {
-                mqttEnvUtil.increment();
-                inboundMsgQueue.offer(new RichMqttMessage(mqttEnvUtil.getCurrentGatewayId(), mqttMessage));
-            } catch (IotException e) {
-                logger.info("data format not correct ...");
-            } catch (Exception ex) {
-                logger.error("message process error: ", ex);
-            }
+        //logger.info("Receive message subject : " + topic);
+        //logger.info("receive messages Qos : " + mqttMessage.getQos());
+        LoraMessage loraMessage = JSON.parseObject(new String(mqttMessage.getPayload()), LoraMessage.class);
+        String devEUI = loraMessage.getDevEUI();
+        //mqttEnvUtil.addEle(loraMessage.getDevEUI());
+        logger.info("消息来自devEUI: " + devEUI);
+        try {
+            mqttEnvUtil.increment();
+            String gatewayId = gatewayConfigService.getGatewayIdByDevEUI(devEUI);
+            inboundMsgQueue.offer(new RichMqttMessage(gatewayId, mqttMessage));
+        } catch (IotException e) {
+            logger.info("data format not correct ...");
+        } catch (Exception ex) {
+            logger.error("message process error: ", ex);
         }
     }
 

@@ -55,4 +55,9 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
         return projectId;
     }
 
+    @Override
+    public String getGatewayIdByDevEUI(String devEui) {
+        return "23";
+    }
+
 }
