@@ -87,8 +87,8 @@ public class RealtimeMessageParserImpl implements RealtimeMessageParser {
         logger.info("告警类别：" + alarmTypes.stream().map(AlarmType::toString).collect(Collectors.joining(", ")));
         message.setAlarmTypes(alarmTypes);
 
-        if(CollectionUtils.isNotEmpty(alarmTypes))
-            message.setDataType(DataType.ALARM_DATA);
+        /*if(CollectionUtils.isNotEmpty(alarmTypes))
+            message.setDataType(DataType.ALARM_DATA);*/
 
         //long ele = CommonUtil.getLong(payload, index);
         byte[] elecByteArr = new byte[4];

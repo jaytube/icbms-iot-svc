@@ -10,6 +10,7 @@ import com.icbms.iot.inbound.service.AlarmDataService;
 import com.icbms.iot.mapper.DeviceAlarmInfoLogMapper;
 import com.icbms.iot.mapper.DeviceBoxInfoMapper;
 import com.icbms.iot.service.GatewayConfigService;
+import com.icbms.iot.util.CommonUtil;
 import com.icbms.iot.util.DateUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -126,15 +127,16 @@ public class AlarmDataServiceImpl implements AlarmDataService {
                 .collect(Collectors.toList());
         List<DeviceBoxInfo> deviceBoxes = deviceBoxInfoMapper.findByProjectIdList(projectIdList);
         List<String> deviceBoxNums = list.stream().filter(Objects::nonNull).map(AlarmDataEntity::getTerminalId).collect(Collectors.toList());
-        deviceBoxes = deviceBoxes.stream().filter(l -> deviceBoxNums.contains(l.getDeviceBoxNum()))
+        deviceBoxes = deviceBoxes.stream().filter(l -> deviceBoxNums.contains(l.getDeviceBoxNum().substring(BOX_NO_START_INDEX)))
                 .collect(Collectors.toList());
         Map<String, DeviceBoxInfo> deviceBoxMap = new HashMap<>();
         for (DeviceBoxInfo deviceBox : deviceBoxes) {
-            deviceBoxMap.put(deviceBox.getDeviceBoxNum(), deviceBox);
+            if(deviceBox.getDeviceBoxNum().length() == 12)
+                deviceBoxMap.put(deviceBox.getDeviceBoxNum().substring(BOX_NO_START_INDEX), deviceBox);
         }
         List<DeviceAlarmInfoLog> logs = list.stream().map(l -> {
             DeviceAlarmInfoLog log = new DeviceAlarmInfoLog();
-            log.setId(UUID.randomUUID().toString());
+            log.setId(CommonUtil.uuid());
             log.setAlarmStatus(l.getAlarmStatus());
             log.setAlarmLevel(l.getAlarmLevel());
             log.setCreateTime(new Date());

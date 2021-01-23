@@ -41,6 +41,6 @@ public class RealtimeMessage {
 
     private String gatewayId;
 
-    private DataType dataType;
+    //private DataType dataType;
 
 }

@@ -66,8 +66,6 @@ public class PushCallback implements MqttCallback {
     @Override
     public void messageArrived(String topic, MqttMessage mqttMessage) {
         // The message you get after you subscribe will be executed here
-        //logger.info("Receive message subject : " + topic);
-        //logger.info("receive messages Qos : " + mqttMessage.getQos());
         LoraMessage loraMessage = JSON.parseObject(new String(mqttMessage.getPayload()), LoraMessage.class);
         String devEUI = loraMessage.getDevEUI();
         //mqttEnvUtil.addEle(loraMessage.getDevEUI());
@@ -77,9 +75,9 @@ public class PushCallback implements MqttCallback {
             String gatewayId = gatewayConfigService.getGatewayIdByDevEUI(devEUI);
             inboundMsgQueue.offer(new RichMqttMessage(gatewayId, mqttMessage));
         } catch (IotException e) {
-            logger.info("data format not correct ...");
+            logger.info("数据格式错误...");
         } catch (Exception ex) {
-            logger.error("message process error: ", ex);
+            logger.error("数据处理失败: ", ex);
         }
     }
 

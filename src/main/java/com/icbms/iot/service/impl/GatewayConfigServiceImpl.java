@@ -51,8 +51,10 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
     }
 
     public String getProjectIdByTerminalId(String terminalId) {
-        String projectId = (String) redisTempalte.opsForHash().get(TERMINAL_CONFIG, terminalId);
-        return projectId;
+        //just for test
+        return "c76c14ecbc05466095f96f0a782e26e6";
+        /*String projectId = (String) redisTempalte.opsForHash().get(TERMINAL_CONFIG, terminalId);
+        return projectId;*/
     }
 
     @Override
