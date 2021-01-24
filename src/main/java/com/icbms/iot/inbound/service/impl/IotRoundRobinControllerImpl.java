@@ -70,7 +70,7 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
                 mqttEnvUtil.reset();
                 String gatewayIp = e.getKey();
                 String gatewayId = "";
-                List<String> loraIds = e.getValue();
+                //List<String> loraIds = e.getValue();
                 mqttEnvUtil.setCurrentGatewayId(gatewayId);
                 CommonResponse resp = loRaCommandService.startRoundRobin();
                 long start = System.currentTimeMillis();

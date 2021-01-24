@@ -1,7 +1,6 @@
 package com.icbms.iot.inbound.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.icbms.iot.dto.DataType;
 import com.icbms.iot.dto.LoraMessage;
 import com.icbms.iot.dto.RealtimeMessage;
 import com.icbms.iot.dto.RichMqttMessage;
@@ -84,8 +83,7 @@ public class RealtimeMessageProcessMaster extends AbstractMessageProcessor {
     public void execute() {
         RealtimeMessage realTimeMessage = realTimeMsgThreadLocal.get();
         realtimeMsgQueue.offer(realTimeMessage);
-        if(realTimeMessage.getDataType() == DataType.ALARM_DATA)
-            alarmDataMsgQueue.offer(realTimeMessage);
+        alarmDataMsgQueue.offer(realTimeMessage);
     }
 
     @Override

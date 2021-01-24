@@ -20,9 +20,15 @@ public class IotConstant {
 
     public static final String REAL_STAT_LAST_DATA = "REAL_STAT_LAST_DATA";
 
-    public static final String REAL_DATA_REMARK = "网关上传到服务器通信运行数据主信息";
+    public static final String SWITCH_INFO_REMARK = "网关上传到服务器通信运行数据主信息";
+
+    public static final String SWITCH_INFO_DETAIL_REMARK = "网关上传到服务器通信运行数据明细信息";
 
     public static final Long REAL_DATA_SAVE_FREQUENCY = 600000L;
 
     public static final int REAL_DATA_PROCESS_CAPACITY = 20;
+
+    public static final int BOX_NO_START_INDEX = 8;
+
+    public static final String CIRCUIT = "线路";
 }

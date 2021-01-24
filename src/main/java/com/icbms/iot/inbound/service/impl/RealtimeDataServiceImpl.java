@@ -4,11 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.icbms.iot.converter.RealtimeMsgToEntityConverter;
 import com.icbms.iot.dto.RealtimeMessage;
 import com.icbms.iot.entity.DeviceBoxInfo;
+import com.icbms.iot.entity.DeviceSwitchInfoDetailLog;
 import com.icbms.iot.entity.DeviceSwitchInfoLog;
 import com.icbms.iot.entity.RealDataEntity;
 import com.icbms.iot.inbound.service.RealtimeDataService;
 import com.icbms.iot.mapper.DeviceBoxInfoMapper;
+import com.icbms.iot.mapper.DeviceSwitchInfoDetailLogMapper;
 import com.icbms.iot.mapper.DeviceSwitchInfoLogMapper;
+import com.icbms.iot.util.CommonUtil;
 import com.icbms.iot.util.DateUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +44,9 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
     @Autowired
     private DeviceSwitchInfoLogMapper switchInfoLogMapper;
 
+    @Autowired
+    private DeviceSwitchInfoDetailLogMapper switchInfoDetailLogMapper;
+
 
     @Override
     public void processRealtimeData(List<RealtimeMessage> realtimeMsgList) {
@@ -60,7 +66,7 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
                 long currentTime = System.currentTimeMillis();
                 if (currentTime - Long.valueOf(latestTime) >= REAL_DATA_SAVE_FREQUENCY) {
                     redisTemplate.opsForHash().put(REAL_STAT_LAST_DATA, terminalId, JSON.toJSONString(realData));
-                    this.redisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, terminalId, String.valueOf(currentTime));
+                    redisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, terminalId, String.valueOf(currentTime));
                     result.add(realData);
                 }
             } else {
@@ -85,26 +91,30 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
                 .collect(Collectors.toList());
         List<DeviceBoxInfo> deviceBoxes = deviceBoxInfoMapper.findByProjectIdList(projectIdList);
         List<String> deviceBoxNums = list.stream().filter(Objects::nonNull).map(RealDataEntity::getTerminalId).collect(Collectors.toList());
-        deviceBoxes = deviceBoxes.stream().filter(l -> deviceBoxNums.contains(l.getDeviceBoxNum()))
+        deviceBoxes = deviceBoxes.stream().filter(l -> deviceBoxNums.contains(l.getDeviceBoxNum().substring(BOX_NO_START_INDEX)))
                 .collect(Collectors.toList());
         Map<String, DeviceBoxInfo> deviceBoxMap = new HashMap<>();
         for (DeviceBoxInfo deviceBox : deviceBoxes) {
-            deviceBoxMap.put(deviceBox.getDeviceBoxNum(), deviceBox);
+            if(deviceBox.getDeviceBoxNum().length() == 12)
+                deviceBoxMap.put(deviceBox.getDeviceBoxNum().substring(BOX_NO_START_INDEX), deviceBox);
         }
 
-        List<DeviceSwitchInfoLog> logs = list.stream().map(l -> {
+        List<DeviceSwitchInfoLog> logs = new ArrayList<>();
+        List<DeviceSwitchInfoDetailLog> detailLogs = new ArrayList<>();
+        for (RealDataEntity l : list) {
             DeviceSwitchInfoLog log = new DeviceSwitchInfoLog();
-            log.setId(UUID.randomUUID().toString());
+            String deviceSwitchLogInfoId = CommonUtil.uuid();
+            log.setId(deviceSwitchLogInfoId);
             log.setProjectId(l.getProjectId());
             DeviceBoxInfo deviceBoxInfo = deviceBoxMap.get(l.getTerminalId());
-            log.setDeviceBoxId(deviceBoxInfo.getId());
-            log.setDeviceSwitchName("");
-            //TODO
-            log.setAddress("");
+            String deviceBoxId = deviceBoxInfo != null ? deviceBoxInfo.getDeviceBoxNum() : "";
+            log.setDeviceBoxId(deviceBoxId);
+            log.setAddress(l.getSwitchAddr());
+            int deviceSwithAddr = Integer.valueOf(l.getSwitchAddr()) + 1;
+            log.setDeviceSwitchName(CIRCUIT + deviceSwithAddr);
             log.setDeviceSwitchStatus(l.getSwitchOnoff());
             log.setSwitchElectric(l.getElectricCurrent());
-            //TODO
-            log.setSwitchElectriCnt("");
+            log.setSwitchElectriCnt(l.getElectricCnt());
             log.setSwitchVoltage(l.getVoltage());
             log.setSwitchTemperature(l.getTemperature());
             log.setSwitchPower(l.getPower());
@@ -112,14 +122,37 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
             Date reportTime = DateUtil.parse(l.getReportTime(), "yyyy-MM-dd HH:mm:ss");
             log.setCreateTime(reportTime);
             log.setUpdateTime(reportTime);
-            log.setRemark(REAL_DATA_REMARK);
-            return log;
-        }).collect(Collectors.toList());
+            log.setRemark(SWITCH_INFO_REMARK);
+            logs.add(log);
+
+            //detail log
+            DeviceSwitchInfoDetailLog detailLog = new DeviceSwitchInfoDetailLog();
+            detailLog.setId(CommonUtil.uuid());
+            detailLog.setDeviceSwitchInfoLogId(deviceSwitchLogInfoId);
+            detailLog.setProjectId(l.getProjectId());
+            detailLog.setDeviceBoxId(deviceBoxId);
+            detailLog.setAddress(l.getSwitchAddr());
+            detailLog.setSwitchVoltageA(l.getPhaseVoltageA());
+            detailLog.setSwitchVoltageB(l.getPhaseVoltageB());
+            detailLog.setSwitchVoltageC(l.getPhaseVoltageC());
+            detailLog.setSwitchElectricA(l.getPhaseCurrentA());
+            detailLog.setSwitchElectricB(l.getPhaseCurrentB());
+            detailLog.setSwitchElectricC(l.getPhaseCurrentC());
+            detailLog.setSwitchElectricN(l.getPhaseCurrentN());
+            detailLog.setSwitchPowerA(l.getPhasePowerA());
+            detailLog.setSwitchPowerB(l.getPhasePowerB());
+            detailLog.setSwitchPowerC(l.getPhasePowerC());
+            detailLog.setCreateTime(reportTime);
+            detailLog.setUpdateTime(reportTime);
+            detailLog.setRemark(SWITCH_INFO_DETAIL_REMARK);
+            detailLogs.add(detailLog);
+        }
+
 
         switchInfoLogMapper.batchInsert(logs);
         logger.info("插入device_switch_info_log");
 
-        //TODO save device switch detail log
-
+        switchInfoDetailLogMapper.batchInsert(detailLogs);
+        logger.info("插入device_switch_info_detail_log");
     }
 }
