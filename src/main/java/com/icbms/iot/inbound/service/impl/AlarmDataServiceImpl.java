@@ -9,7 +9,7 @@ import com.icbms.iot.enums.AlarmType;
 import com.icbms.iot.inbound.service.AlarmDataService;
 import com.icbms.iot.mapper.DeviceAlarmInfoLogMapper;
 import com.icbms.iot.mapper.DeviceBoxInfoMapper;
-import com.icbms.iot.service.GatewayConfigService;
+import com.icbms.iot.common.service.GatewayConfigService;
 import com.icbms.iot.util.CommonUtil;
 import com.icbms.iot.util.DateUtil;
 import org.apache.commons.collections4.CollectionUtils;

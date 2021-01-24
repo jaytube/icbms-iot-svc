@@ -2,7 +2,7 @@ package com.icbms.iot.converter;
 
 import com.icbms.iot.dto.RealtimeMessage;
 import com.icbms.iot.entity.RealDataEntity;
-import com.icbms.iot.service.GatewayConfigService;
+import com.icbms.iot.common.service.GatewayConfigService;
 import com.icbms.iot.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

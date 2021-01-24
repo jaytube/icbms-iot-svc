@@ -1,6 +1,6 @@
-package com.icbms.iot.service.impl;
+package com.icbms.iot.common.service.impl;
 
-import com.icbms.iot.service.GatewayConfigService;
+import com.icbms.iot.common.service.GatewayConfigService;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

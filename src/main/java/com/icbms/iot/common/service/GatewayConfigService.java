@@ -1,4 +1,4 @@
-package com.icbms.iot.service;
+package com.icbms.iot.common.service;
 
 import java.util.Set;
 

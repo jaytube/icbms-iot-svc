@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 
 import static com.icbms.iot.constant.IotConstant.*;
 import static com.icbms.iot.util.TerminalBoxConvertUtil.getTerminalNo;
-import static com.icbms.iot.util.TerminalBoxConvertUtil.getTerminalString;
 
 @Service
 public class RealtimeDataServiceImpl implements RealtimeDataService {
