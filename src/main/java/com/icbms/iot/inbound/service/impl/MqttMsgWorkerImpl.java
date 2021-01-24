@@ -63,7 +63,7 @@ public class MqttMsgWorkerImpl implements MqttMsgWorker {
                 }
                 if(realtimeMsgQueue.size() >= REAL_DATA_PROCESS_CAPACITY) {
                     List<RealtimeMessage> msgList = new ArrayList<>();
-                    IntStream.rangeClosed(0, realtimeMsgQueue.size())
+                    IntStream.range(0, realtimeMsgQueue.size())
                             .forEach(i -> msgList.add(realtimeMsgQueue.poll()));
 
                     realtimeDataService.processRealtimeData(msgList);

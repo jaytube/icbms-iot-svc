@@ -69,8 +69,10 @@ public class PushCallback implements MqttCallback {
         LoraMessage loraMessage = JSON.parseObject(new String(mqttMessage.getPayload()), LoraMessage.class);
         String devEUI = loraMessage.getDevEUI();
         //mqttEnvUtil.addEle(loraMessage.getDevEUI());
-        logger.info("消息来自devEUI: " + devEUI);
+        if(mqttEnvUtil.getMessageReceived() > 1)
+            return;
         try {
+            logger.info("消息来自devEUI: " + devEUI);
             mqttEnvUtil.increment();
             String gatewayId = gatewayConfigService.getGatewayIdByDevEUI(devEUI);
             inboundMsgQueue.offer(new RichMqttMessage(gatewayId, mqttMessage));

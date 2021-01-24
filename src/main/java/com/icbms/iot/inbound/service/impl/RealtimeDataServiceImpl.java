@@ -26,6 +26,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.icbms.iot.constant.IotConstant.*;
+import static com.icbms.iot.util.TerminalBoxConvertUtil.getTerminalNo;
+import static com.icbms.iot.util.TerminalBoxConvertUtil.getTerminalString;
 
 @Service
 public class RealtimeDataServiceImpl implements RealtimeDataService {
@@ -54,27 +56,28 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
         if(CollectionUtils.isEmpty(realtimeMsgList))
             return;
 
-        List<RealDataEntity> entityList = realtimeMsgList.stream().map(msgToEntityConverter::convert)
+        List<RealDataEntity> entityList = realtimeMsgList.stream().filter(Objects::nonNull)
+                .map(msgToEntityConverter::convert)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
         List<RealDataEntity> result = new ArrayList<>();
         for (RealDataEntity realData : entityList) {
-            String terminalId = realData.getTerminalId();
-            if (redisTemplate.opsForHash().hasKey(REAL_DATA, terminalId)) {
-                String latestTime = (String) redisTemplate.opsForHash().get(REAL_HIS_DATA_STORE_UP_TO_DATE, terminalId);
+            String field = realData.getTerminalId() + "_" + realData.getSwitchAddr();
+            if (redisTemplate.opsForHash().hasKey(REAL_DATA, field)) {
+                String latestTime = (String) redisTemplate.opsForHash().get(REAL_HIS_DATA_STORE_UP_TO_DATE, field);
                 long currentTime = System.currentTimeMillis();
                 if (currentTime - Long.valueOf(latestTime) >= REAL_DATA_SAVE_FREQUENCY) {
-                    redisTemplate.opsForHash().put(REAL_STAT_LAST_DATA, terminalId, JSON.toJSONString(realData));
-                    redisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, terminalId, String.valueOf(currentTime));
+                    redisTemplate.opsForHash().put(REAL_STAT_LAST_DATA, field, JSON.toJSONString(realData));
+                    redisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, field, String.valueOf(currentTime));
                     result.add(realData);
                 }
             } else {
-                redisTemplate.opsForHash().put(REAL_STAT_LAST_DATA, terminalId, JSON.toJSONString(realData));
-                redisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, terminalId, String.valueOf(System.currentTimeMillis()));
+                redisTemplate.opsForHash().put(REAL_STAT_LAST_DATA, field, JSON.toJSONString(realData));
+                redisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, field, String.valueOf(System.currentTimeMillis()));
                 result.add(realData);
             }
-            redisTemplate.opsForHash().put(REAL_DATA, terminalId, JSON.toJSONString(realData));
+            redisTemplate.opsForHash().put(REAL_DATA, field, JSON.toJSONString(realData));
         }
 
         saveRealHisDataEntities(result);
@@ -91,12 +94,11 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
                 .collect(Collectors.toList());
         List<DeviceBoxInfo> deviceBoxes = deviceBoxInfoMapper.findByProjectIdList(projectIdList);
         List<String> deviceBoxNums = list.stream().filter(Objects::nonNull).map(RealDataEntity::getTerminalId).collect(Collectors.toList());
-        deviceBoxes = deviceBoxes.stream().filter(l -> deviceBoxNums.contains(l.getDeviceBoxNum().substring(BOX_NO_START_INDEX)))
+        deviceBoxes = deviceBoxes.stream().filter(l -> deviceBoxNums.contains(getTerminalNo(l.getDeviceBoxNum())))
                 .collect(Collectors.toList());
         Map<String, DeviceBoxInfo> deviceBoxMap = new HashMap<>();
         for (DeviceBoxInfo deviceBox : deviceBoxes) {
-            if(deviceBox.getDeviceBoxNum().length() == 12)
-                deviceBoxMap.put(deviceBox.getDeviceBoxNum().substring(BOX_NO_START_INDEX), deviceBox);
+            deviceBoxMap.put(getTerminalNo(deviceBox.getDeviceBoxNum()), deviceBox);
         }
 
         List<DeviceSwitchInfoLog> logs = new ArrayList<>();
@@ -107,7 +109,9 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
             log.setId(deviceSwitchLogInfoId);
             log.setProjectId(l.getProjectId());
             DeviceBoxInfo deviceBoxInfo = deviceBoxMap.get(l.getTerminalId());
-            String deviceBoxId = deviceBoxInfo != null ? deviceBoxInfo.getDeviceBoxNum() : "";
+            //String deviceBoxId = deviceBoxInfo != null ? deviceBoxInfo.getId() : "";
+            //TODO just for test
+            String deviceBoxId = "dummy";
             log.setDeviceBoxId(deviceBoxId);
             log.setAddress(l.getSwitchAddr());
             int deviceSwithAddr = Integer.valueOf(l.getSwitchAddr()) + 1;
@@ -155,4 +159,6 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
         switchInfoDetailLogMapper.batchInsert(detailLogs);
         logger.info("插入device_switch_info_detail_log");
     }
+
+
 }

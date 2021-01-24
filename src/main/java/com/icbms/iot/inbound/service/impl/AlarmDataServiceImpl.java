@@ -19,12 +19,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.invoke.MethodHandles;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.icbms.iot.constant.IotConstant.*;
+import static com.icbms.iot.util.TerminalBoxConvertUtil.getTerminalNo;
 
 @Service
 public class AlarmDataServiceImpl implements AlarmDataService {
@@ -53,7 +55,7 @@ public class AlarmDataServiceImpl implements AlarmDataService {
             AlarmType[] alarmTypeArr = AlarmType.values();
             for (int i=0; i<alarmTypeArr.length; i++) {
                 AlarmType alarmType = alarmTypeArr[i];
-                String jsonStr = (String) redisTemplate.opsForHash().get(ALARM_DATA, boxNo + "_" + (15 - i));
+                String jsonStr = (String) redisTemplate.opsForHash().get(ALARM_DATA, boxNo + "_0_" + (15 - i));
                 if (StringUtils.isNotBlank(jsonStr)) {
                     AlarmDataEntity alarmEntity = JSON.parseObject(jsonStr, AlarmDataEntity.class);
                     if (!"0".equals(alarmEntity.getAlarmStatus())) {
@@ -62,11 +64,11 @@ public class AlarmDataServiceImpl implements AlarmDataService {
                         alarmEntity.setProjectId(projectId);
                         alarmEntity.setGatewayId(realtimeMessage.getGatewayId());
                         alarmEntity.setTerminalId(boxNo);
-                        alarmEntity.setSwitchAddr("");
+                        alarmEntity.setSwitchAddr("0");
                         alarmEntity.setAlarmLevel(Objects.toString(alarmType.getLevel(), ""));
                         alarmEntity.setAlarmContent(alarmType.getAlarmContent() + "恢复");
                         alarmEntity.setAlarmType(alarmType.getAlarmContent());
-                        map.put(boxNo + "_" + (15 - i), JSON.toJSONString(alarmEntity));
+                        map.put(boxNo + "_0_" + (15 - i), JSON.toJSONString(alarmEntity));
                         list.add(alarmEntity);
                     }
                 }
@@ -74,7 +76,7 @@ public class AlarmDataServiceImpl implements AlarmDataService {
         } else {
             for (AlarmType alarmType : alarmTypes) {
                 int code = alarmType.getCode();
-                String jsonStr = (String) redisTemplate.opsForHash().get(ALARM_DATA, boxNo + "_" + (15 - code));
+                String jsonStr = (String) redisTemplate.opsForHash().get(ALARM_DATA, boxNo + "_0_" + (15 - code));
                 if (StringUtils.isNotBlank(jsonStr)) {
                     AlarmDataEntity alarmEntity = JSON.parseObject(jsonStr, AlarmDataEntity.class);
                     if (!"1".equals(alarmEntity.getAlarmStatus())) {
@@ -83,11 +85,11 @@ public class AlarmDataServiceImpl implements AlarmDataService {
                         alarmEntity.setProjectId(projectId);
                         alarmEntity.setGatewayId(realtimeMessage.getGatewayId());
                         alarmEntity.setTerminalId(boxNo);
-                        alarmEntity.setSwitchAddr("");
+                        alarmEntity.setSwitchAddr("0");
                         alarmEntity.setAlarmLevel(Objects.toString(alarmType.getLevel(), ""));
                         alarmEntity.setAlarmContent(alarmType.getAlarmContent());
                         alarmEntity.setAlarmType(alarmType.getAlarmContent());
-                        map.put(boxNo + "_" + (15 - code), JSON.toJSONString(alarmEntity));
+                        map.put(boxNo + "_0_" + (15 - code), JSON.toJSONString(alarmEntity));
                         list.add(alarmEntity);
                     }
                 } else {
@@ -97,11 +99,11 @@ public class AlarmDataServiceImpl implements AlarmDataService {
                     alarmEntity.setProjectId(projectId);
                     alarmEntity.setGatewayId(realtimeMessage.getGatewayId());
                     alarmEntity.setTerminalId(boxNo);
-                    alarmEntity.setSwitchAddr("");
+                    alarmEntity.setSwitchAddr("0");
                     alarmEntity.setAlarmLevel(Objects.toString(alarmType.getLevel(), ""));
                     alarmEntity.setAlarmContent(alarmType.getAlarmContent());
                     alarmEntity.setAlarmType(alarmType.getAlarmContent());
-                    map.put(boxNo + "_" + (15 - code), JSON.toJSONString(alarmEntity));
+                    map.put(boxNo + "_0_" + (15 - code), JSON.toJSONString(alarmEntity));
                     list.add(alarmEntity);
                 }
             }
@@ -117,6 +119,7 @@ public class AlarmDataServiceImpl implements AlarmDataService {
     }
 
     @Override
+    @Transactional
     public void saveAlarmDataEntityList(List<AlarmDataEntity> list) {
         if(CollectionUtils.isEmpty(list))
             return;
@@ -125,14 +128,15 @@ public class AlarmDataServiceImpl implements AlarmDataService {
                 .filter(StringUtils::isNotBlank)
                 .distinct()
                 .collect(Collectors.toList());
-        List<DeviceBoxInfo> deviceBoxes = deviceBoxInfoMapper.findByProjectIdList(projectIdList);
+        //List<DeviceBoxInfo> deviceBoxes = deviceBoxInfoMapper.findByProjectIdList(projectIdList);
+        //TODO jsut for test
+        List<DeviceBoxInfo> deviceBoxes = Arrays.asList(mockDeviceBoxInfo());
         List<String> deviceBoxNums = list.stream().filter(Objects::nonNull).map(AlarmDataEntity::getTerminalId).collect(Collectors.toList());
-        deviceBoxes = deviceBoxes.stream().filter(l -> deviceBoxNums.contains(l.getDeviceBoxNum().substring(BOX_NO_START_INDEX)))
+        deviceBoxes = deviceBoxes.stream().filter(l -> deviceBoxNums.contains(getTerminalNo(l.getDeviceBoxNum())))
                 .collect(Collectors.toList());
         Map<String, DeviceBoxInfo> deviceBoxMap = new HashMap<>();
         for (DeviceBoxInfo deviceBox : deviceBoxes) {
-            if(deviceBox.getDeviceBoxNum().length() == 12)
-                deviceBoxMap.put(deviceBox.getDeviceBoxNum().substring(BOX_NO_START_INDEX), deviceBox);
+            deviceBoxMap.put(getTerminalNo(deviceBox.getDeviceBoxNum()), deviceBox);
         }
         List<DeviceAlarmInfoLog> logs = list.stream().map(l -> {
             DeviceAlarmInfoLog log = new DeviceAlarmInfoLog();
@@ -144,16 +148,21 @@ public class AlarmDataServiceImpl implements AlarmDataService {
             log.setRecordTime(DateUtil.parse(l.getReportTime(), "yyyy-MM-dd HH:mm:ss"));
             log.setDeviceBoxId(l.getTerminalId());
             DeviceBoxInfo info = deviceBoxMap.get(l.getTerminalId());
+            if(info == null)
+                return null;
             log.setDeviceBoxMac(info.getDeviceBoxNum());
             log.setDeviceBoxId(info.getId());
-            log.setNode("");
+            log.setProjectId(info.getProjectId());
+            int i = Integer.parseInt(l.getSwitchAddr()) + 1;
+            log.setNode(CIRCUIT + i);
             log.setType(l.getAlarmType());
             log.setRemark(l.getAlarmContent());
             log.setInfo(l.getAlarmContent());
             return log;
-        }).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
 
-        deviceAlarmInfoLogMapper.batchInsert(logs);
+        int successCount = deviceAlarmInfoLogMapper.batchInsert(logs);
+        logger.info("插入表device_alarm_info_log" + successCount + "条告警数据！");
     }
 
     @Override
@@ -168,4 +177,13 @@ public class AlarmDataServiceImpl implements AlarmDataService {
         redisTemplate.opsForHash().putAll(ALARM_DATA, alarmDataMap);
         saveAlarmDataEntityList(alarmDataList);
     }
+
+    private DeviceBoxInfo mockDeviceBoxInfo() {
+        DeviceBoxInfo boxInfo = new DeviceBoxInfo();
+        boxInfo.setDeviceBoxNum(BOX_NO_START_STRING + "0001");
+        boxInfo.setId("123");
+        boxInfo.setProjectId("c76c14ecbc05466095f96f0a782e26e6");
+        return boxInfo;
+    }
+
 }

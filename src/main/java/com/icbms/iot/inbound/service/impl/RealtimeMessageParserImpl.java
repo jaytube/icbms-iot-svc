@@ -82,7 +82,7 @@ public class RealtimeMessageParserImpl implements RealtimeMessageParser {
         short ram6 = CommonUtil.getShort(payload, index);
         index += 2;
         List<AlarmType> alarmTypes = parseAlarmTypes(ram6);
-        logger.info("告警类别：" + alarmTypes.stream().map(AlarmType::toString).collect(Collectors.joining(", ")));
+        logger.info("告警类别：" + alarmTypes.stream().map(AlarmType::getAlarmContent).collect(Collectors.joining(", ")));
         message.setAlarmTypes(alarmTypes);
 
         /*if(CollectionUtils.isNotEmpty(alarmTypes))
@@ -229,6 +229,7 @@ public class RealtimeMessageParserImpl implements RealtimeMessageParser {
     }
 
     private List<AlarmType> parseAlarmTypes(short alarmValue) {
+        //return Arrays.stream(AlarmType.values()).collect(Collectors.toList());
         String alarmStr = String.format("%16s", Integer.toBinaryString(alarmValue & 0xFFFF))
                 .replace(" ", "0");
         List<AlarmType> result = new ArrayList<>();

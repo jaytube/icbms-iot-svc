@@ -22,7 +22,8 @@ public class RealtimeMsgToEntityConverter {
         entity.setGatewayId(realtimeMessage.getGatewayId());
         entity.setTerminalId(Objects.toString(realtimeMessage.getBoxNo(), null));
         entity.setSwitchAddr("0");
-        entity.setControlFlag("");
+        entity.setSwitchOnoff(realtimeMessage.getSwitchFlag() ? "0" : "1");
+        entity.setControlFlag("0");
         entity.setVoltage(Objects.toString(realtimeMessage.getCircuitVoltage(), null));
         entity.setLeakageCurrent(Objects.toString(realtimeMessage.getCurrentLeak(), null));
         entity.setPower(Objects.toString(realtimeMessage.getCircuitPower(), null));
