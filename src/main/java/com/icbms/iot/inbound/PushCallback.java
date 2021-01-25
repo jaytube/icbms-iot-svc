@@ -66,11 +66,11 @@ public class PushCallback implements MqttCallback {
     @Override
     public void messageArrived(String topic, MqttMessage mqttMessage) {
         // The message you get after you subscribe will be executed here
+        logger.info("订阅主题: " + topic);
         LoraMessage loraMessage = JSON.parseObject(new String(mqttMessage.getPayload()), LoraMessage.class);
+        logger.info("payload: " + new String(mqttMessage.getPayload()));
         String devEUI = loraMessage.getDevEUI();
-        //mqttEnvUtil.addEle(loraMessage.getDevEUI());
-        if(mqttEnvUtil.getMessageReceived() > 1)
-            return;
+        mqttEnvUtil.addEle(loraMessage.getDevEUI());
         try {
             logger.info("消息来自devEUI: " + devEUI);
             mqttEnvUtil.increment();

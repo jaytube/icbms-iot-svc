@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class IotRoundRobinControllerImpl implements IotRoundRobinController {
@@ -92,7 +93,8 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
                         logger.info("单个设备查询实时空开数据, id: " + c);
                     });
                 }*/
-                //logger.info("停止轮询网关" + gatewayIp + ", 响应: " + resp2.getData());
+                logger.info("总共轮询了{}个设备", mqttEnvUtil.getProcessedDeviceList().size());
+                logger.info("设备ID:" + mqttEnvUtil.getProcessedDeviceList().stream().collect(Collectors.joining(", ")));
                 logger.info("网关" + gatewayIp + " 轮询花费: " + timeCost + " seconds.");
                 try {
                     Thread.sleep(500);
