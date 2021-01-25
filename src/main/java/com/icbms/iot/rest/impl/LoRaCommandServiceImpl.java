@@ -16,6 +16,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.icbms.iot.util.CommonUtil.hexStringToBytes;
+import static com.icbms.iot.util.RestUtil.HTTP_HEADER_CONTENT_TYPE;
 
 /**
  * @Author: Cherry
@@ -119,7 +121,10 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
     @Override
     public CommonResponse<String> getDbInstance(String code) {
         // code cluing
-        CommonResponse<Map> response = restUtil.doGetNoToken(DEVICE_IP + "/api-tms/pass/scptenant/" + code + "_123");
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.add("Content-Type", HTTP_HEADER_CONTENT_TYPE);
+        requestHeaders.add("Authorization", getRedisToken());
+        CommonResponse<Map> response = restUtil.doGetWithToken(DEVICE_IP + "/api-tms/pass/scptenant/" + code + "_123", requestHeaders);
         if (response.getCode() != 200) {
             return CommonResponse.faild(response.getMsg(), JSON.toJSONString(response.getData()));
         }
