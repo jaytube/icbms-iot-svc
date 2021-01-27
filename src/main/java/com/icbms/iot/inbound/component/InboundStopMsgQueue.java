@@ -9,26 +9,26 @@ import java.lang.invoke.MethodHandles;
 import java.util.concurrent.ArrayBlockingQueue;
 
 @Component
-public class InboundMsgQueue {
+public class InboundStopMsgQueue {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final ArrayBlockingQueue<RichMqttMessage> mqttMessageQueue = new ArrayBlockingQueue(1000);
+    private final ArrayBlockingQueue<RichMqttMessage> mqttStopMessageQueue = new ArrayBlockingQueue(1000);
 
     public void offer(RichMqttMessage mqttMessage) {
-        this.mqttMessageQueue.offer(mqttMessage);
-        logger.info("入站消息队列长度: " + this.mqttMessageQueue.size());
+        this.mqttStopMessageQueue.offer(mqttMessage);
+        logger.info("入站停止轮询消息队列长度: " + this.mqttStopMessageQueue.size());
     }
 
     public RichMqttMessage poll() {
-        return this.mqttMessageQueue.poll();
+        return this.mqttStopMessageQueue.poll();
     }
 
     public int size() {
-        return this.mqttMessageQueue.size();
+        return this.mqttStopMessageQueue.size();
     }
 
     public boolean isEmpty() {
-        return this.mqttMessageQueue.isEmpty();
+        return this.mqttStopMessageQueue.isEmpty();
     }
 }

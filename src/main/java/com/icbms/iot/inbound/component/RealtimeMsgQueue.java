@@ -16,12 +16,11 @@ public class RealtimeMsgQueue {
     private final ArrayBlockingQueue<RealtimeMessage> processedMsgQueue = new ArrayBlockingQueue(1000);
 
     public void offer(RealtimeMessage msg) {
-        logger.info("实时数据处理队列长度: " + processedMsgQueue.size());
         this.processedMsgQueue.offer(msg);
+        logger.info("实时数据处理队列长度: " + processedMsgQueue.size());
     }
 
     public RealtimeMessage poll() {
-        logger.info("实时数据处理队列长度: " + processedMsgQueue.size());
         return this.processedMsgQueue.poll();
     }
 

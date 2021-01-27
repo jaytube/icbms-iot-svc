@@ -43,6 +43,7 @@ public class MqttConfig {
         log.info("password: " + password);
         log.info("timeout: " + timeout);
         log.info("topic: " + realtimeTopic);
+        log.info("topic: " + stopTopic);
         log.info("keepalive: " + keepAlive);
         String clientId = UUID.randomUUID().toString();
         log.info("clientId: " + clientId);

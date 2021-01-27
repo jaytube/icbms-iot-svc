@@ -16,12 +16,11 @@ public class AlarmDataMsgQueue {
     private final ArrayBlockingQueue<RealtimeMessage> alarmMsgQueue = new ArrayBlockingQueue(1000);
 
     public void offer(RealtimeMessage msg) {
-        logger.info("告警数据处理队列长度: " + alarmMsgQueue.size());
         this.alarmMsgQueue.offer(msg);
+        logger.info("告警数据处理队列长度: " + alarmMsgQueue.size());
     }
 
     public RealtimeMessage poll() {
-        logger.info("告警数据处理队列长度: " + alarmMsgQueue.size());
         return this.alarmMsgQueue.poll();
     }
 

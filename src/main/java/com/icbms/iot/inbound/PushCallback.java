@@ -2,12 +2,13 @@ package com.icbms.iot.inbound;
 
 import com.alibaba.fastjson.JSON;
 import com.icbms.iot.client.MqttPushClient;
+import com.icbms.iot.common.service.GatewayConfigService;
 import com.icbms.iot.config.MqttConfig;
 import com.icbms.iot.dto.LoraMessage;
 import com.icbms.iot.dto.RichMqttMessage;
 import com.icbms.iot.exception.IotException;
 import com.icbms.iot.inbound.component.InboundMsgQueue;
-import com.icbms.iot.common.service.GatewayConfigService;
+import com.icbms.iot.inbound.component.InboundStopMsgQueue;
 import com.icbms.iot.util.MqttEnvUtil;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -36,6 +37,9 @@ public class PushCallback implements MqttCallback {
     @Autowired
     private InboundMsgQueue inboundMsgQueue;
 
+    @Autowired
+    private InboundStopMsgQueue inboundStopMsgQueue;
+    
     @Autowired
     private GatewayConfigService gatewayConfigService;
 
@@ -72,17 +76,20 @@ public class PushCallback implements MqttCallback {
         String devEUI = loraMessage.getDevEUI();
         mqttEnvUtil.addEle(loraMessage.getDevEUI());
         logger.info("消息来自devEUI: " + devEUI);
-        return;
-        /*try {
+        String gatewayId = topic.split("\\/")[1];
+        logger.info("gateway ID: " + gatewayId);
+        try {
             logger.info("消息来自devEUI: " + devEUI);
             mqttEnvUtil.increment();
-            String gatewayId = gatewayConfigService.getGatewayIdByDevEUI(devEUI);
-            inboundMsgQueue.offer(new RichMqttMessage(gatewayId, mqttMessage));
+            if(topic.contains("realtime"))
+                inboundMsgQueue.offer(new RichMqttMessage(gatewayId, mqttMessage));
+            else if(topic.contains("stop"))
+                inboundStopMsgQueue.offer(new RichMqttMessage(gatewayId, mqttMessage));
         } catch (IotException e) {
             logger.info("数据格式错误...");
         } catch (Exception ex) {
             logger.error("数据处理失败: ", ex);
-        }*/
+        }
     }
 
     @Override

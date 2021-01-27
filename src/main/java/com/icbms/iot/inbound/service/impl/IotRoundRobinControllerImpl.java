@@ -1,6 +1,7 @@
 package com.icbms.iot.inbound.service.impl;
 
 import com.icbms.iot.common.CommonResponse;
+import com.icbms.iot.inbound.component.InboundStopMsgQueue;
 import com.icbms.iot.inbound.service.IotRoundRobinController;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.MqttEnvUtil;
@@ -29,7 +30,8 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
     @Autowired
     private MqttEnvUtil mqttEnvUtil;
 
-    private static final int DEVICE_COUNT = 10;
+    @Autowired
+    private InboundStopMsgQueue inboundStopMsgQueue;
 
     private static final int MAX_TIME = 30;
 

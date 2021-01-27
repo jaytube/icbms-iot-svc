@@ -4,11 +4,13 @@ import com.icbms.iot.dto.RealtimeMessage;
 import com.icbms.iot.dto.RichMqttMessage;
 import com.icbms.iot.inbound.component.AlarmDataMsgQueue;
 import com.icbms.iot.inbound.component.InboundMsgQueue;
+import com.icbms.iot.inbound.component.InboundStopMsgQueue;
 import com.icbms.iot.inbound.component.RealtimeMsgQueue;
 import com.icbms.iot.inbound.service.AlarmDataService;
 import com.icbms.iot.inbound.service.InBoundMessageMaster;
 import com.icbms.iot.inbound.service.MqttMsgWorker;
 import com.icbms.iot.inbound.service.RealtimeDataService;
+import com.icbms.iot.util.MqttEnvUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,9 @@ public class MqttMsgWorkerImpl implements MqttMsgWorker {
     private InboundMsgQueue inboundMsgQueue;
 
     @Autowired
+    private InboundStopMsgQueue inboundStopMsgQueue;
+
+    @Autowired
     private RealtimeMsgQueue realtimeMsgQueue;
 
     @Autowired
@@ -47,6 +52,9 @@ public class MqttMsgWorkerImpl implements MqttMsgWorker {
     @Autowired
     private RealtimeDataService realtimeDataService;
 
+    @Autowired
+    private MqttEnvUtil mqttEnvUtil;
+
     @Override
     @Async
     public void processMsg() {
@@ -56,6 +64,12 @@ public class MqttMsgWorkerImpl implements MqttMsgWorker {
                     RichMqttMessage mqttMsg = inboundMsgQueue.poll();
                     realTimeProcessMaster.setParameter(mqttMsg);
                     realTimeProcessMaster.performExecute();
+                }
+                if(!inboundStopMsgQueue.isEmpty()) {
+                    RichMqttMessage stopMsg = inboundStopMsgQueue.poll();
+                    String gatewayId = stopMsg.getGatewayId();
+                    mqttEnvUtil.setSingleGatewayStopped(true);
+                    logger.info("收到停止网关: " + gatewayId + "轮询消息, 开始关闭轮询 。。。");
                 }
                 if(!alarmDataMsgQueue.isEmpty()) {
                     RealtimeMessage alarmData = alarmDataMsgQueue.poll();
