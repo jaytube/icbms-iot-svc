@@ -96,6 +96,16 @@ public class MqttPushClient {
         }
     }
 
+    public void subscribe(String[] topic, int[] qos) {
+        logger.info("Start subscribing to topics " + topic);
+        try {
+            client.subscribe(topic, qos);
+        } catch (MqttException e) {
+            logger.error("subscribe topic");
+            e.printStackTrace();
+        }
+    }
+
     public void setPushCallback(PushCallback pushCallback) {
         this.pushCallback = pushCallback;
     }

@@ -23,7 +23,9 @@ public class MqttConfig {
 
     private String hostUrl;
 
-    private String topic;
+    private String realtimeTopic;
+
+    private String stopTopic;
 
     private int timeout;
 
@@ -40,7 +42,7 @@ public class MqttConfig {
         log.info("username: " + username);
         log.info("password: " + password);
         log.info("timeout: " + timeout);
-        log.info("topic: " + topic);
+        log.info("topic: " + realtimeTopic);
         log.info("keepalive: " + keepAlive);
         String clientId = UUID.randomUUID().toString();
         log.info("clientId: " + clientId);
@@ -53,7 +55,9 @@ public class MqttConfig {
             log.error("连接mqtt server 失败！", e);
         }
         // End with / / to subscribe to all topics starting with test
-        mqttPushClient.subscribe(topic, 0);
+        int[] Qos = {0, 2};
+        String[] topics = {realtimeTopic, stopTopic};
+        mqttPushClient.subscribe(topics, Qos);
         return mqttPushClient;
     }
 

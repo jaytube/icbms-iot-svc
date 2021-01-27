@@ -38,7 +38,7 @@ public class TestController {
     public String publishTopic() {
         String topicString = "test";
         DeviceAlarmInfoLog alarmInfoLog = findById("01a4350c9d6a4f46a8f3026abfdc06d8");
-        mqttPushClient.publish(0, false, mqttConfig.getTopic(), JSON.toJSONString(alarmInfoLog));
+        mqttPushClient.publish(0, false, mqttConfig.getRealtimeTopic(), JSON.toJSONString(alarmInfoLog));
         return "ok";
     }
 
@@ -52,14 +52,14 @@ public class TestController {
     // Send custom message content (using default theme)
     @GetMapping("/publishTopic/{data}")
     public String test1(@PathVariable("data") String data) {
-        mqttPushClient.publish(0, false, mqttConfig.getTopic(), data);
+        mqttPushClient.publish(0, false, mqttConfig.getRealtimeTopic(), data);
         return "ok";
     }
 
     // Send custom message content and specify subject
     @GetMapping("/publishTopic/{topic}/{data}")
     public String test2(@PathVariable("topic") String topic, @PathVariable("data") String data) {
-        mqttPushClient.publish(0, false, mqttConfig.getTopic(), data);
+        mqttPushClient.publish(0, false, mqttConfig.getRealtimeTopic(), data);
         return "ok";
     }
 
