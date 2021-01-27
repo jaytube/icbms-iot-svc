@@ -159,5 +159,4 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
         logger.info("插入device_switch_info_detail_log");
     }
 
-
 }

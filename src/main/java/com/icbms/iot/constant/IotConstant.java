@@ -24,6 +24,8 @@ public class IotConstant {
 
     public static final String SWITCH_INFO_DETAIL_REMARK = "网关上传到服务器通信运行数据明细信息";
 
+    public static final String DEVICE_NO_SIGNAL = "节点通信中断";
+
     public static final Long REAL_DATA_SAVE_FREQUENCY = 600000L;
 
     public static final int REAL_DATA_PROCESS_CAPACITY = 1;
@@ -33,4 +35,10 @@ public class IotConstant {
     public static final String CIRCUIT = "线路";
 
     public static final String BOX_NO_START_STRING = "LY202101";
+
+    public static final int MONITOR_FREQUENCY = 10000;
+
+    public static final int HEART_BEAT = 3000;
+
+    public static final String GATEWAY_ALL = "GATEWAY_ALL";
 }

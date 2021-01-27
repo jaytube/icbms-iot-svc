@@ -161,8 +161,10 @@ public class AlarmDataServiceImpl implements AlarmDataService {
             return log;
         }).filter(Objects::nonNull).collect(Collectors.toList());
 
-        int successCount = deviceAlarmInfoLogMapper.batchInsert(logs);
-        logger.info("插入表device_alarm_info_log" + successCount + "条告警数据！");
+        if(CollectionUtils.isNotEmpty(logs)) {
+            int successCount = deviceAlarmInfoLogMapper.batchInsert(logs);
+            logger.info("插入表device_alarm_info_log" + successCount + "条告警数据！");
+        }
     }
 
     @Override
@@ -180,7 +182,7 @@ public class AlarmDataServiceImpl implements AlarmDataService {
 
     private DeviceBoxInfo mockDeviceBoxInfo() {
         DeviceBoxInfo boxInfo = new DeviceBoxInfo();
-        boxInfo.setDeviceBoxNum(BOX_NO_START_STRING + "0001");
+        boxInfo.setDeviceBoxNum(BOX_NO_START_STRING + "0155");
         boxInfo.setId("123");
         boxInfo.setProjectId("c76c14ecbc05466095f96f0a782e26e6");
         return boxInfo;

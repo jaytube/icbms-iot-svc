@@ -48,7 +48,7 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
     @Override
     @Async
     public void roundRobinControl() {
-        logger.info("Iot 服务初始化 ...");
+        logger.info("Iot 网关控制服务初始化 ...");
 
         try {
             Thread.sleep(5000);
