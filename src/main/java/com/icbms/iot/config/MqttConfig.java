@@ -55,7 +55,9 @@ public class MqttConfig {
             log.error("连接mqtt server 失败！", e);
         }
         // End with / / to subscribe to all topics starting with test
-        mqttPushClient.subscribe(realtimeTopic, 0);
+        int[] Qos = {0, 2};
+        String[] topics = {realtimeTopic, stopTopic};
+        mqttPushClient.subscribe(topics, Qos);
         return mqttPushClient;
     }
 
