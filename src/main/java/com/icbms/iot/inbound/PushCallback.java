@@ -71,7 +71,9 @@ public class PushCallback implements MqttCallback {
         logger.info("payload: " + new String(mqttMessage.getPayload()));
         String devEUI = loraMessage.getDevEUI();
         mqttEnvUtil.addEle(loraMessage.getDevEUI());
-        try {
+        logger.info("消息来自devEUI: " + devEUI);
+        return;
+        /*try {
             logger.info("消息来自devEUI: " + devEUI);
             mqttEnvUtil.increment();
             String gatewayId = gatewayConfigService.getGatewayIdByDevEUI(devEUI);
@@ -80,7 +82,7 @@ public class PushCallback implements MqttCallback {
             logger.info("数据格式错误...");
         } catch (Exception ex) {
             logger.error("数据处理失败: ", ex);
-        }
+        }*/
     }
 
     @Override

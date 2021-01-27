@@ -86,6 +86,9 @@ public class MqttPushClient {
     public void subscribe(String topic, int qos) {
         logger.info("Start subscribing to topics " + topic);
         try {
+            String[] topics = {"application/+/node/+/rx", "ephm/2021112_shqy/sendOver"};
+            int[] qoses = {2, 2};
+            client.subscribe(topics, qoses);
             client.subscribe(topic, qos);
         } catch (MqttException e) {
             logger.error("subscribe topic");

@@ -41,13 +41,13 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    private static final String START_ROUND_ROBIN = "http://10.0.1.70:9900/api-sdm/v1/pUI";
+    private static final String START_ROUND_ROBIN = "http://10.0.1.71:9900/api-sdm/v1/pUI";
 
-    private static final String STOP_ROUND_ROBIN = "http://10.0.1.70:9900/api-sdm/v1/stpp";
+    private static final String STOP_ROUND_ROBIN = "http://10.0.1.71:9900/api-sdm/v1/stpp";
 
-    private static final String EXECUTE_CMD = "https://10.0.1.70:8080/api/";
+    private static final String EXECUTE_CMD = "https://10.0.1.71:8080/api/";
 
-    private static final String DEVICE_IP = "http://10.0.1.70:9900";
+    private static final String DEVICE_IP = "http://10.0.1.71:9900";
 
     @Override
     public CommonResponse<Map> startRoundRobin() {
