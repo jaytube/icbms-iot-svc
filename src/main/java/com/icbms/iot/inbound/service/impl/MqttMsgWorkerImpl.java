@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 
 import static com.icbms.iot.constant.IotConstant.REAL_DATA_PROCESS_CAPACITY;
@@ -60,31 +61,43 @@ public class MqttMsgWorkerImpl implements MqttMsgWorker {
     public void processMsg() {
         while(true) {
             try {
-                if (!inboundMsgQueue.isEmpty()) {
-                    RichMqttMessage mqttMsg = inboundMsgQueue.poll();
-                    realTimeProcessMaster.setParameter(mqttMsg);
-                    realTimeProcessMaster.performExecute();
-                }
-                if(!inboundStopMsgQueue.isEmpty()) {
-                    RichMqttMessage stopMsg = inboundStopMsgQueue.poll();
-                    String gatewayId = stopMsg.getGatewayId();
-                    mqttEnvUtil.setSingleGatewayStopped(true);
-                    logger.info("收到停止网关: " + gatewayId + "轮询消息, 开始关闭轮询 。。。");
-                }
-                if(!alarmDataMsgQueue.isEmpty()) {
-                    RealtimeMessage alarmData = alarmDataMsgQueue.poll();
-                    alarmDataService.processAlarmData(alarmData);
-                }
-                if(realtimeMsgQueue.size() >= REAL_DATA_PROCESS_CAPACITY) {
-                    List<RealtimeMessage> msgList = new ArrayList<>();
-                    IntStream.range(0, realtimeMsgQueue.size())
-                            .forEach(i -> msgList.add(realtimeMsgQueue.poll()));
-
-                    realtimeDataService.processRealtimeData(msgList);
-                }
+                process();
             } catch(Exception e) {
                 logger.error("消息处理错误: {}", e);
             }
+        }
+    }
+
+    private void process() {
+        if (!inboundMsgQueue.isEmpty()) {
+            CompletableFuture.runAsync(() -> {
+                RichMqttMessage mqttMsg = inboundMsgQueue.poll();
+                realTimeProcessMaster.setParameter(mqttMsg);
+                realTimeProcessMaster.performExecute();
+            });
+        }
+        if(!inboundStopMsgQueue.isEmpty()) {
+            RichMqttMessage stopMsg = inboundStopMsgQueue.poll();
+            String gatewayId = stopMsg.getGatewayId();
+            mqttEnvUtil.setSingleGatewayStopped(true);
+            logger.info("收到停止网关: " + gatewayId + "轮询消息, 开始关闭轮询 。。。");
+        }
+        if(!alarmDataMsgQueue.isEmpty()) {
+            CompletableFuture.runAsync(() -> {
+                logger.info("线程: " + Thread.currentThread().getName() + " 开始处理告警数据...");
+                RealtimeMessage alarmData = alarmDataMsgQueue.poll();
+                alarmDataService.processAlarmData(alarmData);
+            });
+        }
+        if(realtimeMsgQueue.size() >= REAL_DATA_PROCESS_CAPACITY) {
+            CompletableFuture.runAsync(() -> {
+                logger.info("线程: " + Thread.currentThread().getName() + " 开始处理实时数据...");
+                List<RealtimeMessage> msgList = new ArrayList<>();
+                IntStream.range(0, realtimeMsgQueue.size())
+                        .forEach(i -> msgList.add(realtimeMsgQueue.poll()));
+
+                realtimeDataService.processRealtimeData(msgList);
+            });
         }
     }
 
