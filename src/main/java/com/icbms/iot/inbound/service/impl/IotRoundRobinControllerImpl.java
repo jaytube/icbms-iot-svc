@@ -1,10 +1,13 @@
 package com.icbms.iot.inbound.service.impl;
 
 import com.icbms.iot.common.CommonResponse;
+import com.icbms.iot.entity.GatewayInfo;
 import com.icbms.iot.inbound.component.InboundStopMsgQueue;
 import com.icbms.iot.inbound.service.IotRoundRobinController;
+import com.icbms.iot.mapper.GatewayInfoMapper;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.MqttEnvUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.lang.invoke.MethodHandles;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,16 +33,22 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
     @Autowired
     private InboundStopMsgQueue inboundStopMsgQueue;
 
+    @Autowired
+    private GatewayInfoMapper gatewayInfoMapper;
+
     private static final int MAX_TIME = 30;
 
-    private Map<String, List<String>> gateWayDeviceMap = new HashMap<>();
+    private Map<String, GatewayInfo> gateWayDeviceMap = new HashMap<>();
 
     @PostConstruct
     public void initGateWays() {
         //TODO get devices from db;
         List<String> loraIds = Arrays.asList("3932353052376d03", "3932353073378903", "3932353069378e03", "393235306d378d03", "3932353060378d03",
                 "393235306a378a03", "3932353053378d03", "3932353078378e03");
-        gateWayDeviceMap.put("10.0.1.70", loraIds);
+        List<GatewayInfo> all = gatewayInfoMapper.findAll();
+        if (CollectionUtils.isNotEmpty(all)) {
+            all.forEach(gatewayInfo -> gateWayDeviceMap.put(Objects.toString(gatewayInfo.getGatewayId()), gatewayInfo));
+        }
     }
 
     @Override
@@ -58,8 +64,8 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
 
         logger.info("停止所有网关轮询 ...");
         gateWayDeviceMap.entrySet().stream().forEach(e -> {
-            String gateway = e.getKey();
-            loRaCommandService.stopRoundRobin();
+            String gatewayIp = e.getValue().getIpAddress();
+            loRaCommandService.stopRoundRobin(gatewayIp);
         });
 
         try {
@@ -68,18 +74,18 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
             e.printStackTrace();
         }
 
-        while(true) {
+        while (true) {
             gateWayDeviceMap.entrySet().stream().forEach(e -> {
                 mqttEnvUtil.reset();
-                String gatewayIp = e.getKey();
-                String gatewayId = "";
+                String gatewayIp = e.getValue().getIpAddress();
+                String gatewayId = e.getKey();
                 //List<String> loraIds = e.getValue();
                 mqttEnvUtil.setCurrentGatewayId(gatewayId);
-                CommonResponse resp = loRaCommandService.startRoundRobin();
+                CommonResponse resp = loRaCommandService.startRoundRobin(gatewayIp);
                 long start = System.currentTimeMillis();
                 logger.info("开启轮询网关" + gatewayIp + ", 响应：" + resp.getData());
                 long timeCost = 0;
-                while(!mqttEnvUtil.isSingleGatewayStopped() && timeCost < MAX_TIME) {
+                while (!mqttEnvUtil.isSingleGatewayStopped() && timeCost < MAX_TIME) {
                     timeCost = (System.currentTimeMillis() - start) / 1000;
                     continue;
                 }
