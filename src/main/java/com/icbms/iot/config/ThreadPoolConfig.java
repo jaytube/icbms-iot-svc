@@ -23,7 +23,7 @@ public class ThreadPoolConfig {
     public ThreadPoolTaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.setCorePoolSize(10);
-        taskExecutor.setMaxPoolSize(50);
+        taskExecutor.setMaxPoolSize(30);
         taskExecutor.setQueueCapacity(20000);
         taskExecutor.setKeepAliveSeconds(60);
         taskExecutor.setThreadNamePrefix("taskExecutor-");
