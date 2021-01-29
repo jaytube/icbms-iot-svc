@@ -16,9 +16,11 @@ public class GatewayDeviceMap {
 
     private int gatewayId;
 
-    private String deviceId;
+    private String deviceSn;
+
+    private int deviceId;
 
     private String projectId;
 
-    private String gymId;
+    private int gymId;
 }
