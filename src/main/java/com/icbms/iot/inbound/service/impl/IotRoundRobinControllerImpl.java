@@ -7,6 +7,7 @@ import com.icbms.iot.enums.GatewayRunType;
 import com.icbms.iot.inbound.factory.GatewayRunnerFactory;
 import com.icbms.iot.inbound.service.GatewayRunner;
 import com.icbms.iot.inbound.service.IotRoundRobinController;
+import com.icbms.iot.mapper.GatewayInfoMapper;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,11 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
     @Autowired
     private Executor taskExecutor;
 
+    @Autowired
+    private GatewayInfoMapper gatewayInfoMapper;
+
+    private static final int MAX_TIME = 30;
+
     @Override
     @Async
     public void roundRobinControl() {
@@ -55,7 +61,6 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
                     singleRunner.run(e.getKey());
                 }, taskExecutor);
             });
-            logger.info("同时开启网关 ...");
         }
     }
 }
