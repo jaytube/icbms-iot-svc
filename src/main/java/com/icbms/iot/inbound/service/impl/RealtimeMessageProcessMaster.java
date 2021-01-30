@@ -53,6 +53,7 @@ public class RealtimeMessageProcessMaster extends AbstractMessageProcessor {
         String gatewayId = message.getGatewayId();
         LoraMessage loraMessage = JSON.parseObject(messageJson, LoraMessage.class);
         loraMessage.setGatewayId(gatewayId);
+        logger.info("消息来自devEUI: " + loraMessage.getDevEUI() + ", 网关ID: " + message.getGatewayId());
         loraMsgThreadLocal.set(loraMessage);
     }
 
