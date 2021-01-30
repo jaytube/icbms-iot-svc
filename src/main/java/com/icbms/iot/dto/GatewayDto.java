@@ -9,8 +9,8 @@ public class GatewayDto {
     private int id;
     private String ip;
     private String port;
-    private boolean finished;
-    private boolean stopped;
+    private volatile boolean finished;
+    private volatile boolean stopped;
     private GatewayRunType type;
 
 }

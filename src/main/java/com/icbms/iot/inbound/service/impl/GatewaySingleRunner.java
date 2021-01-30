@@ -35,6 +35,7 @@ public class GatewaySingleRunner implements GatewayRunner {
             gateway.setFinished(false);
             logger.info("开启轮询网关" + gateway.getId() + ", ip: " + gateway.getIp() + ", 响应：" + resp.getData());
             while(!gateway.isFinished()) {
+                gateway = gatewayKeeper.getById(gatewayId);
                 continue;
             }
             logger.info("网关" + + gateway.getId() + ", ip: " + gateway.getIp() + "轮询结束");

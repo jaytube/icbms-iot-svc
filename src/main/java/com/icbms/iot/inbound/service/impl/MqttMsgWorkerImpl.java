@@ -74,7 +74,6 @@ public class MqttMsgWorkerImpl implements MqttMsgWorker {
     }
 
     private void process() {
-
         if (!inboundMsgQueue.isEmpty()) {
             CompletableFuture.runAsync(() -> {
                 RichMqttMessage mqttMsg = inboundMsgQueue.poll();
@@ -89,7 +88,7 @@ public class MqttMsgWorkerImpl implements MqttMsgWorker {
                 String gatewayId = stopMsg.getGatewayId();
                 GatewayDto gateway = gatewayKeeper.getById(Integer.parseInt(gatewayId));
                 gateway.setFinished(true);
-                logger.info("收到停止网关: " + gatewayId + "轮询消息, 开始关闭轮询 。。。");
+                logger.info("收到停止网关: " + gatewayId + "的轮询消息, 开始关闭轮询 。。。");
             }, taskExecutor);
         }
 

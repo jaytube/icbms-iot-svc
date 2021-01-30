@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.ApplicationScope;
 
 import javax.annotation.PostConstruct;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +27,7 @@ public class GatewayKeeper {
         dto.setFinished(false);
         dto.setStopped(false);
         dto.setId(1);
-        dto.setIp("10.0.1.70");
+        dto.setIp("http://10.0.1.71");
         dto.setPort("9900");
         dto.setType(GatewayRunType.GROUP);
         gatewayMap.put(1, dto);
