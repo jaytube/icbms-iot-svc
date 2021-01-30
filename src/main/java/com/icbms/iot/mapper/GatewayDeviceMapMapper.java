@@ -16,5 +16,5 @@ public interface GatewayDeviceMapMapper {
     List<String> findDeviceSns(int gymId, String projectId, String gatewayId);
 
     @Select("select * from gateway_device_map where gym_id = #{gymId} AND project_id = #{projectId}")
-    List<GatewayDeviceMap> findDeviceSns(int gymId, String projectId);
+    List<GatewayDeviceMap> findDeviceSns2(int gymId, String projectId);
 }
