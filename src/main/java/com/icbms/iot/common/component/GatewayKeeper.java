@@ -2,20 +2,25 @@ package com.icbms.iot.common.component;
 
 import com.icbms.iot.dto.GatewayDto;
 import com.icbms.iot.dto.GatewayGroupDto;
+import com.icbms.iot.entity.GatewayInfo;
 import com.icbms.iot.enums.GatewayRunType;
+import com.icbms.iot.mapper.GatewayInfoMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.ApplicationScope;
 
 import javax.annotation.PostConstruct;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScope
 @Component
 public class GatewayKeeper {
+
+    @Autowired
+    private GatewayInfoMapper gatewayInfoMapper;
 
     private volatile Map<Integer, GatewayDto> gatewayMap = new ConcurrentHashMap<>();
 
@@ -23,21 +28,25 @@ public class GatewayKeeper {
 
     @PostConstruct
     private void initGatewayMap() {
-        GatewayDto dto = new GatewayDto();
-        dto.setFinished(false);
-        dto.setStopped(false);
-        dto.setId(1);
-        dto.setIp("http://10.0.1.71");
-        dto.setPort("9900");
-        dto.setType(GatewayRunType.GROUP);
-        gatewayMap.put(1, dto);
-        Set<GatewayDto> set = new HashSet<>();
+        List<GatewayInfo> gatewayInfoList = gatewayInfoMapper.findAll();
+        if(CollectionUtils.isNotEmpty(gatewayInfoList)) {
+            gatewayInfoList.stream().forEach(g -> {
+                GatewayDto dto = new GatewayDto();
+                dto.setFinished(false);
+                dto.setStopped(false);
+                dto.setId(g.getGatewayId());
+                dto.setIp(g.getIpAddress());
+                dto.setType(GatewayRunType.SINGLE);
+                gatewayMap.put(g.getId(), dto);
+            });
+        }
+       /* Set<GatewayDto> set = new HashSet<>();
         set.add(dto);
         GatewayGroupDto group = new GatewayGroupDto();
         group.setGateways(set);
         group.setFinished(false);
         group.setStopped(false);
-        group.setGroupId(1);
+        group.setGroupId(1);*/
         //gatewayGroupMap.put(1, group);
     }
 
