@@ -1,5 +1,7 @@
 package com.icbms.iot.config;
 
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
@@ -9,7 +11,16 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import java.util.concurrent.Executor;
 
 @Configuration
+@ConfigurationProperties("iot.pool")
+@Data
 public class ThreadPoolConfig {
+
+    private int coreSize;
+    private int maxSize;
+    private int queueCapacity;
+    private int alive;
+    private String prefix;
+    private int waitTerminalSeconds;
 
     @Bean
     public TaskScheduler taskScheduler() {
@@ -22,13 +33,13 @@ public class ThreadPoolConfig {
     @Bean("taskExecutor")
     public Executor taskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setCorePoolSize(10);
-        taskExecutor.setMaxPoolSize(50);
-        taskExecutor.setQueueCapacity(20000);
-        taskExecutor.setKeepAliveSeconds(60);
-        taskExecutor.setThreadNamePrefix("taskExecutor-");
-        taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
-        taskExecutor.setAwaitTerminationSeconds(60);
+        taskExecutor.setCorePoolSize(coreSize);
+        taskExecutor.setMaxPoolSize(maxSize);
+        taskExecutor.setQueueCapacity(queueCapacity);
+        taskExecutor.setKeepAliveSeconds(alive);
+        taskExecutor.setThreadNamePrefix(prefix);
+        //taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
+        taskExecutor.setAwaitTerminationSeconds(waitTerminalSeconds);
         return taskExecutor;
     }
 }
