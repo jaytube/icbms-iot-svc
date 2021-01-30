@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandles;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class AlarmDataMsgQueue {
@@ -21,7 +22,12 @@ public class AlarmDataMsgQueue {
     }
 
     public RealtimeMessage poll() {
-        return this.alarmMsgQueue.poll();
+        try {
+            return this.alarmMsgQueue.poll(1, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            logger.error("获取告警消息超时, {}", e);
+            return null;
+        }
     }
 
     public int size() {

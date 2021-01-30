@@ -49,6 +49,9 @@ public class RealtimeMessageProcessMaster extends AbstractMessageProcessor {
     @Override
     public void decode() {
         RichMqttMessage message = msgThreadLocal.get();
+        if(message == null)
+            throw new IotException(ErrorCodeEnum.IOT_MESSAGE_NULL);
+
         String messageJson = new String(message.getMqttMsg().getPayload());
         String gatewayId = message.getGatewayId();
         LoraMessage loraMessage = JSON.parseObject(messageJson, LoraMessage.class);

@@ -75,16 +75,17 @@ public class MqttMsgWorkerImpl implements MqttMsgWorker {
 
     private void process() {
         if (!inboundMsgQueue.isEmpty()) {
+            RichMqttMessage mqttMsg = inboundMsgQueue.poll();
             CompletableFuture.runAsync(() -> {
-                RichMqttMessage mqttMsg = inboundMsgQueue.poll();
                 realTimeProcessMaster.setParameter(mqttMsg);
                 realTimeProcessMaster.performExecute();
             }, taskExecutor);
         }
 
         if(!inboundStopMsgQueue.isEmpty()) {
+            RichMqttMessage stopMsg = inboundStopMsgQueue.poll();
             CompletableFuture.runAsync(() -> {
-                RichMqttMessage stopMsg = inboundStopMsgQueue.poll();
+                logger.info("线程: " + Thread.currentThread().getName() + " 开始处理停止轮询数据...");
                 String gatewayId = stopMsg.getGatewayId();
                 GatewayDto gateway = gatewayKeeper.getById(Integer.parseInt(gatewayId));
                 gateway.setFinished(true);
@@ -93,19 +94,19 @@ public class MqttMsgWorkerImpl implements MqttMsgWorker {
         }
 
         if(!alarmDataMsgQueue.isEmpty()) {
+            RealtimeMessage alarmData = alarmDataMsgQueue.poll();
             CompletableFuture.runAsync(() -> {
                 logger.info("线程: " + Thread.currentThread().getName() + " 开始处理告警数据...");
-                RealtimeMessage alarmData = alarmDataMsgQueue.poll();
                 alarmDataService.processAlarmData(alarmData);
             }, taskExecutor);
         }
 
         if(realtimeMsgQueue.size() >= REAL_DATA_PROCESS_CAPACITY) {
+            List<RealtimeMessage> msgList = new ArrayList<>();
+            IntStream.range(0, realtimeMsgQueue.size())
+                    .forEach(i -> msgList.add(realtimeMsgQueue.poll()));
             CompletableFuture.runAsync(() -> {
                 logger.info("线程: " + Thread.currentThread().getName() + " 开始处理实时数据...");
-                List<RealtimeMessage> msgList = new ArrayList<>();
-                IntStream.range(0, realtimeMsgQueue.size())
-                        .forEach(i -> msgList.add(realtimeMsgQueue.poll()));
                 realtimeDataService.processRealtimeData(msgList);
             }, taskExecutor);
         }

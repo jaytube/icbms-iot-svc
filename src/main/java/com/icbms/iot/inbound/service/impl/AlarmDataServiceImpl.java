@@ -188,6 +188,8 @@ public class AlarmDataServiceImpl implements AlarmDataService {
 
     @Override
     public void processAlarmData(RealtimeMessage msg) {
+        if(msg == null)
+            return;
         Map<String, String> alarmDataMap = new HashMap<>();
         List<AlarmDataEntity> alarmDataList = new ArrayList<>();
         Map<String, Object> map = generateAlarmData(msg);
