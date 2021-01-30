@@ -31,7 +31,7 @@ public class GatewaySingleRunner implements GatewayRunner {
 
         logger.info("线程:" + Thread.currentThread().getName()+" 开启单个网关轮询...");
         while(!gateway.isStopped()) {
-            CommonResponse resp = loRaCommandService.startRoundRobin();
+            CommonResponse resp = loRaCommandService.startRoundRobin(gateway.getIp());
             gateway.setFinished(false);
             logger.info("开启轮询网关" + gateway.getId() + ", ip: " + gateway.getIp() + ", 响应：" + resp.getData());
             while(!gateway.isFinished()) {

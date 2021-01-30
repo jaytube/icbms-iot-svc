@@ -37,7 +37,7 @@ public class GatewayGroupRunner implements GatewayRunner {
 
         logger.info("停止所有网关轮询 ...");
         gatewayGroup.getGateways().stream().forEach(e -> {
-            loRaCommandService.stopRoundRobin();
+            loRaCommandService.stopRoundRobin(e.getIp());
         });
         logger.info("线程:" + Thread.currentThread().getName()+" 开启网关组轮询...");
         while(!gatewayGroup.isStopped()) {
@@ -46,7 +46,7 @@ public class GatewayGroupRunner implements GatewayRunner {
                 for (GatewayDto gateway : gateways) {
                     Integer gatewayId = gateway.getId();
                     String gatewayIp = gateway.getIp();
-                    CommonResponse resp = loRaCommandService.startRoundRobin();
+                    CommonResponse resp = loRaCommandService.startRoundRobin(gatewayIp);
                     gateway.setFinished(false);
                     long start = System.currentTimeMillis();
                     logger.info("开启轮询网关ID: " + gatewayId + ", IP: " + gatewayIp + ", 响应：" + resp.getData());
