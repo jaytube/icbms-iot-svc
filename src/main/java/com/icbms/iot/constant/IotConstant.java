@@ -30,11 +30,11 @@ public class IotConstant {
 
     public static final int REAL_DATA_PROCESS_CAPACITY = 5;
 
-    public static final int BOX_NO_START_INDEX = 8;
+    public static final int BOX_NO_START_INDEX = 11;
 
     public static final String CIRCUIT = "线路";
 
-    public static final String BOX_NO_START_STRING = "LY202101";
+    public static final String BOX_NO_START_STRING = "LY2021011ST";
 
     public static final int MONITOR_FREQUENCY = 180000;
 
