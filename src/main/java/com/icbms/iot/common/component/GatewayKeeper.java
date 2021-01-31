@@ -40,14 +40,6 @@ public class GatewayKeeper {
                 gatewayMap.put(g.getId(), dto);
             });
         }
-       /* Set<GatewayDto> set = new HashSet<>();
-        set.add(dto);
-        GatewayGroupDto group = new GatewayGroupDto();
-        group.setGateways(set);
-        group.setFinished(false);
-        group.setStopped(false);
-        group.setGroupId(1);*/
-        //gatewayGroupMap.put(1, group);
     }
 
     public Map<Integer, GatewayDto> getGatewayMap() {

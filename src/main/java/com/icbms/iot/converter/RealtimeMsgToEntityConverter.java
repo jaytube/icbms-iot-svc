@@ -1,5 +1,6 @@
 package com.icbms.iot.converter;
 
+import com.icbms.iot.common.service.DeviceInfoService;
 import com.icbms.iot.dto.RealtimeMessage;
 import com.icbms.iot.entity.RealDataEntity;
 import com.icbms.iot.common.service.GatewayConfigService;
@@ -12,16 +13,17 @@ import java.util.Objects;
 @Service
 public class RealtimeMsgToEntityConverter {
 
+
     @Autowired
-    private GatewayConfigService gatewayConfigService;
+    private DeviceInfoService deviceInfoService;
 
     public RealDataEntity convert(RealtimeMessage realtimeMessage) {
         RealDataEntity entity = new RealDataEntity();
-        String projectId = gatewayConfigService.getProjectIdByTerminalId(realtimeMessage.getBoxNo() + "");
+        String projectId = deviceInfoService.getProjectIdByDeviceNo(realtimeMessage.getBoxNo() + "");
         entity.setProjectId(projectId);
         entity.setGatewayId(realtimeMessage.getGatewayId());
         entity.setTerminalId(Objects.toString(realtimeMessage.getBoxNo(), null));
-        entity.setSwitchAddr("0");
+        entity.setSwitchAddr("100");
         entity.setSwitchOnoff(realtimeMessage.getSwitchFlag() ? "0" : "1");
         entity.setControlFlag("0");
         entity.setVoltage(Objects.toString(realtimeMessage.getCircuitVoltage(), null));

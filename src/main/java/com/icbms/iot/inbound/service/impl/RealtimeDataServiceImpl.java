@@ -108,9 +108,8 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
             log.setId(deviceSwitchLogInfoId);
             log.setProjectId(l.getProjectId());
             DeviceBoxInfo deviceBoxInfo = deviceBoxMap.get(l.getTerminalId());
-            //String deviceBoxId = deviceBoxInfo != null ? deviceBoxInfo.getId() : "";
-            //TODO just for test
-            String deviceBoxId = "dummy";
+            String deviceBoxId = deviceBoxInfo != null ? deviceBoxInfo.getId() : "";
+            //String deviceBoxId = "dummy";
             log.setDeviceBoxId(deviceBoxId);
             log.setAddress(l.getSwitchAddr());
             int deviceSwithAddr = Integer.valueOf(l.getSwitchAddr()) + 1;

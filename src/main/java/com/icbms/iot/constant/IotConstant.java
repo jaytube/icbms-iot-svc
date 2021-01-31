@@ -47,4 +47,6 @@ public class IotConstant {
     public static final String REAL_TIME = "realtime";
 
     public static final String STOP = "stop";
+
+    public static final String DEVICE_INFO = "DEVICE_INFO";
 }

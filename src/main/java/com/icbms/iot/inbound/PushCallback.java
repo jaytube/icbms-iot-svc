@@ -69,10 +69,11 @@ public class PushCallback implements MqttCallback {
     @Override
     public void messageArrived(String topic, MqttMessage mqttMessage) {
         // The message you get after you subscribe will be executed here
+        logger.info("订阅主题: " + topic);
         if(StringUtils.isEmpty(topic))
             return;
 
-        logger.info("订阅主题: " + topic + ", 消息内容: " + new String(mqttMessage.getPayload()));
+        logger.info("消息内容: " + new String(mqttMessage.getPayload()));
         String gatewayId = topic.split("\\/")[1];
         try {
             if(topic.contains(REAL_TIME))
