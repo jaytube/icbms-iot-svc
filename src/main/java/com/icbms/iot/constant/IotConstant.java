@@ -41,4 +41,10 @@ public class IotConstant {
     public static final int HEART_BEAT = 300000;
 
     public static final String GATEWAY_ALL = "GATEWAY_ALL";
+
+    public static final int MAX_WAITING_TIME = 30;
+
+    public static final String REAL_TIME = "realtime";
+
+    public static final String STOP = "stop";
 }

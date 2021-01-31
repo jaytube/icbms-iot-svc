@@ -1,6 +1,7 @@
 package com.icbms.iot.inbound.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.dto.RealtimeMessage;
 import com.icbms.iot.entity.AlarmDataEntity;
 import com.icbms.iot.entity.DeviceAlarmInfoLog;
@@ -12,17 +13,23 @@ import com.icbms.iot.mapper.DeviceBoxInfoMapper;
 import com.icbms.iot.common.service.GatewayConfigService;
 import com.icbms.iot.util.CommonUtil;
 import com.icbms.iot.util.DateUtil;
+import com.icbms.iot.util.RestUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.invoke.MethodHandles;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import static com.icbms.iot.constant.IotConstant.*;
@@ -44,6 +51,15 @@ public class AlarmDataServiceImpl implements AlarmDataService {
 
     @Autowired
     private DeviceAlarmInfoLogMapper deviceAlarmInfoLogMapper;
+
+    @Value("${icbms.alarm.url}")
+    private String alarmUrl;
+
+    @Autowired
+    private Executor taskExecutor;
+
+    @Autowired
+    private RestUtil restUtil;
 
     public Map<String, Object> generateAlarmData(RealtimeMessage realtimeMessage) {
         List<AlarmDataEntity> list = new ArrayList<>();
@@ -120,9 +136,9 @@ public class AlarmDataServiceImpl implements AlarmDataService {
 
     @Override
     @Transactional
-    public void saveAlarmDataEntityList(List<AlarmDataEntity> list) {
+    public List<DeviceAlarmInfoLog> saveAlarmDataEntityList(List<AlarmDataEntity> list) {
         if(CollectionUtils.isEmpty(list))
-            return;
+            return new ArrayList<>();
 
         List<String> projectIdList = list.stream().filter(Objects::nonNull).map(AlarmDataEntity::getProjectId)
                 .filter(StringUtils::isNotBlank)
@@ -164,11 +180,16 @@ public class AlarmDataServiceImpl implements AlarmDataService {
         if(CollectionUtils.isNotEmpty(logs)) {
             int successCount = deviceAlarmInfoLogMapper.batchInsert(logs);
             logger.info("插入表device_alarm_info_log" + successCount + "条告警数据！");
+            return logs;
         }
+
+        return new ArrayList<>();
     }
 
     @Override
     public void processAlarmData(RealtimeMessage msg) {
+        if(msg == null)
+            return;
         Map<String, String> alarmDataMap = new HashMap<>();
         List<AlarmDataEntity> alarmDataList = new ArrayList<>();
         Map<String, Object> map = generateAlarmData(msg);
@@ -177,7 +198,24 @@ public class AlarmDataServiceImpl implements AlarmDataService {
         List<AlarmDataEntity> list = (List<AlarmDataEntity>) map.get(MYSQL_ALARM);
         alarmDataList.addAll(list);
         redisTemplate.opsForHash().putAll(ALARM_DATA, alarmDataMap);
-        saveAlarmDataEntityList(alarmDataList);
+        List<DeviceAlarmInfoLog> logs = saveAlarmDataEntityList(alarmDataList);
+        sendAlarm(logs);
+    }
+
+    private void sendAlarm(List<DeviceAlarmInfoLog> logs) {
+        if(CollectionUtils.isNotEmpty(logs)) {
+            for (DeviceAlarmInfoLog log : logs) {
+                if(log == null)
+                    continue;
+                CompletableFuture.runAsync(() -> {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("id", log.getId());
+                    CommonResponse<Map> resp = restUtil.doPlainPost(alarmUrl, map);
+                    if(resp.getCode() != HttpStatus.OK.value())
+                        logger.error("发送告警数据失败，id: {}", log.getId());
+                }, taskExecutor);
+            }
+        }
     }
 
     private DeviceBoxInfo mockDeviceBoxInfo() {

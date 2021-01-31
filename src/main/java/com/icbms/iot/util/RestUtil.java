@@ -5,6 +5,8 @@ import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.rest.LoRaCommandService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.retry.annotation.Backoff;
@@ -15,6 +17,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +37,8 @@ public class RestUtil {
     private LoRaCommandService loRaCommandService;
 
     public static final String HTTP_HEADER_CONTENT_TYPE = "application/json;charset=UTF-8";
+
+    private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     /**
      * JWT TOKEN值
@@ -153,6 +158,18 @@ public class RestUtil {
 
     @Retryable(value = RestClientException.class, maxAttempts = 2,
             backoff = @Backoff(delay = 5000L, multiplier = 2))
+    public CommonResponse<Map> doPlainPost(String url,  Map<String, String> params) {
+        log.info("【Plain Post】【请求URL】：{}", url);
+        HttpHeaders requestHeaders = new HttpHeaders();
+        HttpEntity<Map> requestEntity = new HttpEntity<>(params, requestHeaders);
+        ResponseEntity<Map> exchange = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Map.class);
+        Map response = exchange.getBody();
+        log.info("【doPost】【请求响应】：{}", response);
+        return response(url, null, exchange);
+    }
+
+    @Retryable(value = RestClientException.class, maxAttempts = 2,
+            backoff = @Backoff(delay = 5000L, multiplier = 2))
     public CommonResponse<Map> doDeleteWithToken(String gatewayIp, String url, List<Map> body) {
         log.info("【doDeleteWithToken】【请求URL】：{}", url);
         HttpHeaders requestHeaders = createHeader(gatewayIp);
@@ -174,6 +191,7 @@ public class RestUtil {
                 String paramsStr = JSON.toJSONString(params);
                 message = "[URL]:" + url + "[PARAMS]:" + paramsStr;
             }
+            logger.info("POST FAILED.");
             return new CommonResponse(exchange.getStatusCodeValue(), message, exchange.getBody());
         }
     }

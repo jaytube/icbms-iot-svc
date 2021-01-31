@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandles;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class InboundMsgQueue {
@@ -21,7 +22,12 @@ public class InboundMsgQueue {
     }
 
     public RichMqttMessage poll() {
-        return this.mqttMessageQueue.poll();
+        try {
+            return this.mqttMessageQueue.poll(1, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            logger.error("获取停止实时消息超时, {}", e);
+            return null;
+        }
     }
 
     public int size() {

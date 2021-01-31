@@ -41,7 +41,7 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
     @Autowired
     private GatewayInfoMapper gateWayInfoMapper;
 
-    @PostConstruct
+    //@PostConstruct
     public void initGateWayInfos() {
         List<GatewayAddress> allAddress = gateWayAddressMapper.findAll();
         if (CollectionUtils.isEmpty(allAddress)) {
