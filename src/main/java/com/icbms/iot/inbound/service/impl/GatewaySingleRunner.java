@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import java.lang.invoke.MethodHandles;
 import java.util.concurrent.TimeUnit;
 
+import static com.icbms.iot.constant.IotConstant.MAX_WAITING_TIME;
+
 @Service("singleRunner")
 public class GatewaySingleRunner implements GatewayRunner {
 
@@ -34,11 +36,14 @@ public class GatewaySingleRunner implements GatewayRunner {
             CommonResponse resp = loRaCommandService.startRoundRobin(gateway.getIp());
             gateway.setFinished(false);
             logger.info("开启轮询网关" + gateway.getId() + ", ip: " + gateway.getIp() + ", 响应：" + resp.getData());
-            while(!gateway.isFinished()) {
+            long timeCost = 0;
+            long start = System.currentTimeMillis();
+            while(!gateway.isFinished() && timeCost < MAX_WAITING_TIME) {
+                timeCost = (System.currentTimeMillis() - start) / 1000;
                 gateway = gatewayKeeper.getById(gatewayId);
                 continue;
             }
-            logger.info("网关" + + gateway.getId() + ", ip: " + gateway.getIp() + "轮询结束");
+            logger.info("网关" + + gateway.getId() + ", ip: " + gateway.getIp() + "轮询结束, 本次轮询花费时间:" + timeCost + "秒！");
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {

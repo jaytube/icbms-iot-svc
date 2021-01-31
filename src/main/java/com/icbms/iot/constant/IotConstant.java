@@ -28,7 +28,7 @@ public class IotConstant {
 
     public static final Long REAL_DATA_SAVE_FREQUENCY = 600000L;
 
-    public static final int REAL_DATA_PROCESS_CAPACITY = 1;
+    public static final int REAL_DATA_PROCESS_CAPACITY = 5;
 
     public static final int BOX_NO_START_INDEX = 8;
 
@@ -42,7 +42,7 @@ public class IotConstant {
 
     public static final String GATEWAY_ALL = "GATEWAY_ALL";
 
-    public static final int MAX_WAITING_TIME = 30;
+    public static final int MAX_WAITING_TIME = 40;
 
     public static final String REAL_TIME = "realtime";
 
