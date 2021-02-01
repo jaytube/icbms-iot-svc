@@ -49,7 +49,7 @@ public class DeviceMonitorImpl implements DeviceMonitor {
         if(CollectionUtils.isEmpty(all))
             return;
 
-        Map<Integer, List<GatewayDeviceMap>> map = all.stream().collect(Collectors.groupingBy(GatewayDeviceMap::getGatewayId));
+        Map<Integer, List<GatewayDeviceMap>> map = all.stream().distinct().collect(Collectors.groupingBy(GatewayDeviceMap::getGatewayId));
         for (Map.Entry<Integer, List<GatewayDeviceMap>> cursor : map.entrySet()) {
             String gatewayId = Integer.toString(cursor.getKey());
             List<GatewayDeviceMap> val = cursor.getValue();
