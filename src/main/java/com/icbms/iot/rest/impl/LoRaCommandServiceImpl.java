@@ -96,8 +96,8 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
         String bearer_token = null;
         if (token_type != null && access_token != null && expires_in != null) {
             bearer_token = Objects.toString(token_type) + " " + Objects.toString(access_token);
-            redisTemplate.opsForValue().set("BEARER_TOKEN", bearer_token);
-            redisTemplate.expire("BEARER_TOKEN", Long.parseLong(Objects.toString(expires_in)), TimeUnit.SECONDS);
+            redisTemplate.opsForValue().set(gatewayIp, bearer_token);
+            redisTemplate.expire(gatewayIp, Long.parseLong(Objects.toString(expires_in)), TimeUnit.SECONDS);
         }
 
         if (StringUtils.isNotBlank(bearer_token)) {
@@ -110,10 +110,10 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
 
     @Override
     public String getRedisToken(String gatewayIp) {
-        Object bearer_token = redisTemplate.opsForValue().get("BEARER_TOKEN");
+        Object bearer_token = redisTemplate.opsForValue().get(gatewayIp);
         if (bearer_token == null) {
             getToken(gatewayIp);
-            bearer_token = redisTemplate.opsForValue().get("BEARER_TOKEN");
+            bearer_token = redisTemplate.opsForValue().get(gatewayIp);
         }
         return Objects.toString(bearer_token);
     }

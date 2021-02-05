@@ -37,50 +37,50 @@ public class LoRaCommandController {
 
     @GetMapping("/start")
     @ResponseBody
-    public CommonResponse start() {
-        return loRaCommandService.startRoundRobin(REST_IP);
+    public CommonResponse start(String ip) {
+        return loRaCommandService.startRoundRobin(ip);
     }
 
     @GetMapping("/stop")
     @ResponseBody
-    public CommonResponse stop() {
-        return loRaCommandService.stopRoundRobin(REST_IP);
+    public CommonResponse stop(String ip) {
+        return loRaCommandService.stopRoundRobin(ip);
     }
 
     @GetMapping("/getToken")
     @ResponseBody
-    public CommonResponse getToken() {
-        return loRaCommandService.getToken(REST_IP);
+    public CommonResponse getToken(@RequestParam("ip") String ip) {
+        return loRaCommandService.getToken(ip);
     }
 
     @GetMapping("/getRedisToken")
     @ResponseBody
-    public CommonResponse getRedisToken() {
-        return CommonResponse.success(loRaCommandService.getRedisToken(REST_IP));
+    public CommonResponse getRedisToken(String ip) {
+        return CommonResponse.success(loRaCommandService.getRedisToken(ip));
     }
 
     @GetMapping("/getDbInstance")
     @ResponseBody
-    public CommonResponse getDbInstance(String code) {
-        return loRaCommandService.getDbInstance(REST_IP, code);
+    public CommonResponse getDbInstance(String ip, String code) {
+        return loRaCommandService.getDbInstance(ip, code);
     }
 
     @GetMapping("/getDbInstanceFromRedis")
     @ResponseBody
-    public CommonResponse getDbInstanceFromRedis(String code) {
-        return CommonResponse.success(loRaCommandService.getDbInstanceFromRedis(REST_IP, code));
+    public CommonResponse getDbInstanceFromRedis(String ip, String code) {
+        return CommonResponse.success(loRaCommandService.getDbInstanceFromRedis(ip, code));
     }
 
     @GetMapping("/getGatewayList")
     @ResponseBody
-    public CommonResponse getGatewayList() {
-        return loRaCommandService.getGatewayList(REST_IP);
+    public CommonResponse getGatewayList(@RequestParam("ip") String ip) {
+        return loRaCommandService.getGatewayList(ip);
     }
 
     @GetMapping("/getGateWayById")
     @ResponseBody
-    public CommonResponse getGateWayById(String id) {
-        return loRaCommandService.getGateWayById(REST_IP, id);
+    public CommonResponse getGateWayById(String ip, String id) {
+        return loRaCommandService.getGateWayById(ip, id);
     }
 
     @GetMapping("/getTerminalTypes")
@@ -97,8 +97,8 @@ public class LoRaCommandController {
 
     @GetMapping("/getDevice")
     @ResponseBody
-    public CommonResponse getDevice(String deviceSn) {
-        return loRaCommandService.getDevices(REST_IP, deviceSn);
+    public CommonResponse getDevice(String ip, String deviceSn) {
+        return loRaCommandService.getDevices(ip, deviceSn);
     }
 
     @PostMapping("/addDevice")
