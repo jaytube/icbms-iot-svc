@@ -99,7 +99,7 @@ public class DeviceMonitorImpl implements DeviceMonitor {
             int id = gateway.getGatewayId();
             CommonResponse<List<GatewayInfo>> resp = loRaCommandService.getGatewayList(ip);
             if(resp.getCode() != 200) {
-                String dto = (String)stringRedisTemplate.opsForHash().get(GATEWAY_STATUS, id);
+                String dto = (String)stringRedisTemplate.opsForHash().get(GATEWAY_STATUS, Integer.toString(id));
                 long delta = MONITOR_GATEWAY_FREQUENCY;
                 if(dto != null) {
                     GatewayStatusDto gatewayStatusDto = JSON.parseObject(dto, GatewayStatusDto.class);
@@ -112,7 +112,7 @@ public class DeviceMonitorImpl implements DeviceMonitor {
                 GatewayStatusDto statusDto = generateGatewayStatusDto(alarmData.getAlarmContent(), alarmData.getReportTime(), 1);
                 alarmDataMap.put(Integer.toString(id), JSON.toJSONString(statusDto));
             } else {
-                String dto = (String)stringRedisTemplate.opsForHash().get(GATEWAY_STATUS, id);
+                String dto = (String)stringRedisTemplate.opsForHash().get(GATEWAY_STATUS, Integer.toString(id));
                 if(dto != null) {
                     GatewayStatusDto gatewayStatusDto = JSON.parseObject(dto, GatewayStatusDto.class);
                     if(gatewayStatusDto.getStatus() == 1) {
