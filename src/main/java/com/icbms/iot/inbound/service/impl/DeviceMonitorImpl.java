@@ -125,8 +125,8 @@ public class DeviceMonitorImpl implements DeviceMonitor {
             }
         }
 
-        alarmDataService.saveAlarmDataEntityList(list);
-        stringRedisTemplate.opsForHash().putAll(ALARM_DATA, alarmDataMap);
+        alarmDataService.saveAndSendAlarms(list);
+        stringRedisTemplate.opsForHash().putAll(GATEWAY_STATUS, alarmDataMap);
     }
 
     private AlarmDataEntity generateDeviceAlarmData(GatewayDeviceMap deviceNumEuiDto, long delta, String gatewayId) {

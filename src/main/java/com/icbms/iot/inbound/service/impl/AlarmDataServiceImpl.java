@@ -196,6 +196,12 @@ public class AlarmDataServiceImpl implements AlarmDataService {
         List<AlarmDataEntity> list = (List<AlarmDataEntity>) map.get(MYSQL_ALARM);
         alarmDataList.addAll(list);
         redisTemplate.opsForHash().putAll(ALARM_DATA, alarmDataMap);
+        saveAndSendAlarms(alarmDataList);
+    }
+
+
+    @Override
+    public void saveAndSendAlarms(List<AlarmDataEntity> alarmDataList) {
         List<DeviceAlarmInfoLog> logs = saveAlarmDataEntityList(alarmDataList);
         sendAlarm(logs);
     }
