@@ -87,6 +87,7 @@ public class DeviceMonitorImpl implements DeviceMonitor {
     @Scheduled(fixedDelay = MONITOR_GATEWAY_FREQUENCY)
     @Transactional
     public void monitorGateway() {
+        logger.info("开始监测网关状态...");
         List<GatewayInfo> gatewayList = gatewayInfoMapper.findAll();
         if(CollectionUtils.isEmpty(gatewayList))
             return;
