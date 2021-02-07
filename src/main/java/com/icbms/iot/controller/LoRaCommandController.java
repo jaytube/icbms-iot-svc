@@ -9,6 +9,8 @@ import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -27,7 +29,7 @@ public class LoRaCommandController {
     @Autowired
     private RestUtil restUtil;
 
-    private String REST_IP = "http://10.0.1.71";
+    private String REST_IP = "http://10.0.1.73";
 
     @GetMapping("/cmd/{deviceId}/{command}")
     @ResponseBody
@@ -103,20 +105,21 @@ public class LoRaCommandController {
 
     @PostMapping("/addDevice")
     @ResponseBody
-    public CommonResponse addDevice(@RequestBody AddDeviceDto addDeviceDto) {
-        return loRaCommandService.addDevice(REST_IP, addDeviceDto);
+    public CommonResponse addDevice(@RequestBody AddDeviceDto addDeviceDto, String ip) {
+        return loRaCommandService.addDevice(ip, addDeviceDto);
     }
 
     @GetMapping("/deleteDevice")
     @ResponseBody
-    public CommonResponse deleteDevice(String deviceSn) {
-        return loRaCommandService.deleteDevice(REST_IP, deviceSn);
+    public CommonResponse deleteDevice(String deviceSn, String ip) {
+        return loRaCommandService.deleteDevice(ip, deviceSn);
     }
 
     @PostMapping("/deleteDevices")
     @ResponseBody
-    public CommonResponse deleteDevices(@RequestBody List<Integer> deviceIds) {
-        return loRaCommandService.deleteDevices(REST_IP, deviceIds);
+    public CommonResponse deleteDevices(/*@RequestBody List<Integer> deviceIds*/) {
+        List<Integer> ids = Arrays.asList(33);
+        return loRaCommandService.deleteDevices(REST_IP, ids);
     }
 
     @GetMapping("/test")

@@ -48,7 +48,7 @@ public class GatewayKeeper {
                 map.put(g.getGatewayId(), dto);
             });
         }
-        List<GatewayDeviceMap> allMaps = gatewayDeviceMapMapper.findAll();
+        /*List<GatewayDeviceMap> allMaps = gatewayDeviceMapMapper.findAll();
         if(CollectionUtils.isNotEmpty(allMaps)) {
             List<Integer> onlineGateWayIds = allMaps.stream().map(GatewayDeviceMap::getGatewayId)
                     .distinct().collect(Collectors.toList());
@@ -58,7 +58,8 @@ public class GatewayKeeper {
                         gatewayMap.put(i, map.get(i));
                 });
             }
-        }
+        }*/
+        gatewayMap.putAll(map);
     }
 
     public Map<Integer, GatewayDto> getGatewayMap() {

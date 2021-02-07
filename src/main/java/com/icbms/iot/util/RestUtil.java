@@ -108,8 +108,8 @@ public class RestUtil {
         return response(url, paramsMap, responseEntity);
     }
 
-    @Retryable(value = RestClientException.class, maxAttempts = 2,
-            backoff = @Backoff(delay = 5000L, multiplier = 2))
+    @Retryable(value = RestClientException.class, maxAttempts = 1,
+            backoff = @Backoff(delay = 5000L, multiplier = 1))
     public CommonResponse<Map> doGetWithToken(String gatewayIp, String url) {
         log.info("【doGetWithToken】【请求URL】：{}", url);
         HttpHeaders requestHeaders = createHeader(gatewayIp);
