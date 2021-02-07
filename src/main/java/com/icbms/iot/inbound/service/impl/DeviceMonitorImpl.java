@@ -59,9 +59,9 @@ public class DeviceMonitorImpl implements DeviceMonitor {
             List<AlarmDataEntity> list = new ArrayList<>();
             Map<String, String> alarmDataMap = new HashMap<>();
             for (GatewayDeviceMap device : val) {
-                String devEUI = device.getDeviceSn();
+                String hashKey = TerminalBoxConvertUtil.getTerminalNo(device.getDeviceBoxNum()) + "_100";
                 long currentTime = System.currentTimeMillis();
-                Object lastUpdated = stringRedisTemplate.opsForHash().get(REAL_HIS_DATA_STORE_UP_TO_DATE, devEUI);
+                Object lastUpdated = stringRedisTemplate.opsForHash().get(REAL_HIS_DATA_STORE_UP_TO_DATE, hashKey);
                 if(lastUpdated != null && currentTime - Long.parseLong((String) lastUpdated) > HEART_BEAT) {
                     AlarmDataEntity alarmData = generateAlarmData(device,
                             currentTime - Long.parseLong((String) lastUpdated), gatewayId);
