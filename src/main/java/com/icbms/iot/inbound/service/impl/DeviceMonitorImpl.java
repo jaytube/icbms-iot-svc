@@ -121,6 +121,9 @@ public class DeviceMonitorImpl implements DeviceMonitor {
                         GatewayStatusDto statusDto = generateGatewayStatusDto(alarmData.getAlarmContent(), alarmData.getReportTime(), 0);
                         alarmDataMap.put(Integer.toString(id), JSON.toJSONString(statusDto));
                     }
+                } else {
+                    GatewayStatusDto statusDto = generateGatewayStatusDto("第["+id+"]号网关运行状态正常!", DateUtil.parseDate(System.currentTimeMillis()), 0);
+                    alarmDataMap.put(Integer.toString(id), JSON.toJSONString(statusDto));
                 }
             }
         }
