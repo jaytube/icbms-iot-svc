@@ -45,7 +45,7 @@ public class GatewayKeeper {
                 dto.setId(g.getGatewayId());
                 dto.setIp(g.getIpAddress());
                 dto.setType(GatewayRunType.SINGLE);
-                map.put(g.getId(), dto);
+                map.put(g.getGatewayId(), dto);
             });
         }
         List<GatewayDeviceMap> allMaps = gatewayDeviceMapMapper.findAll();
