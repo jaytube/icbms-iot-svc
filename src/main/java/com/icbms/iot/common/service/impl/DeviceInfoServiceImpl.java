@@ -1,5 +1,6 @@
 package com.icbms.iot.common.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.icbms.iot.common.service.DeviceInfoService;
 import com.icbms.iot.dto.DevicePlainInfoDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +19,11 @@ public class DeviceInfoServiceImpl implements DeviceInfoService {
     @Override
     public String getProjectIdByDeviceNo(String deviceNo) {
         String terminalString = getTerminalString(deviceNo);
-        DevicePlainInfoDto dto = (DevicePlainInfoDto) redisTemplate.opsForHash().get(DEVICE_INFO, terminalString);
-        if(dto != null)
+        String dtoStr = (String) redisTemplate.opsForHash().get(DEVICE_INFO, terminalString);
+        if(dtoStr != null) {
+            DevicePlainInfoDto dto = JSON.parseObject(dtoStr, DevicePlainInfoDto.class);
             return dto.getProjectId();
+        }
 
         return "";
     }

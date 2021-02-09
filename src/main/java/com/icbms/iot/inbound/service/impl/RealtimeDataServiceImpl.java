@@ -66,10 +66,9 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
         for (RealDataEntity realData : entityList) {
             String field = realData.getTerminalId() + "_" + realData.getSwitchAddr();
             if (redisTemplate.opsForHash().hasKey(REAL_DATA, field)) {
-                String latestTime = (String) redisTemplate.opsForHash().get(REAL_HIS_DATA_STORE_UP_TO_DATE, field);
+                Object latestTime = redisTemplate.opsForHash().get(REAL_HIS_DATA_STORE_UP_TO_DATE, field);
                 long currentTime = System.currentTimeMillis();
-                long delta = currentTime - Long.valueOf(latestTime);
-                if (delta >= REAL_DATA_SAVE_FREQUENCY) {
+                if (latestTime == null || currentTime - Long.parseLong((String) latestTime) >= REAL_DATA_SAVE_FREQUENCY) {
                     redisTemplate.opsForHash().put(REAL_STAT_LAST_DATA, field, JSON.toJSONString(realData));
                     redisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, field, String.valueOf(currentTime));
                     result.add(realData);
@@ -98,11 +97,11 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
                 .collect(Collectors.toList());
         List<DeviceBoxInfo> deviceBoxes = deviceBoxInfoMapper.findByProjectIdList(projectIdList);
         List<String> deviceBoxNums = list.stream().filter(Objects::nonNull).map(RealDataEntity::getTerminalId).collect(Collectors.toList());
-        deviceBoxes = deviceBoxes.stream().filter(l -> deviceBoxNums.contains(getTerminalNo(l.getDeviceBoxNum())))
+        deviceBoxes = deviceBoxes.stream().filter(l -> deviceBoxNums.contains(l.getDeviceBoxName()))
                 .collect(Collectors.toList());
         Map<String, DeviceBoxInfo> deviceBoxMap = new HashMap<>();
         for (DeviceBoxInfo deviceBox : deviceBoxes) {
-            deviceBoxMap.put(getTerminalNo(deviceBox.getDeviceBoxNum()), deviceBox);
+            deviceBoxMap.put(deviceBox.getDeviceBoxName(), deviceBox);
         }
 
         List<DeviceSwitchInfoLog> logs = new ArrayList<>();

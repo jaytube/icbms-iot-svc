@@ -19,15 +19,15 @@ public class TerminalBoxConvertUtil {
         if (terminalId != null && !"".equals(terminalId)) {
             int len = terminalId.length();
             if (len == 1) {
-                return BOX_NO_START_STRING + "00000" + terminalId;
-            } else if (len == 2) {
                 return BOX_NO_START_STRING + "0000" + terminalId;
-            } else if (len == 3) {
+            } else if (len == 2) {
                 return BOX_NO_START_STRING + "000" + terminalId;
-            } else if (len == 4) {
+            } else if (len == 3) {
                 return BOX_NO_START_STRING + "00" + terminalId;
+            } else if (len == 4) {
+                return BOX_NO_START_STRING + "0" + terminalId;
             } else {
-                return len == 5 ? BOX_NO_START_STRING + "0" + terminalId : BOX_NO_START_STRING + terminalId;
+                return BOX_NO_START_STRING + terminalId;
             }
         } else {
             return null;
