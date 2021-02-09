@@ -26,7 +26,7 @@ public class IotConstant {
 
     public static final String DEVICE_NO_SIGNAL = "节点通信中断";
 
-    public static final Long REAL_DATA_SAVE_FREQUENCY = 600000L;
+    public static final Long REAL_DATA_SAVE_FREQUENCY = 10000L;
 
     public static final int REAL_DATA_PROCESS_CAPACITY = 1;
 

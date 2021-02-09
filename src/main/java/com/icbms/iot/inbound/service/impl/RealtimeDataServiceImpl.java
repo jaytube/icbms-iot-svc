@@ -68,7 +68,8 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
             if (redisTemplate.opsForHash().hasKey(REAL_DATA, field)) {
                 String latestTime = (String) redisTemplate.opsForHash().get(REAL_HIS_DATA_STORE_UP_TO_DATE, field);
                 long currentTime = System.currentTimeMillis();
-                if (currentTime - Long.valueOf(latestTime) >= REAL_DATA_SAVE_FREQUENCY) {
+                long delta = currentTime - Long.valueOf(latestTime);
+                if (delta >= REAL_DATA_SAVE_FREQUENCY) {
                     redisTemplate.opsForHash().put(REAL_STAT_LAST_DATA, field, JSON.toJSONString(realData));
                     redisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, field, String.valueOf(currentTime));
                     result.add(realData);
