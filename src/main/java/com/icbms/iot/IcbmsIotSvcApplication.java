@@ -1,6 +1,5 @@
 package com.icbms.iot;
 
-import com.icbms.iot.inbound.service.IotRoundRobinController;
 import com.icbms.iot.inbound.service.MqttMsgWorker;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -19,7 +18,7 @@ public class IcbmsIotSvcApplication {
 
 	public static void main(String[] args) {
 		ConfigurableApplicationContext context = SpringApplication.run(IcbmsIotSvcApplication.class, args);
-		context.getBean(IotRoundRobinController.class).roundRobinControl();
+		//context.getBean(IotRoundRobinController.class).roundRobinControl();
 		context.getBean(MqttMsgWorker.class).processMsg();
 	}
 

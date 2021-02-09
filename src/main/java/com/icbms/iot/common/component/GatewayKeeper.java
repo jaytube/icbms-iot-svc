@@ -2,7 +2,6 @@ package com.icbms.iot.common.component;
 
 import com.icbms.iot.dto.GatewayDto;
 import com.icbms.iot.dto.GatewayGroupDto;
-import com.icbms.iot.entity.GatewayDeviceMap;
 import com.icbms.iot.entity.GatewayInfo;
 import com.icbms.iot.enums.GatewayRunType;
 import com.icbms.iot.mapper.GatewayDeviceMapMapper;
@@ -17,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @ApplicationScope
 @Component

@@ -89,7 +89,7 @@ public class MqttMsgWorkerImpl implements MqttMsgWorker {
                 String gatewayId = stopMsg.getGatewayId();
                 GatewayDto gateway = gatewayKeeper.getById(Integer.parseInt(gatewayId));
                 gateway.setFinished(true);
-                logger.info("收到停止网关: " + gatewayId + "的轮询消息, 开始关闭轮询 。。。");
+                logger.info("收到网关: " + gatewayId + "停止轮询的消息, 关闭轮询 。。。");
             }, taskExecutor);
         }
 

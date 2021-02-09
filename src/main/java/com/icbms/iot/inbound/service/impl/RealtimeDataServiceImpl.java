@@ -3,6 +3,7 @@ package com.icbms.iot.inbound.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.icbms.iot.converter.RealtimeMsgToEntityConverter;
 import com.icbms.iot.dto.RealtimeMessage;
+import com.icbms.iot.dto.TerminalStatusDto;
 import com.icbms.iot.entity.DeviceBoxInfo;
 import com.icbms.iot.entity.DeviceSwitchInfoDetailLog;
 import com.icbms.iot.entity.DeviceSwitchInfoLog;
@@ -13,6 +14,7 @@ import com.icbms.iot.mapper.DeviceSwitchInfoDetailLogMapper;
 import com.icbms.iot.mapper.DeviceSwitchInfoLogMapper;
 import com.icbms.iot.util.CommonUtil;
 import com.icbms.iot.util.DateUtil;
+import com.icbms.iot.util.TerminalStatusUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -77,6 +79,8 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
                 result.add(realData);
             }
             redisTemplate.opsForHash().put(REAL_DATA, field, JSON.toJSONString(realData));
+            TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalOkStatus(realData.getGatewayId(), realData.getTerminalId());
+            redisTemplate.opsForHash().put(TERMINAL_STATUS, realData.getTerminalId(), JSON.toJSONString(statusDto));
         }
 
         saveRealHisDataEntities(result);

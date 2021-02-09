@@ -28,7 +28,7 @@ public class IotConstant {
 
     public static final Long REAL_DATA_SAVE_FREQUENCY = 600000L;
 
-    public static final int REAL_DATA_PROCESS_CAPACITY = 5;
+    public static final int REAL_DATA_PROCESS_CAPACITY = 1;
 
     public static final int BOX_NO_START_INDEX = 11;
 
@@ -39,6 +39,8 @@ public class IotConstant {
     public static final int MONITOR_DEVICE_FREQUENCY = 120000;
 
     public static final int MONITOR_GATEWAY_FREQUENCY = 300000;
+
+    public static final int ROUND_ROBIN_FREQUENCY = 30000;
 
     public static final int HEART_BEAT = 300000;
 

@@ -1,8 +1,10 @@
 package com.icbms.iot.inbound.service;
 
-public interface DeviceMonitor {
+public interface ScheduleTaskService {
 
     void monitorDevice();
 
     void monitorGateway();
+
+    void roundRobinControl();
 }

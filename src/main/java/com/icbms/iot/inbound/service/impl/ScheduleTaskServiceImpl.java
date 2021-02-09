@@ -2,12 +2,15 @@ package com.icbms.iot.inbound.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.icbms.iot.common.CommonResponse;
+import com.icbms.iot.common.component.GatewayKeeper;
+import com.icbms.iot.dto.GatewayDto;
 import com.icbms.iot.dto.GatewayStatusDto;
 import com.icbms.iot.entity.AlarmDataEntity;
 import com.icbms.iot.entity.GatewayDeviceMap;
 import com.icbms.iot.entity.GatewayInfo;
+import com.icbms.iot.enums.GatewayRunType;
 import com.icbms.iot.inbound.service.AlarmDataService;
-import com.icbms.iot.inbound.service.DeviceMonitor;
+import com.icbms.iot.inbound.service.ScheduleTaskService;
 import com.icbms.iot.mapper.GatewayDeviceMapMapper;
 import com.icbms.iot.mapper.GatewayInfoMapper;
 import com.icbms.iot.rest.LoRaCommandService;
@@ -29,7 +32,7 @@ import java.util.stream.Collectors;
 import static com.icbms.iot.constant.IotConstant.*;
 
 @Service
-public class DeviceMonitorImpl implements DeviceMonitor {
+public class ScheduleTaskServiceImpl implements ScheduleTaskService {
 
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -47,6 +50,9 @@ public class DeviceMonitorImpl implements DeviceMonitor {
 
     @Autowired
     private LoRaCommandService loRaCommandService;
+
+    @Autowired
+    private GatewayKeeper gatewayKeeper;
 
     @Override
     @Scheduled(fixedDelay = MONITOR_DEVICE_FREQUENCY)
@@ -130,6 +136,50 @@ public class DeviceMonitorImpl implements DeviceMonitor {
 
         alarmDataService.saveAndSendAlarms(list);
         stringRedisTemplate.opsForHash().putAll(GATEWAY_STATUS, alarmDataMap);
+    }
+
+    @Override
+    @Scheduled(fixedDelay = ROUND_ROBIN_FREQUENCY)
+    @Transactional
+    public void roundRobinControl() {
+        logger.info("开始网关轮询...");
+        List<GatewayInfo> gatewayList = gatewayInfoMapper.findAll();
+        if(CollectionUtils.isEmpty(gatewayList))
+            return;
+
+        Map<Integer, GatewayDto> gatewayDtoMap = gatewayKeeper.getGatewayMap();
+        Map<Integer, GatewayInfo> gatewayInfoMap = new HashMap<>();
+        gatewayList.stream().forEach(t -> {
+            gatewayInfoMap.put(t.getGatewayId(), t);
+        });
+        Iterator<Map.Entry<Integer, GatewayDto>> iterator = gatewayDtoMap.entrySet().iterator();
+        while(iterator.hasNext()) {
+            Map.Entry<Integer, GatewayDto> next = iterator.next();
+            int gatewayId = next.getKey();
+            if(!gatewayInfoMap.containsKey(gatewayId))
+                iterator.remove();
+        }
+        gatewayInfoMap.entrySet().stream().forEach(e -> {
+            int gatewayId = e.getKey();
+            GatewayInfo gatewayInfo = e.getValue();
+            GatewayDto dto = gatewayDtoMap.getOrDefault(gatewayInfo.getGatewayId(), null);
+            if(dto == null) {
+                GatewayDto gatewayDto = new GatewayDto();
+                dto.setFinished(false);
+                dto.setStopped(false);
+                dto.setId(gatewayId);
+                dto.setIp(gatewayInfo.getIpAddress());
+                dto.setType(GatewayRunType.SINGLE);
+                gatewayKeeper.getGatewayMap().put(gatewayId, gatewayDto);
+            }
+        });
+        gatewayDtoMap.entrySet().stream().forEach(e -> {
+            GatewayDto g = e.getValue();
+            String ip = g.getIp();
+            loRaCommandService.startRoundRobin(ip);
+            logger.info("网关: " + ip + "开始轮询");
+            g.setFinished(false);
+        });
     }
 
     private AlarmDataEntity generateDeviceAlarmData(GatewayDeviceMap deviceNumEuiDto, long delta, String gatewayId) {

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.common.service.DeviceInfoService;
 import com.icbms.iot.dto.RealtimeMessage;
+import com.icbms.iot.dto.TerminalStatusDto;
 import com.icbms.iot.entity.AlarmDataEntity;
 import com.icbms.iot.entity.DeviceAlarmInfoLog;
 import com.icbms.iot.entity.DeviceBoxInfo;
@@ -14,6 +15,7 @@ import com.icbms.iot.mapper.DeviceBoxInfoMapper;
 import com.icbms.iot.util.CommonUtil;
 import com.icbms.iot.util.DateUtil;
 import com.icbms.iot.util.RestUtil;
+import com.icbms.iot.util.TerminalStatusUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -122,7 +124,6 @@ public class AlarmDataServiceImpl implements AlarmDataService {
                     list.add(alarmEntity);
                 }
             }
-
         }
         //redisTemplate.opsForHash().putAll(ALARM_DATA, resultMap);
         Map<String, Object> resultMap = new HashMap<>();
