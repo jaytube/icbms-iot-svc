@@ -33,8 +33,8 @@ public class LoRaCommandController {
 
     @GetMapping("/cmd/{deviceId}/{command}")
     @ResponseBody
-    public CommonResponse cmd(@PathVariable("deviceId") String deviceId, @PathVariable("command") LoRaCommand command) throws Exception {
-        return loRaCommandService.executeCmd(REST_IP, command, deviceId);
+    public CommonResponse cmd(@PathVariable("deviceId") String deviceId, @PathVariable("command") LoRaCommand command, @RequestParam("gatewayIp") String gatewayIp) throws Exception {
+        return loRaCommandService.executeCmd(gatewayIp, command, deviceId);
     }
 
     @GetMapping("/start")
@@ -117,9 +117,9 @@ public class LoRaCommandController {
 
     @PostMapping("/deleteDevices")
     @ResponseBody
-    public CommonResponse deleteDevices(/*@RequestBody List<Integer> deviceIds*/) {
-        List<Integer> ids = Arrays.asList(33);
-        return loRaCommandService.deleteDevices(REST_IP, ids);
+    public CommonResponse deleteDevices(@RequestParam("gatewayIp") String gatewayIp, @RequestParam("id")Integer id) {
+        List<Integer> ids = Arrays.asList(id);
+        return loRaCommandService.deleteDevices(gatewayIp, ids);
     }
 
     @GetMapping("/test")

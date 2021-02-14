@@ -135,7 +135,7 @@ public class RealtimeMessageParserImpl implements RealtimeMessageParser {
 
         int ram15 = CommonUtil.getShort(payload, index);
         index += 2;
-        double nCurr = ram15 * ram15;
+        double nCurr = ram15 * 0.01;
         logger.info("N箱电流：" + nCurr);
         message.setNCurrent(nCurr);
 
