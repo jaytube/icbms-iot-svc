@@ -8,7 +8,7 @@ import static com.icbms.iot.constant.IotConstant.BOX_NO_START_STRING;
 public class TerminalBoxConvertUtil {
 
     public static String getTerminalNo(String boxNo) {
-        if(StringUtils.isBlank(boxNo) || boxNo.length() != 12)
+        if(StringUtils.isBlank(boxNo) || !boxNo.startsWith("LY"))
             return "";
 
         String terminalNo = boxNo.substring(BOX_NO_START_INDEX).replaceAll("^0+", "");

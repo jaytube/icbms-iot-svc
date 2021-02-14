@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -48,7 +49,7 @@ public class RestUtil {
             "nVzZXIiLCJ1c2VybmFtZSI6ImFkbWluIn0.14eVliflc5oG5FJXIphEfcWbc5A4DxzTk-u5AMaIsJc";
 
     @Retryable(value = RestClientException.class, maxAttempts = 2,
-            backoff = @Backoff(delay = 5000L, multiplier = 2))
+            backoff = @Backoff(delay = 500L, multiplier = 2))
     public CommonResponse<Map> doGet(String url) {
         log.info("【doGet】【请求URL】：{}", url);
         HttpHeaders requestHeaders = new HttpHeaders();
@@ -61,7 +62,7 @@ public class RestUtil {
     }
 
     @Retryable(value = RestClientException.class, maxAttempts = 2,
-            backoff = @Backoff(delay = 5000L, multiplier = 2))
+            backoff = @Backoff(delay = 500L, multiplier = 2))
     public CommonResponse<Map> doPost(String url, Map<String, Object> params) {
         log.info("【doPost】【请求URL】：{}", url);
         log.info("【doPost】【请求入参】：{}", params);
@@ -75,7 +76,7 @@ public class RestUtil {
     }
 
     @Retryable(value = RestClientException.class, maxAttempts = 2,
-            backoff = @Backoff(delay = 5000L, multiplier = 2))
+            backoff = @Backoff(delay = 500L, multiplier = 2))
     public CommonResponse<Map> doGetNoToken(String url) {
         log.info("【doGetNoToken】【请求URL】：{}", url);
         HttpHeaders requestHeaders = new HttpHeaders();
@@ -88,7 +89,7 @@ public class RestUtil {
     }
 
     @Retryable(value = RestClientException.class, maxAttempts = 2,
-            backoff = @Backoff(delay = 5000L, multiplier = 2))
+            backoff = @Backoff(delay = 500L, multiplier = 2))
     public CommonResponse<Map> doPostFormDataNoToken(String url, Map<String, Object> paramsMap) {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         for (Map.Entry<String, Object> entry : paramsMap.entrySet()) {
@@ -109,7 +110,7 @@ public class RestUtil {
     }
 
     @Retryable(value = RestClientException.class, maxAttempts = 1,
-            backoff = @Backoff(delay = 5000L, multiplier = 1))
+            backoff = @Backoff(delay = 500L, multiplier = 1))
     public CommonResponse<Map> doGetWithToken(String gatewayIp, String url) {
         log.info("【doGetWithToken】【请求URL】：{}", url);
         HttpHeaders requestHeaders = createHeader(gatewayIp);
@@ -120,8 +121,14 @@ public class RestUtil {
         return response(url, null, exchange);
     }
 
+    @Recover
+    public CommonResponse<Map> recover(RestClientException e) {
+        log.info("access recover method...");
+        return CommonResponse.faild(e.getMessage(), null);
+    }
+
     @Retryable(value = RestClientException.class, maxAttempts = 2,
-            backoff = @Backoff(delay = 5000L, multiplier = 2))
+            backoff = @Backoff(delay = 500L, multiplier = 2))
     public CommonResponse<Map> doGetWithToken(String url, HttpHeaders requestHeaders) {
         log.info("【doGetWithToken】【请求URL】：{}", url);
         HttpEntity<String> requestEntity = new HttpEntity<String>(null, requestHeaders);
@@ -132,7 +139,7 @@ public class RestUtil {
     }
 
     @Retryable(value = RestClientException.class, maxAttempts = 2,
-            backoff = @Backoff(delay = 5000L, multiplier = 2))
+            backoff = @Backoff(delay = 500L, multiplier = 2))
     public CommonResponse<Map> doPostWithToken(String gatewayIp, String url, Map<String, Object> params) {
         log.info("【doPostWithToken】【请求URL】：{}", url);
         log.info("【doPostWithToken】【请求入参】：{}", params);
@@ -145,7 +152,7 @@ public class RestUtil {
     }
 
     @Retryable(value = RestClientException.class, maxAttempts = 2,
-            backoff = @Backoff(delay = 5000L, multiplier = 2))
+            backoff = @Backoff(delay = 500L, multiplier = 2))
     public CommonResponse<Map> doDeleteWithToken(String gatewayIp, String url) {
         log.info("【doDeleteWithToken】【请求URL】：{}", url);
         HttpHeaders requestHeaders = createHeader(gatewayIp);
@@ -157,7 +164,7 @@ public class RestUtil {
     }
 
     @Retryable(value = RestClientException.class, maxAttempts = 2,
-            backoff = @Backoff(delay = 5000L, multiplier = 2))
+            backoff = @Backoff(delay = 500L, multiplier = 2))
     public CommonResponse<Map> doPlainPost(String url,  Map<String, String> params) {
         log.info("【Plain Post】【请求URL】：{}", url);
         HttpHeaders requestHeaders = new HttpHeaders();
@@ -169,7 +176,7 @@ public class RestUtil {
     }
 
     @Retryable(value = RestClientException.class, maxAttempts = 2,
-            backoff = @Backoff(delay = 5000L, multiplier = 2))
+            backoff = @Backoff(delay = 500L, multiplier = 2))
     public CommonResponse<Map> doDeleteWithToken(String gatewayIp, String url, List<Map> body) {
         log.info("【doDeleteWithToken】【请求URL】：{}", url);
         HttpHeaders requestHeaders = createHeader(gatewayIp);
