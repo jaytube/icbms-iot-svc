@@ -42,7 +42,7 @@ public class IotConstant {
 
     public static final int ROUND_ROBIN_FREQUENCY = 30000;
 
-    public static final int HEART_BEAT = 300000;
+    public static final int HEART_BEAT = 240000;
 
     public static final String GATEWAY_ALL = "GATEWAY_ALL";
 

@@ -70,9 +70,9 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
                 long currentTime = System.currentTimeMillis();
                 if (latestTime == null || currentTime - Long.parseLong((String) latestTime) >= REAL_DATA_SAVE_FREQUENCY) {
                     redisTemplate.opsForHash().put(REAL_STAT_LAST_DATA, field, JSON.toJSONString(realData));
-                    redisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, field, String.valueOf(currentTime));
                     result.add(realData);
                 }
+                redisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, field, String.valueOf(currentTime));
             } else {
                 redisTemplate.opsForHash().put(REAL_STAT_LAST_DATA, field, JSON.toJSONString(realData));
                 redisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, field, String.valueOf(System.currentTimeMillis()));
@@ -96,7 +96,7 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
                 .distinct()
                 .collect(Collectors.toList());
         List<DeviceBoxInfo> deviceBoxes = deviceBoxInfoMapper.findByProjectIdList(projectIdList);
-        List<String> deviceBoxNums = list.stream().filter(Objects::nonNull).map(RealDataEntity::getTerminalId).collect(Collectors.toList());
+        List<String> deviceBoxNums = list.stream().filter(Objects::nonNull).map(RealDataEntity::getTerminalId).distinct().collect(Collectors.toList());
         deviceBoxes = deviceBoxes.stream().filter(l -> deviceBoxNums.contains(l.getDeviceBoxName()))
                 .collect(Collectors.toList());
         Map<String, DeviceBoxInfo> deviceBoxMap = new HashMap<>();

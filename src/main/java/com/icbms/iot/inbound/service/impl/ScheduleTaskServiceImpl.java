@@ -5,6 +5,7 @@ import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.common.component.GatewayKeeper;
 import com.icbms.iot.dto.GatewayDto;
 import com.icbms.iot.dto.GatewayStatusDto;
+import com.icbms.iot.dto.TerminalStatusDto;
 import com.icbms.iot.entity.AlarmDataEntity;
 import com.icbms.iot.entity.GatewayDeviceMap;
 import com.icbms.iot.entity.GatewayInfo;
@@ -16,6 +17,7 @@ import com.icbms.iot.mapper.GatewayInfoMapper;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.DateUtil;
 import com.icbms.iot.util.TerminalBoxConvertUtil;
+import com.icbms.iot.util.TerminalStatusUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -73,17 +75,20 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
 
             List<AlarmDataEntity> list = new ArrayList<>();
             Map<String, String> alarmDataMap = new HashMap<>();
+            Map<String, String> terminalStatusMap = new HashMap<>();
             for (GatewayDeviceMap device : val) {
                 String hashKey = TerminalBoxConvertUtil.getTerminalNo(device.getDeviceBoxNum()) + "_100";
                 long currentTime = System.currentTimeMillis();
                 Object lastUpdated = stringRedisTemplate.opsForHash().get(REAL_HIS_DATA_STORE_UP_TO_DATE, hashKey);
-                if(lastUpdated != null && currentTime - Long.parseLong((String) lastUpdated) > HEART_BEAT) {
+                if(lastUpdated != null && (currentTime - Long.parseLong((String) lastUpdated)) > HEART_BEAT) {
                     AlarmDataEntity alarmData = generateDeviceAlarmData(device,
                             currentTime - Long.parseLong((String) lastUpdated), gatewayId);
                     list.add(alarmData);
                     String key = alarmData.getTerminalId() + "_100_16";
                     alarmDataMap.put(key, JSON.toJSONString(alarmData));
-                } else if(lastUpdated != null && currentTime - Long.parseLong((String) lastUpdated) <= HEART_BEAT) {
+                    TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalBadStatus(gatewayId, alarmData.getTerminalId());
+                    terminalStatusMap.put(alarmData.getTerminalId(), JSON.toJSONString(statusDto));
+                } else if(lastUpdated != null && (currentTime - Long.parseLong((String) lastUpdated)) <= HEART_BEAT) {
                     String key = TerminalBoxConvertUtil.getTerminalNo(device.getDeviceBoxNum()) + "_100_16";
                     String alarmStr = (String) stringRedisTemplate.opsForHash().get(ALARM_DATA, key);
                     if(StringUtils.isNotBlank(alarmStr)) {
@@ -94,12 +99,17 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                             alarmData.setReportTime(DateUtil.parseDate(System.currentTimeMillis()));
                             alarmDataMap.put(key, JSON.toJSONString(alarmData));
                             list.add(alarmData);
+                            TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalOkStatus(gatewayId, alarmData.getTerminalId());
+                            terminalStatusMap.put(alarmData.getTerminalId(), JSON.toJSONString(statusDto));
                         }
                     }
+                } else if(lastUpdated == null) {
+                    stringRedisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, hashKey, currentTime);
                 }
             }
             alarmDataService.saveAndSendAlarms(list);
             stringRedisTemplate.opsForHash().putAll(ALARM_DATA, alarmDataMap);
+            stringRedisTemplate.opsForHash().putAll(TERMINAL_STATUS, terminalStatusMap);
         }
     }
 

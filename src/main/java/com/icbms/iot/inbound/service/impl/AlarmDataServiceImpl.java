@@ -146,7 +146,7 @@ public class AlarmDataServiceImpl implements AlarmDataService {
                 .collect(Collectors.toList());
         List<DeviceBoxInfo> deviceBoxes = deviceBoxInfoMapper.findByProjectIdList(projectIdList);
         //List<DeviceBoxInfo> deviceBoxes = Arrays.asList(mockDeviceBoxInfo());
-        List<String> deviceBoxNums = list.stream().filter(Objects::nonNull).map(AlarmDataEntity::getTerminalId).collect(Collectors.toList());
+        List<String> deviceBoxNums = list.stream().filter(Objects::nonNull).map(AlarmDataEntity::getTerminalId).distinct().collect(Collectors.toList());
         deviceBoxes = deviceBoxes.stream().filter(l -> deviceBoxNums.contains(getTerminalNo(l.getDeviceBoxNum())))
                 .collect(Collectors.toList());
         Map<String, DeviceBoxInfo> deviceBoxMap = new HashMap<>();
@@ -221,14 +221,6 @@ public class AlarmDataServiceImpl implements AlarmDataService {
                 }, taskExecutor);
             }
         }
-    }
-
-    private DeviceBoxInfo mockDeviceBoxInfo() {
-        DeviceBoxInfo boxInfo = new DeviceBoxInfo();
-        boxInfo.setDeviceBoxNum(BOX_NO_START_STRING + "0155");
-        boxInfo.setId("123");
-        boxInfo.setProjectId("c76c14ecbc05466095f96f0a782e26e6");
-        return boxInfo;
     }
 
 }
