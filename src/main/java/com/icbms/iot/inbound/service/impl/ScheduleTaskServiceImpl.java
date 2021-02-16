@@ -17,6 +17,7 @@ import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.DateUtil;
 import com.icbms.iot.util.TerminalBoxConvertUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,9 +83,22 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                     list.add(alarmData);
                     String key = alarmData.getTerminalId() + "_100_16";
                     alarmDataMap.put(key, JSON.toJSONString(alarmData));
+                } else if(lastUpdated != null && currentTime - Long.parseLong((String) lastUpdated) <= HEART_BEAT) {
+                    String key = TerminalBoxConvertUtil.getTerminalNo(device.getDeviceBoxNum()) + "_100_16";
+                    String alarmStr = (String) stringRedisTemplate.opsForHash().get(ALARM_DATA, key);
+                    if(StringUtils.isNotBlank(alarmStr)) {
+                        AlarmDataEntity alarmData = JSON.parseObject(alarmStr, AlarmDataEntity.class);
+                        if("1".equalsIgnoreCase(alarmData.getAlarmStatus())) {
+                            alarmData.setAlarmStatus("0");
+                            alarmData.setAlarmContent("第["+TerminalBoxConvertUtil.getTerminalNo(device.getDeviceBoxNum())+"]号终端恢复连接!");
+                            alarmData.setReportTime(DateUtil.parseDate(System.currentTimeMillis()));
+                            alarmDataMap.put(key, JSON.toJSONString(alarmData));
+                            list.add(alarmData);
+                        }
+                    }
                 }
             }
-            alarmDataService.saveAlarmDataEntityList(list);
+            alarmDataService.saveAndSendAlarms(list);
             stringRedisTemplate.opsForHash().putAll(ALARM_DATA, alarmDataMap);
         }
     }
