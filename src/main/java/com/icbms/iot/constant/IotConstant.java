@@ -36,7 +36,7 @@ public class IotConstant {
 
     public static final String BOX_NO_START_STRING = "LY2021011ST";
 
-    public static final int MONITOR_DEVICE_FREQUENCY = 120000;
+    public static final int MONITOR_DEVICE_FREQUENCY = 60000;
 
     public static final int MONITOR_GATEWAY_FREQUENCY = 300000;
 

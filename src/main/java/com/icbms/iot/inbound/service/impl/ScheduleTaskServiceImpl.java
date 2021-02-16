@@ -87,7 +87,8 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                     String key = alarmData.getTerminalId() + "_100_16";
                     alarmDataMap.put(key, JSON.toJSONString(alarmData));
                     TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalBadStatus(gatewayId, alarmData.getTerminalId());
-                    terminalStatusMap.put(alarmData.getTerminalId(), JSON.toJSONString(statusDto));
+                    String statusKey = alarmData.getTerminalId() + "_LY";
+                    terminalStatusMap.put(statusKey, JSON.toJSONString(statusDto));
                 } else if(lastUpdated != null && (currentTime - Long.parseLong((String) lastUpdated)) <= HEART_BEAT) {
                     String key = TerminalBoxConvertUtil.getTerminalNo(device.getDeviceBoxNum()) + "_100_16";
                     String alarmStr = (String) stringRedisTemplate.opsForHash().get(ALARM_DATA, key);
@@ -100,7 +101,8 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                             alarmDataMap.put(key, JSON.toJSONString(alarmData));
                             list.add(alarmData);
                             TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalOkStatus(gatewayId, alarmData.getTerminalId());
-                            terminalStatusMap.put(alarmData.getTerminalId(), JSON.toJSONString(statusDto));
+                            String statusKey = alarmData.getTerminalId() + "_LY";
+                            terminalStatusMap.put(statusKey, JSON.toJSONString(statusDto));
                         }
                     }
                 } else if(lastUpdated == null) {

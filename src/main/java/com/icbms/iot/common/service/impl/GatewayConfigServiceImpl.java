@@ -84,7 +84,7 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
         if (MapUtils.isEmpty(map))
             return new HashSet<>();
 
-        Set<String> result = map.keySet().stream().filter(Objects::nonNull).map(Objects::toString).collect(Collectors.toSet());
+        Set<String> result = map.keySet().stream().filter(Objects::nonNull).map(Objects::toString).filter(t-> t.contains("_LY")).map(t -> t.split("_")[0]).collect(Collectors.toSet());
         return result;
     }
 

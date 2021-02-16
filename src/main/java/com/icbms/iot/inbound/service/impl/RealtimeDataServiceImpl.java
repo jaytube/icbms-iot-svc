@@ -80,7 +80,8 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
             }
             redisTemplate.opsForHash().put(REAL_DATA, field, JSON.toJSONString(realData));
             TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalOkStatus(realData.getGatewayId(), realData.getTerminalId());
-            redisTemplate.opsForHash().put(TERMINAL_STATUS, realData.getTerminalId(), JSON.toJSONString(statusDto));
+            String statusKey = realData.getTerminalId() + "_LY";
+            redisTemplate.opsForHash().put(TERMINAL_STATUS, statusKey, JSON.toJSONString(statusDto));
         }
 
         saveRealHisDataEntities(result);
