@@ -7,6 +7,8 @@ import com.icbms.iot.dto.DeviceInfoDto;
 import com.icbms.iot.dto.TerminalTypeDto;
 import com.icbms.iot.entity.GatewayInfo;
 import com.icbms.iot.enums.LoRaCommand;
+import com.icbms.iot.exception.ErrorCodeEnum;
+import com.icbms.iot.exception.IotException;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.Base64Util;
 import com.icbms.iot.util.RestUtil;
@@ -87,7 +89,8 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
         params.put("client_secret", "CngWVDbTSn");
         CommonResponse<Map> response = restUtil.doPostFormDataNoToken(gatewayIp + DEVICE_IP_URI + "/api-dca/oauth/token", params);
         if (response.getCode() != 200) {
-            return CommonResponse.faild(response.getMsg(), JSON.toJSONString(response.getData()));
+            log.error("token获取失败!");
+            throw new IotException(ErrorCodeEnum.TOKEN_FETCH_ERROR);
         }
         Map result = response.getData();
         Object token_type = result.get("token_type");
@@ -96,26 +99,25 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
         String bearer_token = null;
         if (token_type != null && access_token != null && expires_in != null) {
             bearer_token = Objects.toString(token_type) + " " + Objects.toString(access_token);
-            redisTemplate.opsForValue().set(gatewayIp, bearer_token);
-            redisTemplate.expire(gatewayIp, Long.parseLong(Objects.toString(expires_in)), TimeUnit.SECONDS);
         }
 
         if (StringUtils.isNotBlank(bearer_token)) {
             CommonResponse<String> success = CommonResponse.success();
             return success.setData(bearer_token);
         } else {
-            return CommonResponse.faild("GET TOKEN FAILED.");
+            log.error("token获取失败! token为空！");
+            throw new IotException(ErrorCodeEnum.TOKEN_FETCH_ERROR);
         }
     }
 
     @Override
     public String getRedisToken(String gatewayIp) {
-        Object bearer_token = redisTemplate.opsForValue().get(gatewayIp);
-        if (bearer_token == null) {
-            getToken(gatewayIp);
-            bearer_token = redisTemplate.opsForValue().get(gatewayIp);
+        CommonResponse<String> tokenResp = getToken(gatewayIp);
+        if(tokenResp.getCode() == 200) {
+            return tokenResp.getData();
+        } else {
+            throw new IotException(ErrorCodeEnum.TOKEN_FETCH_ERROR);
         }
-        return Objects.toString(bearer_token);
     }
 
     @Override

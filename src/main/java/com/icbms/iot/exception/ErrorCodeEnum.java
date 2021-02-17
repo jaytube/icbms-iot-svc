@@ -4,7 +4,8 @@ public enum ErrorCodeEnum {
 
     IOT_MESSAGE_HEAD_INCORRECT(1001, "payload head is not correct"),
     IOT_MESSAGE_END_INCORRECT(1002, "payload end is not correct"),
-    IOT_MESSAGE_NULL(1003, "realtime message is null");
+    IOT_MESSAGE_NULL(1003, "realtime message is null"),
+    TOKEN_FETCH_ERROR(1004, "Get Token Error");
 
     private int code;
     private String msg;
