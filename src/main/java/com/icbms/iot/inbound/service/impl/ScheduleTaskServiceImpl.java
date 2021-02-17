@@ -88,6 +88,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                     alarmDataMap.put(key, JSON.toJSONString(alarmData));
                     TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalBadStatus(gatewayId, alarmData.getTerminalId());
                     String statusKey = alarmData.getTerminalId() + "_LY";
+                    logger.info("terminal status key: " + statusKey);
                     terminalStatusMap.put(statusKey, JSON.toJSONString(statusDto));
                 } else if(lastUpdated != null && (currentTime - Long.parseLong((String) lastUpdated)) <= HEART_BEAT) {
                     String key = TerminalBoxConvertUtil.getTerminalNo(device.getDeviceBoxNum()) + "_100_16";
@@ -102,6 +103,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                             list.add(alarmData);
                             TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalOkStatus(gatewayId, alarmData.getTerminalId());
                             String statusKey = alarmData.getTerminalId() + "_LY";
+                            logger.info("terminal status key: " + statusKey);
                             terminalStatusMap.put(statusKey, JSON.toJSONString(statusDto));
                         }
                     }
