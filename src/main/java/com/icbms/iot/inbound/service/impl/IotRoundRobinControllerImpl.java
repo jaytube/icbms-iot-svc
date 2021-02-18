@@ -36,7 +36,7 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
     @Override
     @Async
     public void roundRobinControl() {
-        logger.info("Iot 网关控制服务初始化 ...");
+        logger.debug("Iot 网关控制服务初始化 ...");
         GatewayRunner groupRunner = runnerFactory.getRunnerByType(GatewayRunType.GROUP);
         Map<Integer, GatewayGroupDto> groups = gatewayKeeper.getGatewayGroupMap();
         if(MapUtils.isNotEmpty(groups)) {
@@ -45,7 +45,7 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
                     groupRunner.run(e.getKey());
                 }, taskExecutor);
             });
-            logger.info("启动网关群轮询 ...");
+            logger.debug("启动网关群轮询 ...");
         }
         GatewayRunner singleRunner = runnerFactory.getRunnerByType(GatewayRunType.SINGLE);
         Map<Integer, GatewayDto> singles = gatewayKeeper.getGatewayMap();
@@ -55,7 +55,7 @@ public class IotRoundRobinControllerImpl implements IotRoundRobinController {
                     singleRunner.run(e.getKey());
                 }, taskExecutor);
             });
-            logger.info("启动网关轮询 ...");
+            logger.debug("启动网关轮询 ...");
         }
     }
 }

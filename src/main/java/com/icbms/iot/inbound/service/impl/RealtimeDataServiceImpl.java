@@ -28,7 +28,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.icbms.iot.constant.IotConstant.*;
-import static com.icbms.iot.util.TerminalBoxConvertUtil.getTerminalNo;
 
 @Service
 public class RealtimeDataServiceImpl implements RealtimeDataService {
@@ -53,7 +52,7 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
 
     @Override
     public void processRealtimeData(List<RealtimeMessage> realtimeMsgList) {
-        logger.info("处理实时数据===========>开始");
+        logger.debug("处理实时数据===========>开始");
         if(CollectionUtils.isEmpty(realtimeMsgList))
             return;
 
@@ -85,7 +84,7 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
         }
 
         saveRealHisDataEntities(result);
-        logger.info("处理实时数据===========>结束");
+        logger.debug("处理实时数据===========>结束");
     }
 
     private void saveRealHisDataEntities(List<RealDataEntity> list) {

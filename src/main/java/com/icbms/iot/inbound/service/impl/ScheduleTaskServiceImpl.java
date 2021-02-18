@@ -90,16 +90,22 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                             currentTime - Long.parseLong((String) lastUpdated), gatewayId);
                     String key = alarmData.getTerminalId() + "_100_16";
                     String old = (String) stringRedisTemplate.opsForHash().get(ALARM_DATA, key);
-                    AlarmDataEntity oldEntity = JSON.parseObject(old, AlarmDataEntity.class);
-                    Date lastReportDate = DateUtil.parse(oldEntity.getReportTime(), "yyyy-MM-dd HH:mm:ss");
-                    long lastReportTimeMillis = lastReportDate.getTime();
-                    long current = System.currentTimeMillis();
-                    if(current - lastReportTimeMillis > DEVICE_NOT_ONLINE_INTERVAL)
+                    if(StringUtils.isNotBlank(old)) {
+                        AlarmDataEntity oldEntity = JSON.parseObject(old, AlarmDataEntity.class);
+                        if (!"1".equals(oldEntity.getAlarmStatus())) {
+                            list.add(alarmData);
+                            alarmDataMap.put(key, JSON.toJSONString(alarmData));
+                            TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalBadStatus(gatewayId, alarmData.getTerminalId());
+                            String statusKey = alarmData.getTerminalId() + "_LY";
+                            terminalStatusMap.put(statusKey, JSON.toJSONString(statusDto));
+                        }
+                    } else {
                         list.add(alarmData);
-                    alarmDataMap.put(key, JSON.toJSONString(alarmData));
-                    TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalBadStatus(gatewayId, alarmData.getTerminalId());
-                    String statusKey = alarmData.getTerminalId() + "_LY";
-                    terminalStatusMap.put(statusKey, JSON.toJSONString(statusDto));
+                        alarmDataMap.put(key, JSON.toJSONString(alarmData));
+                        TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalBadStatus(gatewayId, alarmData.getTerminalId());
+                        String statusKey = alarmData.getTerminalId() + "_LY";
+                        terminalStatusMap.put(statusKey, JSON.toJSONString(statusDto));
+                    }
                 } else if(lastUpdated != null && (currentTime - Long.parseLong((String) lastUpdated)) <= HEART_BEAT) {
                     String key = TerminalBoxConvertUtil.getTerminalNo(device.getDeviceBoxNum()) + "_100_16";
                     String alarmStr = (String) stringRedisTemplate.opsForHash().get(ALARM_DATA, key);

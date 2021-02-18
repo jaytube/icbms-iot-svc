@@ -28,6 +28,6 @@ public interface GatewayInfoMapper {
     @Select("select * from gateway_info")
     List<GatewayInfo> findAll();
 
-    @Select("select * from gateway_info where online = 0")
+    @Select("select * from gateway_info where online = '1'")
     List<GatewayInfo> findAllOnlines();
 }

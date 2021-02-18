@@ -85,18 +85,18 @@ public class MqttMsgWorkerImpl implements MqttMsgWorker {
         if(!inboundStopMsgQueue.isEmpty()) {
             RichMqttMessage stopMsg = inboundStopMsgQueue.poll();
             CompletableFuture.runAsync(() -> {
-                logger.info("线程: " + Thread.currentThread().getName() + " 开始处理停止轮询数据...");
+                logger.debug("线程: " + Thread.currentThread().getName() + " 开始处理停止轮询数据...");
                 String gatewayId = stopMsg.getGatewayId();
                 GatewayDto gateway = gatewayKeeper.getById(Integer.parseInt(gatewayId));
                 gateway.setFinished(true);
-                logger.info("收到网关: " + gatewayId + "停止轮询的消息, 关闭轮询 。。。");
+                logger.debug("收到网关: " + gatewayId + "停止轮询的消息, 关闭轮询 。。。");
             }, taskExecutor);
         }
 
         if(!alarmDataMsgQueue.isEmpty()) {
             RealtimeMessage alarmData = alarmDataMsgQueue.poll();
             CompletableFuture.runAsync(() -> {
-                logger.info("线程: " + Thread.currentThread().getName() + " 开始处理告警数据...");
+                logger.debug("线程: " + Thread.currentThread().getName() + " 开始处理告警数据...");
                 alarmDataService.processAlarmData(alarmData);
             }, taskExecutor);
         }
@@ -106,7 +106,7 @@ public class MqttMsgWorkerImpl implements MqttMsgWorker {
             IntStream.range(0, realtimeMsgQueue.size())
                     .forEach(i -> msgList.add(realtimeMsgQueue.poll()));
             CompletableFuture.runAsync(() -> {
-                logger.info("线程: " + Thread.currentThread().getName() + " 开始处理实时数据...");
+                logger.debug("线程: " + Thread.currentThread().getName() + " 开始处理实时数据...");
                 realtimeDataService.processRealtimeData(msgList);
             }, taskExecutor);
         }
