@@ -30,6 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.invoke.MethodHandles;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import static com.icbms.iot.constant.IotConstant.*;
@@ -57,6 +59,9 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     @Autowired
     private GatewayKeeper gatewayKeeper;
 
+    @Autowired
+    private Executor taskExecutor;
+
     @Override
     @Scheduled(fixedDelay = MONITOR_DEVICE_FREQUENCY)
     @Transactional
@@ -83,12 +88,17 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                 if(lastUpdated != null && (currentTime - Long.parseLong((String) lastUpdated)) > HEART_BEAT) {
                     AlarmDataEntity alarmData = generateDeviceAlarmData(device,
                             currentTime - Long.parseLong((String) lastUpdated), gatewayId);
-                    list.add(alarmData);
                     String key = alarmData.getTerminalId() + "_100_16";
+                    String old = (String) stringRedisTemplate.opsForHash().get(ALARM_DATA, key);
+                    AlarmDataEntity oldEntity = JSON.parseObject(old, AlarmDataEntity.class);
+                    Date lastReportDate = DateUtil.parse(oldEntity.getReportTime(), "yyyy-MM-dd HH:mm:ss");
+                    long lastReportTimeMillis = lastReportDate.getTime();
+                    long current = System.currentTimeMillis();
+                    if(current - lastReportTimeMillis > DEVICE_NOT_ONLINE_INTERVAL)
+                        list.add(alarmData);
                     alarmDataMap.put(key, JSON.toJSONString(alarmData));
                     TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalBadStatus(gatewayId, alarmData.getTerminalId());
                     String statusKey = alarmData.getTerminalId() + "_LY";
-                    logger.info("terminal status key: " + statusKey);
                     terminalStatusMap.put(statusKey, JSON.toJSONString(statusDto));
                 } else if(lastUpdated != null && (currentTime - Long.parseLong((String) lastUpdated)) <= HEART_BEAT) {
                     String key = TerminalBoxConvertUtil.getTerminalNo(device.getDeviceBoxNum()) + "_100_16";
@@ -103,7 +113,6 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                             list.add(alarmData);
                             TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalOkStatus(gatewayId, alarmData.getTerminalId());
                             String statusKey = alarmData.getTerminalId() + "_LY";
-                            logger.info("terminal status key: " + statusKey);
                             terminalStatusMap.put(statusKey, JSON.toJSONString(statusDto));
                         }
                     }
@@ -171,7 +180,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     @Transactional
     public void roundRobinControl() {
         logger.info("开始网关轮询...");
-        List<GatewayInfo> gatewayList = gatewayInfoMapper.findAll();
+        List<GatewayInfo> gatewayList = gatewayInfoMapper.findAllOnlines();
         if(CollectionUtils.isEmpty(gatewayList))
             return;
 
@@ -204,10 +213,13 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
         gatewayDtoMap.entrySet().stream().forEach(e -> {
             GatewayDto g = e.getValue();
             String ip = g.getIp();
-            loRaCommandService.startRoundRobin(ip);
-            logger.info("网关: " + ip + "开始轮询");
+            CompletableFuture.runAsync(() -> {
+                loRaCommandService.startRoundRobin(ip);
+            }, taskExecutor);
+            logger.debug("网关: " + ip + "开始轮询");
             g.setFinished(false);
         });
+        /*loRaCommandService.startRoundRobin("http://10.0.1.71");*/
     }
 
     private AlarmDataEntity generateDeviceAlarmData(GatewayDeviceMap deviceNumEuiDto, long delta, String gatewayId) {

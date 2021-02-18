@@ -42,6 +42,8 @@ public class IotConstant {
 
     public static final int HEART_BEAT = 240000;
 
+    public static final int DEVICE_NOT_ONLINE_INTERVAL = 600000;
+
     public static final String GATEWAY_ALL = "GATEWAY_ALL";
 
     public static final int MAX_WAITING_TIME = 40;

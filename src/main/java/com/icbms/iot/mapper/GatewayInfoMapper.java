@@ -27,4 +27,7 @@ public interface GatewayInfoMapper {
 
     @Select("select * from gateway_info")
     List<GatewayInfo> findAll();
+
+    @Select("select * from gateway_info where online = 0")
+    List<GatewayInfo> findAllOnlines();
 }

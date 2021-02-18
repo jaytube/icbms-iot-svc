@@ -69,7 +69,7 @@ public class PushCallback implements MqttCallback {
     @Override
     public void messageArrived(String topic, MqttMessage mqttMessage) {
         // The message you get after you subscribe will be executed here
-        logger.info("订阅主题: " + topic);
+        logger.debug("订阅主题: " + topic);
         if(StringUtils.isEmpty(topic))
             return;
 
@@ -81,7 +81,7 @@ public class PushCallback implements MqttCallback {
             else if(topic.contains(STOP))
                 inboundStopMsgQueue.offer(new RichMqttMessage(gatewayId, mqttMessage));
         } catch (IotException e) {
-            logger.info("数据格式错误...");
+            logger.error("数据格式错误...");
         } catch (Exception ex) {
             logger.error("数据处理失败: ", ex);
         }

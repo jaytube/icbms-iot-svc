@@ -242,7 +242,7 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
 
     @Override
     public CommonResponse<List<DeviceInfoDto>> getDevices(String gatewayIp, String deviceKey) {
-        String uri = "/api-sdm/SdmDevice?page=1&limit=99";
+        String uri = "/api-sdm/SdmDevice?page=1&limit=3000";
         if (StringUtils.isNotBlank(deviceKey)) {
             uri += "&keyWord=" + deviceKey;
         }
@@ -255,7 +255,9 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
         if (list == null || list.size() == 0) {
             return CommonResponse.success(new ArrayList<>());
         }
-        return CommonResponse.success(list.stream().map(map -> convertDeviceInfo(map)).collect(Collectors.toList()));
+        List<DeviceInfoDto> data = list.stream().map(map -> convertDeviceInfo(map)).collect(Collectors.toList());
+        long count = list.stream().count();
+        return CommonResponse.success(count, data);
     }
 
     @Override

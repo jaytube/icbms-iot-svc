@@ -13,7 +13,7 @@ public class CommonResponse<T> implements Serializable {
 
     private String msg;
 
-    private int count = 0;
+    private long count = 0;
 
     private T data;
 
@@ -32,7 +32,7 @@ public class CommonResponse<T> implements Serializable {
         this.data = data;
     }
 
-    public CommonResponse(int code, String msg, Integer count, T data) {
+    public CommonResponse(int code, String msg, long count, T data) {
         super();
         this.code = code;
         this.msg = msg;
@@ -59,7 +59,7 @@ public class CommonResponse<T> implements Serializable {
         return buildResponse(SUCCESS, "success", data);
     }
 
-    public static <T> CommonResponse<T> success(Integer count, T data) {
+    public static <T> CommonResponse<T> success(long count, T data) {
         return buildResponse(SUCCESS, "success", count, data);
     }
 
@@ -123,7 +123,7 @@ public class CommonResponse<T> implements Serializable {
         return new CommonResponse<T>(code, msg, data);
     }
 
-    public static <T> CommonResponse<T> buildResponse(Integer code, String msg, Integer count, T data) {
+    public static <T> CommonResponse<T> buildResponse(Integer code, String msg, long count, T data) {
         return new CommonResponse<T>(code, msg, count, data);
     }
 
@@ -135,11 +135,11 @@ public class CommonResponse<T> implements Serializable {
         this.code = code;
     }
 
-    public int getCount() {
+    public long getCount() {
         return count;
     }
 
-    public void setCount(int count) {
+    public void setCount(long count) {
         this.count = count;
     }
 
