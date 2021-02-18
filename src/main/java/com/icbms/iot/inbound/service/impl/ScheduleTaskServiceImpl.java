@@ -120,7 +120,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                     stringRedisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, hashKey, currentTime);
                 }
             }
-            alarmDataService.saveAndSendAlarms(list);
+            alarmDataService.saveAlarmDataEntityList(list);
             stringRedisTemplate.opsForHash().putAll(ALARM_DATA, alarmDataMap);
             stringRedisTemplate.opsForHash().putAll(TERMINAL_STATUS, terminalStatusMap);
         }
@@ -171,7 +171,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
             }
         }
 
-        alarmDataService.saveAndSendAlarms(list);
+        alarmDataService.saveAlarmDataEntityList(list);
         stringRedisTemplate.opsForHash().putAll(GATEWAY_STATUS, alarmDataMap);
     }
 
