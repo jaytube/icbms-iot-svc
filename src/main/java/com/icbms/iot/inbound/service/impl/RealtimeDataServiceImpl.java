@@ -63,28 +63,37 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
                 .collect(Collectors.toList());
 
         List<RealDataEntity> result = new ArrayList<>();
+        Map<String, String> realDataMap = new HashMap<>();
+        Map<String, String> realLastDataMap = new HashMap<>();
+        Map<String, String> realHistDateMap = new HashMap<>();
+        Map<String, String> terminalStatusMap = new HashMap<>();
         for (RealDataEntity realData : entityList) {
             String field = realData.getTerminalId() + "_" + realData.getSwitchAddr();
+            long currentTime = System.currentTimeMillis();
             if (redisTemplate.opsForHash().hasKey(REAL_DATA, field)) {
                 Object latestTime = redisTemplate.opsForHash().get(REAL_HIS_DATA_STORE_UP_TO_DATE, field);
-                long currentTime = System.currentTimeMillis();
                 if (latestTime == null || currentTime - Long.parseLong((String) latestTime) >= REAL_DATA_SAVE_FREQUENCY) {
-                    redisTemplate.opsForHash().put(REAL_STAT_LAST_DATA, field, JSON.toJSONString(realData));
+                    realLastDataMap.put(field, JSON.toJSONString(realData));
                     result.add(realData);
                 }
-                redisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, field, String.valueOf(currentTime));
             } else {
-                redisTemplate.opsForHash().put(REAL_STAT_LAST_DATA, field, JSON.toJSONString(realData));
-                redisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, field, String.valueOf(System.currentTimeMillis()));
+                realLastDataMap.put(field, JSON.toJSONString(realData));
                 result.add(realData);
             }
-            redisTemplate.opsForHash().put(REAL_DATA, field, JSON.toJSONString(realData));
+            realHistDateMap.put(field, String.valueOf(currentTime));
+            realDataMap.put(field, JSON.toJSONString(realData));
             TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalOkStatus(realData.getGatewayId(), realData.getTerminalId());
             String statusKey = realData.getTerminalId() + "_LY";
-            redisTemplate.opsForHash().put(TERMINAL_STATUS, statusKey, JSON.toJSONString(statusDto));
+            terminalStatusMap.put(statusKey, JSON.toJSONString(statusDto));
         }
 
-        saveRealHisDataEntities(result);
+        redisTemplate.opsForHash().putAll(REAL_STAT_LAST_DATA, realLastDataMap);
+        redisTemplate.opsForHash().putAll(REAL_DATA, realDataMap);
+        redisTemplate.opsForHash().putAll(REAL_HIS_DATA_STORE_UP_TO_DATE, realHistDateMap);
+        redisTemplate.opsForHash().putAll(TERMINAL_STATUS, terminalStatusMap);
+        if(CollectionUtils.isNotEmpty(result))
+            saveRealHisDataEntities(result);
+
         logger.debug("处理实时数据===========>结束");
     }
 
@@ -117,7 +126,7 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
             //String deviceBoxId = "dummy";
             log.setDeviceBoxId(deviceBoxId);
             log.setAddress(l.getSwitchAddr());
-            int deviceSwithAddr = Integer.valueOf(l.getSwitchAddr()) + 1;
+            int deviceSwithAddr = Integer.valueOf(l.getSwitchAddr());
             log.setDeviceSwitchName(CIRCUIT + deviceSwithAddr);
             log.setDeviceSwitchStatus(l.getSwitchOnoff());
             log.setSwitchElectric(l.getElectricCurrent());

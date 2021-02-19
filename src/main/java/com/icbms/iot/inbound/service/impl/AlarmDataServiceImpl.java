@@ -168,7 +168,7 @@ public class AlarmDataServiceImpl implements AlarmDataService {
             log.setDeviceBoxMac(info.getDeviceBoxNum());
             log.setDeviceBoxId(info.getId());
             log.setProjectId(info.getProjectId());
-            int i = Integer.parseInt(l.getSwitchAddr()) + 1;
+            int i = Integer.parseInt(l.getSwitchAddr());
             log.setNode(CIRCUIT + i);
             log.setType(l.getAlarmType());
             log.setRemark(l.getAlarmContent());
