@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.icbms.iot.constant.IotConstant.*;
+import static com.icbms.iot.util.TerminalBoxConvertUtil.getTerminalNo;
 
 @Service
 public class RealtimeDataServiceImpl implements RealtimeDataService {
@@ -97,11 +98,11 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
                 .collect(Collectors.toList());
         List<DeviceBoxInfo> deviceBoxes = deviceBoxInfoMapper.findByProjectIdList(projectIdList);
         List<String> deviceBoxNums = list.stream().filter(Objects::nonNull).map(RealDataEntity::getTerminalId).distinct().collect(Collectors.toList());
-        deviceBoxes = deviceBoxes.stream().filter(l -> deviceBoxNums.contains(l.getDeviceBoxName()))
+        deviceBoxes = deviceBoxes.stream().filter(l -> deviceBoxNums.contains(getTerminalNo(l.getDeviceBoxNum())))
                 .collect(Collectors.toList());
         Map<String, DeviceBoxInfo> deviceBoxMap = new HashMap<>();
         for (DeviceBoxInfo deviceBox : deviceBoxes) {
-            deviceBoxMap.put(deviceBox.getDeviceBoxName(), deviceBox);
+            deviceBoxMap.put(getTerminalNo(deviceBox.getDeviceBoxNum()), deviceBox);
         }
 
         List<DeviceSwitchInfoLog> logs = new ArrayList<>();

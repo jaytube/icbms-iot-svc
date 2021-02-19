@@ -73,7 +73,7 @@ public class PushCallback implements MqttCallback {
         if(StringUtils.isEmpty(topic))
             return;
 
-        logger.info("消息内容: " + new String(mqttMessage.getPayload()));
+        logger.debug("消息内容: " + new String(mqttMessage.getPayload()));
         String gatewayId = topic.split("\\/")[1];
         try {
             if(topic.contains(REAL_TIME))
