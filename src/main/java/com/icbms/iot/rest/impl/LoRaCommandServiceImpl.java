@@ -56,7 +56,7 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
         Map<String, Object> params = new HashMap<>();
         params.put("tenant", "cluing");
         params.put("type", "S08");
-        params.put("time", "100");
+        params.put("time", "200");
         return restUtil.doPost(gatewayIp + START_ROUND_ROBIN_URI, params);
     }
 

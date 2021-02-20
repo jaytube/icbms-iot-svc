@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.stream.IntStream;
 
 /**
  * @Author: Cherry
@@ -28,6 +31,9 @@ public class LoRaCommandController {
 
     @Autowired
     private RestUtil restUtil;
+
+    @Autowired
+    private Executor taskExecutor;
 
     private String REST_IP = "http://10.0.1.73";
 
@@ -126,6 +132,21 @@ public class LoRaCommandController {
     @ResponseBody
     public CommonResponse test(String URL) {
         return restUtil.doGetNoToken(URL);
+    }
+
+    @GetMapping("/deleteBatch")
+    public CommonResponse deleteBatch(@RequestParam("gatewayIp") String gatewayIp) {
+        List<Integer> ids = new ArrayList<>();
+        IntStream.range(200, 580).forEach(i -> ids.add(i));
+        CompletableFuture.runAsync(() -> {
+            loRaCommandService.deleteDevices(gatewayIp, ids);
+        });
+
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+        }
+        return CommonResponse.success();
     }
 
 }
