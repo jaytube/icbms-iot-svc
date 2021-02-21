@@ -219,9 +219,10 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
         gatewayDtoMap.entrySet().stream().forEach(e -> {
             GatewayDto g = e.getValue();
             String ip = g.getIp();
-            CompletableFuture.runAsync(() -> {
+            /*CompletableFuture.runAsync(() -> {
                 loRaCommandService.startRoundRobin(ip);
-            }, taskExecutor);
+            }, taskExecutor);*/
+            loRaCommandService.startRoundRobin(ip);
             logger.debug("网关: " + ip + "开始轮询");
             g.setFinished(false);
         });
