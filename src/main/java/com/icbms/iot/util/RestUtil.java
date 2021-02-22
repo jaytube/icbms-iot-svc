@@ -130,7 +130,7 @@ public class RestUtil {
     @Recover
     public CommonResponse<Map> recover(IotException e) {
         log.error("exception when call remote service, {}", e);
-        return CommonResponse.faild(e.getMessage(), null);
+        return CommonResponse.faild(e.getErrorCode()+ ", " + e.getErrorMessage(), null);
     }
 
     @Retryable(value = RestClientException.class, maxAttempts = 2,
