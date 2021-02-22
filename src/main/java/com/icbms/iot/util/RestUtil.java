@@ -2,6 +2,7 @@ package com.icbms.iot.util;
 
 import com.alibaba.fastjson.JSON;
 import com.icbms.iot.common.CommonResponse;
+import com.icbms.iot.exception.IotException;
 import com.icbms.iot.rest.LoRaCommandService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
@@ -123,7 +124,12 @@ public class RestUtil {
 
     @Recover
     public CommonResponse<Map> recover(RestClientException e) {
-        log.debug("access recover method...");
+        return CommonResponse.faild(e.getMessage(), null);
+    }
+
+    @Recover
+    public CommonResponse<Map> recover(IotException e) {
+        log.error("exception when call remote service, {}", e);
         return CommonResponse.faild(e.getMessage(), null);
     }
 
