@@ -166,10 +166,10 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
 
 
         switchInfoLogMapper.batchInsert(logs);
-        logger.info("插入device_switch_info_log");
+        logger.debug("插入device_switch_info_log");
 
         switchInfoDetailLogMapper.batchInsert(detailLogs);
-        logger.info("插入device_switch_info_detail_log");
+        logger.debug("插入device_switch_info_detail_log");
     }
 
 }

@@ -24,7 +24,7 @@ public class IotConstant {
 
     public static final String DEVICE_NO_SIGNAL = "节点通信中断";
 
-    public static final Long REAL_DATA_SAVE_FREQUENCY = 10000L;
+    public static final Long REAL_DATA_SAVE_FREQUENCY = 20000L;
 
     public static final int REAL_DATA_PROCESS_CAPACITY = 1;
 
@@ -34,9 +34,9 @@ public class IotConstant {
 
     public static final String BOX_NO_START_STRING = "LY2021011ST";
 
-    public static final int MONITOR_DEVICE_FREQUENCY = 120000;
+    public static final int MONITOR_DEVICE_FREQUENCY = 150000;
 
-    public static final int MONITOR_GATEWAY_FREQUENCY = 600000;
+    public static final int MONITOR_GATEWAY_FREQUENCY = 480000;
 
     public static final int ROUND_ROBIN_FREQUENCY = 45000;
 

@@ -30,4 +30,15 @@ public interface GatewayInfoMapper {
 
     @Select("select * from gateway_info where online = '1'")
     List<GatewayInfo> findAllOnlines();
+
+    @Select({
+            "<script>",
+            "select * from gateway_info where gateway_id in (",
+            "<foreach collection='list' item='item' index='index' separator=','>",
+            "#{item}",
+            "</foreach>",
+            ")",
+            "</script>"
+    })
+    List<GatewayInfo> findByGatewayId(List<String> gatewayAddresses);
 }

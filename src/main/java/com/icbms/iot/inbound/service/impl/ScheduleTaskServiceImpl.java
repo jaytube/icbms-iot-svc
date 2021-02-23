@@ -3,17 +3,17 @@ package com.icbms.iot.inbound.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.common.component.GatewayKeeper;
+import com.icbms.iot.common.service.GatewayConfigService;
 import com.icbms.iot.dto.GatewayDto;
 import com.icbms.iot.dto.GatewayStatusDto;
 import com.icbms.iot.dto.TerminalStatusDto;
-import com.icbms.iot.entity.AlarmDataEntity;
-import com.icbms.iot.entity.GatewayDeviceMap;
-import com.icbms.iot.entity.GatewayInfo;
+import com.icbms.iot.entity.*;
 import com.icbms.iot.enums.GatewayRunType;
 import com.icbms.iot.inbound.service.AlarmDataService;
 import com.icbms.iot.inbound.service.ScheduleTaskService;
 import com.icbms.iot.mapper.GatewayDeviceMapMapper;
 import com.icbms.iot.mapper.GatewayInfoMapper;
+import com.icbms.iot.mapper.ProjectInfoMapper;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.DateUtil;
 import com.icbms.iot.util.TerminalBoxConvertUtil;
@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.invoke.MethodHandles;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
@@ -51,16 +50,16 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     private GatewayDeviceMapMapper gatewayDeviceMapMapper;
 
     @Autowired
-    private GatewayInfoMapper gatewayInfoMapper;
-
-    @Autowired
     private LoRaCommandService loRaCommandService;
 
     @Autowired
     private GatewayKeeper gatewayKeeper;
 
     @Autowired
-    private Executor taskExecutor;
+    private GatewayInfoMapper gatewayInfoMapper;
+
+    @Autowired
+    private GatewayConfigService gatewayConfigService;
 
     @Override
     @Scheduled(fixedDelay = MONITOR_DEVICE_FREQUENCY)
@@ -123,7 +122,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                         }
                     }
                 } else if(lastUpdated == null) {
-                    stringRedisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, hashKey, currentTime);
+                    stringRedisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, hashKey, Long.toString(currentTime));
                 }
             }
             alarmDataService.saveAlarmDataEntityList(list);
@@ -137,13 +136,10 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     @Transactional
     public void monitorGateway() {
         logger.info("开始监测网关状态...");
-        List<GatewayInfo> gatewayList = gatewayInfoMapper.findAll();
-        if(CollectionUtils.isEmpty(gatewayList))
-            return;
-
+        List<GatewayInfo> gatewayInfoList = gatewayInfoMapper.findAll();
         List<AlarmDataEntity> list = new ArrayList<>();
         Map<String, String> alarmDataMap = new HashMap<>();
-        for (GatewayInfo gateway : gatewayList) {
+        for (GatewayInfo gateway : gatewayInfoList) {
             String ip = gateway.getIpAddress();
             int id = gateway.getGatewayId();
             CommonResponse<List<GatewayInfo>> resp = loRaCommandService.getGatewayList(ip);
@@ -186,13 +182,13 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     @Transactional
     public void roundRobinControl() {
         logger.info("开始网关轮询...");
-        List<GatewayInfo> gatewayList = gatewayInfoMapper.findAllOnlines();
-        if(CollectionUtils.isEmpty(gatewayList))
+        List<GatewayInfo> gatewayInfoList = gatewayConfigService.getAvailableGateways();
+        if(CollectionUtils.isEmpty(gatewayInfoList))
             return;
 
         Map<Integer, GatewayDto> gatewayDtoMap = gatewayKeeper.getGatewayMap();
         Map<Integer, GatewayInfo> gatewayInfoMap = new HashMap<>();
-        gatewayList.stream().forEach(t -> {
+        gatewayInfoList.stream().forEach(t -> {
             gatewayInfoMap.put(t.getGatewayId(), t);
         });
         Iterator<Map.Entry<Integer, GatewayDto>> iterator = gatewayDtoMap.entrySet().iterator();

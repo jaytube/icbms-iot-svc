@@ -1,5 +1,6 @@
 package com.icbms.iot.common.component;
 
+import com.icbms.iot.common.service.GatewayConfigService;
 import com.icbms.iot.dto.GatewayDto;
 import com.icbms.iot.dto.GatewayGroupDto;
 import com.icbms.iot.entity.GatewayInfo;
@@ -27,13 +28,16 @@ public class GatewayKeeper {
     @Autowired
     private GatewayDeviceMapMapper gatewayDeviceMapMapper;
 
+    @Autowired
+    private GatewayConfigService gatewayConfigService;
+
     private volatile Map<Integer, GatewayDto> gatewayMap = new ConcurrentHashMap<>();
 
     private volatile Map<Integer, GatewayGroupDto> gatewayGroupMap = new ConcurrentHashMap<>();
 
     @PostConstruct
     private void initGatewayMap() {
-        List<GatewayInfo> gatewayInfoList = gatewayInfoMapper.findAll();
+        List<GatewayInfo> gatewayInfoList = gatewayConfigService.getAvailableGateways();
         Map<Integer, GatewayDto> map = new HashMap<>();
         if(CollectionUtils.isNotEmpty(gatewayInfoList)) {
             gatewayInfoList.stream().forEach(g -> {
@@ -46,17 +50,7 @@ public class GatewayKeeper {
                 map.put(g.getGatewayId(), dto);
             });
         }
-        /*List<GatewayDeviceMap> allMaps = gatewayDeviceMapMapper.findAll();
-        if(CollectionUtils.isNotEmpty(allMaps)) {
-            List<Integer> onlineGateWayIds = allMaps.stream().map(GatewayDeviceMap::getGatewayId)
-                    .distinct().collect(Collectors.toList());
-            if(CollectionUtils.isNotEmpty(onlineGateWayIds)) {
-                onlineGateWayIds.stream().forEach(i -> {
-                    if(map.get(i) != null)
-                        gatewayMap.put(i, map.get(i));
-                });
-            }
-        }*/
+
         gatewayMap.putAll(map);
     }
 

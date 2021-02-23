@@ -18,7 +18,7 @@ public class AlarmDataMsgQueue {
 
     public void offer(RealtimeMessage msg) {
         this.alarmMsgQueue.offer(msg);
-        logger.info("告警数据处理队列长度: " + alarmMsgQueue.size());
+        logger.debug("告警数据处理队列长度: " + alarmMsgQueue.size());
     }
 
     public RealtimeMessage poll() {

@@ -18,7 +18,7 @@ public class InboundStopMsgQueue {
 
     public void offer(RichMqttMessage mqttMessage) {
         this.mqttStopMessageQueue.offer(mqttMessage);
-        logger.info("入站停止轮询消息队列长度: " + this.mqttStopMessageQueue.size());
+        logger.debug("入站停止轮询消息队列长度: " + this.mqttStopMessageQueue.size());
     }
 
     public RichMqttMessage poll() {

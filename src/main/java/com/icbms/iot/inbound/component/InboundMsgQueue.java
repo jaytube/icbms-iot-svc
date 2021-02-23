@@ -18,7 +18,7 @@ public class InboundMsgQueue {
 
     public void offer(RichMqttMessage mqttMessage) {
         this.mqttMessageQueue.offer(mqttMessage);
-        logger.info("入站消息队列长度: " + this.mqttMessageQueue.size());
+        logger.debug("入站消息队列长度: " + this.mqttMessageQueue.size());
     }
 
     public RichMqttMessage poll() {

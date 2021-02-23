@@ -1,12 +1,10 @@
 package com.icbms.iot.common.service.impl;
 
-import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.common.service.GatewayConfigService;
-import com.icbms.iot.entity.GatewayAddress;
 import com.icbms.iot.entity.GatewayInfo;
-import com.icbms.iot.mapper.GatewayAddressMapper;
+import com.icbms.iot.entity.ProjectInfo;
 import com.icbms.iot.mapper.GatewayInfoMapper;
-import com.icbms.iot.rest.LoRaCommandService;
+import com.icbms.iot.mapper.ProjectInfoMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
@@ -15,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.lang.invoke.MethodHandles;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,35 +29,10 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
     private StringRedisTemplate redisTempalte;
 
     @Autowired
-    private GatewayAddressMapper gateWayAddressMapper;
+    private ProjectInfoMapper projectInfoMapper;
 
     @Autowired
-    private LoRaCommandService loRaCommandService;
-
-    @Autowired
-    private GatewayInfoMapper gateWayInfoMapper;
-
-    //@PostConstruct
-    public void initGateWayInfos() {
-        List<GatewayAddress> allAddress = gateWayAddressMapper.findAll();
-        if (CollectionUtils.isEmpty(allAddress)) {
-            return;
-        }
-        List<GatewayInfo> allInDb = gateWayInfoMapper.findAll();
-        Map<String, GatewayInfo> map = new HashMap<>();
-        allInDb.forEach(item -> map.put(item.getIpAddress(), item));
-        List<GatewayInfo> allGateWays = new ArrayList<>();
-        for (GatewayAddress address : allAddress) {
-            CommonResponse<List<GatewayInfo>> gatewayListData = loRaCommandService.getGatewayList(address.getIpAddress());
-            List<GatewayInfo> gatewayInfos = gatewayListData.getData();
-            if (CollectionUtils.isEmpty(gatewayInfos)) {
-                continue;
-            }
-            allGateWays.addAll(gatewayInfos);
-        }
-        List<GatewayInfo> infoList = allGateWays.stream().filter(gatewayInfo -> !map.containsKey(gatewayInfo.getIpAddress())).collect(Collectors.toList());
-        gateWayInfoMapper.batchInsert(infoList);
-    }
+    private GatewayInfoMapper gatewayInfoMapper;
 
 
     public String getProjectIdByGatewayId(String gatewayId) {
@@ -95,6 +66,24 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
     @Override
     public String getGatewayIdByDevEUI(String devEui) {
         return "23";
+    }
+
+    @Override
+    public List<GatewayInfo> getAvailableGateways() {
+        Date date = new Date();
+        List<ProjectInfo> allEffectiveProjects = projectInfoMapper.findAllEffectiveProjects(date);
+        if(CollectionUtils.isEmpty(allEffectiveProjects))
+            return new ArrayList<>();
+
+        List<String> gatewayList = allEffectiveProjects.stream().filter(Objects::nonNull)
+                .map(ProjectInfo::getGatewayAddress).distinct().collect(Collectors.toList());
+
+        if(CollectionUtils.isEmpty(gatewayList))
+            return new ArrayList<>();
+
+        List<GatewayInfo> gatewayInfoList = gatewayInfoMapper.findByGatewayId(gatewayList);
+
+        return gatewayInfoList;
     }
 
 }

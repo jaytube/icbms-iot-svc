@@ -18,7 +18,7 @@ public class RealtimeMsgQueue {
 
     public void offer(RealtimeMessage msg) {
         this.processedMsgQueue.offer(msg);
-        logger.info("实时数据处理队列长度: " + processedMsgQueue.size());
+        logger.debug("实时数据处理队列长度: " + processedMsgQueue.size());
     }
 
     public RealtimeMessage poll() {
