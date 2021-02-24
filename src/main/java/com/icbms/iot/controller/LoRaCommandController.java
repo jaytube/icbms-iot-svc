@@ -2,18 +2,23 @@ package com.icbms.iot.controller;
 
 import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.dto.AddDeviceDto;
+import com.icbms.iot.dto.DeviceInfoDto;
 import com.icbms.iot.enums.LoRaCommand;
+import com.icbms.iot.mapper.GatewayDeviceMapMapper;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.RestUtil;
 import io.swagger.annotations.Api;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -132,18 +137,21 @@ public class LoRaCommandController {
     }
 
     @GetMapping("/deleteBatch")
-    public CommonResponse deleteBatch(@RequestParam("gatewayIp") String gatewayIp) {
-        List<Integer> ids = new ArrayList<>();
-        IntStream.range(200, 580).forEach(i -> ids.add(i));
-        CompletableFuture.runAsync(() -> {
-            loRaCommandService.deleteDevices(gatewayIp, ids);
-        });
+    public CommonResponse deleteBatch(@RequestParam("gatewayIp") String gatewayIp, @RequestParam("projectId") String projectId) {
+        CommonResponse<List<DeviceInfoDto>> devicesResp = loRaCommandService.getDevices(gatewayIp, "");
+        List<DeviceInfoDto> devices = devicesResp.getData();
+        if(CollectionUtils.isEmpty(devices))
+            return CommonResponse.success();
 
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
+        List<Integer> ids = devices.stream().map(DeviceInfoDto::getApplicationId).distinct().collect(Collectors.toList());
+        CommonResponse<Map> deleteResp = loRaCommandService.deleteDevices(gatewayIp, ids);
+        if("200".equals(deleteResp.getCode())) {
+            String gatewayId = gatewayIp.substring(gatewayIp.lastIndexOf(".") + 1);
+            loRaCommandService.deleteDevicesByProjectId(projectId, gatewayId);
+            return CommonResponse.success();
+        } else {
+            return CommonResponse.faild();
         }
-        return CommonResponse.success();
     }
 
 }

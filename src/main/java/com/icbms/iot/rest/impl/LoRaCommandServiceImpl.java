@@ -5,10 +5,13 @@ import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.dto.AddDeviceDto;
 import com.icbms.iot.dto.DeviceInfoDto;
 import com.icbms.iot.dto.TerminalTypeDto;
+import com.icbms.iot.entity.DeviceAlarmInfoLog;
+import com.icbms.iot.entity.DeviceBoxInfo;
 import com.icbms.iot.entity.GatewayInfo;
 import com.icbms.iot.enums.LoRaCommand;
 import com.icbms.iot.exception.ErrorCodeEnum;
 import com.icbms.iot.exception.IotException;
+import com.icbms.iot.mapper.*;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.Base64Util;
 import com.icbms.iot.util.RestUtil;
@@ -20,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -42,6 +46,27 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private GatewayDeviceMapMapper gatewayDeviceMapMapper;
+
+    @Autowired
+    private DeviceSwitchInfoLogMapper deviceSwitchInfoLogMapper;
+
+    @Autowired
+    private DeviceAlarmInfoLogMapper deviceAlarmInfoLogMapper;
+
+    @Autowired
+    private DeviceLocationInfoMapper deviceLocationInfoMapper;
+
+    @Autowired
+    private DeviceBoxInfoMapper deviceBoxInfoMapper;
+
+    @Autowired
+    private DeviceSwitchInfoDetailLogMapper deviceSwitchInfoDetailLogMapper;
+
+    @Autowired
+    private LocationInfoMapper locationInfoMapper;
 
     private static final String START_ROUND_ROBIN_URI = ":9900/api-sdm/v1/pUI";
 
@@ -277,6 +302,21 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
             return map;
         }).collect(Collectors.toList());
         return restUtil.doDeleteWithToken(gatewayIp, gatewayIp + DEVICE_IP_URI + "/api-sdm/SdmDevice/batchDel", body);
+    }
+
+    @Override
+    @Transactional
+    public void deleteDevicesByProjectId(String projectId, String gatewayId) {
+        gatewayDeviceMapMapper.deleteByGatewayId(gatewayId);
+        List<DeviceBoxInfo> boxList = deviceBoxInfoMapper.findByProjectIdList(Arrays.asList(projectId));
+        List<String> boxIdList = boxList.stream().filter(Objects::nonNull).map(DeviceBoxInfo::getId).distinct().collect(Collectors.toList());
+        deviceBoxInfoMapper.deleteByProjectId(projectId);
+        locationInfoMapper.deleteByProjectId(projectId);
+        if(CollectionUtils.isNotEmpty(boxIdList))
+            deviceLocationInfoMapper.deleteByDeviceBoxIds(boxIdList);
+        deviceAlarmInfoLogMapper.deleteByProjectId(projectId);
+        deviceSwitchInfoLogMapper.deleteByProjectId(projectId);
+        deviceSwitchInfoDetailLogMapper.deleteByProjectId(projectId);
     }
 
     private GatewayInfo convertGateWay(String gatewayIp, Map<String, Object> map) {
