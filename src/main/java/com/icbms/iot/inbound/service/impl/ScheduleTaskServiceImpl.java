@@ -62,7 +62,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     private GatewayConfigService gatewayConfigService;
 
     @Override
-    @Scheduled(fixedDelay = MONITOR_DEVICE_FREQUENCY)
+    @Scheduled(fixedDelay = MONITOR_DEVICE_FREQUENCY, initialDelay = MONITOR_DEVICE_FREQUENCY)
     @Transactional
     public void monitorDevice() {
         logger.info("开始监测设备状态...");
@@ -132,7 +132,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     }
 
     @Override
-    @Scheduled(fixedDelay = MONITOR_GATEWAY_FREQUENCY)
+    @Scheduled(fixedDelay = MONITOR_GATEWAY_FREQUENCY, initialDelay = MONITOR_GATEWAY_FREQUENCY)
     @Transactional
     public void monitorGateway() {
         logger.info("开始监测网关状态...");
@@ -178,7 +178,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     }
 
     @Override
-    @Scheduled(fixedDelay = ROUND_ROBIN_FREQUENCY)
+    @Scheduled(fixedDelay = ROUND_ROBIN_FREQUENCY, initialDelay = ROUND_ROBIN_FREQUENCY)
     @Transactional
     public void roundRobinControl() {
         logger.info("开始网关轮询...");

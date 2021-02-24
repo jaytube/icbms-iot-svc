@@ -30,7 +30,7 @@ public class ThreadPoolConfig implements AsyncConfigurer {
     @Bean
     public TaskScheduler taskScheduler() {
         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-        taskScheduler.setPoolSize(5);
+        taskScheduler.setPoolSize(10);
         taskScheduler.setThreadNamePrefix("iot-monitor-");
         return taskScheduler;
     }
