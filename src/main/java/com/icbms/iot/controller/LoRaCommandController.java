@@ -32,9 +32,6 @@ public class LoRaCommandController {
     @Autowired
     private RestUtil restUtil;
 
-    @Autowired
-    private Executor taskExecutor;
-
     private String REST_IP = "http://10.0.1.73";
 
     @GetMapping("/cmd/{deviceId}/{command}")

@@ -7,13 +7,14 @@ import com.icbms.iot.common.service.GatewayConfigService;
 import com.icbms.iot.dto.GatewayDto;
 import com.icbms.iot.dto.GatewayStatusDto;
 import com.icbms.iot.dto.TerminalStatusDto;
-import com.icbms.iot.entity.*;
+import com.icbms.iot.entity.AlarmDataEntity;
+import com.icbms.iot.entity.GatewayDeviceMap;
+import com.icbms.iot.entity.GatewayInfo;
 import com.icbms.iot.enums.GatewayRunType;
 import com.icbms.iot.inbound.service.AlarmDataService;
 import com.icbms.iot.inbound.service.ScheduleTaskService;
 import com.icbms.iot.mapper.GatewayDeviceMapMapper;
 import com.icbms.iot.mapper.GatewayInfoMapper;
-import com.icbms.iot.mapper.ProjectInfoMapper;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.DateUtil;
 import com.icbms.iot.util.TerminalBoxConvertUtil;
@@ -30,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.invoke.MethodHandles;
 import java.util.*;
-import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import static com.icbms.iot.constant.IotConstant.*;
