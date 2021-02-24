@@ -4,6 +4,7 @@ import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.dto.AddDeviceDto;
 import com.icbms.iot.dto.DeviceInfoDto;
 import com.icbms.iot.enums.LoRaCommand;
+import com.icbms.iot.exception.IotException;
 import com.icbms.iot.mapper.GatewayDeviceMapMapper;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.RestUtil;
@@ -137,21 +138,13 @@ public class LoRaCommandController {
     }
 
     @GetMapping("/deleteBatch")
-    public CommonResponse deleteBatch(@RequestParam("gatewayIp") String gatewayIp, @RequestParam("projectId") String projectId) {
-        CommonResponse<List<DeviceInfoDto>> devicesResp = loRaCommandService.getDevices(gatewayIp, "");
-        List<DeviceInfoDto> devices = devicesResp.getData();
-        if(CollectionUtils.isEmpty(devices))
-            return CommonResponse.success();
-
-        List<Integer> ids = devices.stream().map(DeviceInfoDto::getApplicationId).distinct().collect(Collectors.toList());
-        CommonResponse<Map> deleteResp = loRaCommandService.deleteDevices(gatewayIp, ids);
-        if("200".equals(deleteResp.getCode())) {
-            String gatewayId = gatewayIp.substring(gatewayIp.lastIndexOf(".") + 1);
+    public CommonResponse deleteBatch(@RequestParam("gatewayId") String gatewayId, @RequestParam("projectId") String projectId) {
+        try {
             loRaCommandService.deleteDevicesByProjectId(projectId, gatewayId);
-            return CommonResponse.success();
-        } else {
-            return CommonResponse.faild();
+        } catch(IotException e) {
+            return CommonResponse.faild(e.getErrorCode() + ", " + e.getErrorMessage());
         }
+        return CommonResponse.success();
     }
 
 }
