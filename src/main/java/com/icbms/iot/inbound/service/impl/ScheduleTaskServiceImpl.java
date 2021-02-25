@@ -114,6 +114,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                             alarmData.setAlarmStatus("0");
                             alarmData.setAlarmContent("第["+TerminalBoxConvertUtil.getTerminalNo(device.getDeviceBoxNum())+"]号终端恢复连接!");
                             alarmData.setReportTime(DateUtil.parseDate(System.currentTimeMillis()));
+                            alarmData.setAlarmType(DEVICE_NO_SIGNAL_RECOVER);
                             alarmDataMap.put(key, JSON.toJSONString(alarmData));
                             list.add(alarmData);
                             TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalOkStatus(gatewayId, alarmData.getTerminalId());
