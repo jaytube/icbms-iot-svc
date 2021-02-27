@@ -2,18 +2,24 @@ package com.icbms.iot.controller;
 
 import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.dto.AddDeviceDto;
+import com.icbms.iot.dto.DeviceInfoDto;
 import com.icbms.iot.enums.LoRaCommand;
+import com.icbms.iot.exception.IotException;
+import com.icbms.iot.mapper.GatewayDeviceMapMapper;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.RestUtil;
 import io.swagger.annotations.Api;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -31,9 +37,6 @@ public class LoRaCommandController {
 
     @Autowired
     private RestUtil restUtil;
-
-    @Autowired
-    private Executor taskExecutor;
 
     private String REST_IP = "http://10.0.1.73";
 
@@ -135,16 +138,11 @@ public class LoRaCommandController {
     }
 
     @GetMapping("/deleteBatch")
-    public CommonResponse deleteBatch(@RequestParam("gatewayIp") String gatewayIp) {
-        List<Integer> ids = new ArrayList<>();
-        IntStream.range(200, 580).forEach(i -> ids.add(i));
-        CompletableFuture.runAsync(() -> {
-            loRaCommandService.deleteDevices(gatewayIp, ids);
-        });
-
+    public CommonResponse deleteBatch(@RequestParam("gatewayId") String gatewayId, @RequestParam("projectId") String projectId) {
         try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
+            loRaCommandService.deleteDevicesByProjectId(projectId, gatewayId);
+        } catch(IotException e) {
+            return CommonResponse.faild(e.getErrorCode() + ", " + e.getErrorMessage());
         }
         return CommonResponse.success();
     }

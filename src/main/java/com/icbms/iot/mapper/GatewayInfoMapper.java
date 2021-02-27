@@ -41,4 +41,7 @@ public interface GatewayInfoMapper {
             "</script>"
     })
     List<GatewayInfo> findByGatewayId(List<String> gatewayAddresses);
+
+    @Select("select * from gateway_info where gateway_id = #{gatewayId}")
+    GatewayInfo findById(String gatewayId);
 }

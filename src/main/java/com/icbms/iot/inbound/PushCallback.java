@@ -5,8 +5,7 @@ import com.icbms.iot.common.service.GatewayConfigService;
 import com.icbms.iot.config.MqttConfig;
 import com.icbms.iot.dto.RichMqttMessage;
 import com.icbms.iot.exception.IotException;
-import com.icbms.iot.inbound.component.InboundMsgQueue;
-import com.icbms.iot.inbound.component.InboundStopMsgQueue;
+import com.icbms.iot.inbound.service.InboundMsgProcessor;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -34,13 +33,10 @@ public class PushCallback implements MqttCallback {
     private MqttConfig mqttConfig;
 
     @Autowired
-    private InboundMsgQueue inboundMsgQueue;
+    private GatewayConfigService gatewayConfigService;
 
     @Autowired
-    private InboundStopMsgQueue inboundStopMsgQueue;
-    
-    @Autowired
-    private GatewayConfigService gatewayConfigService;
+    private InboundMsgProcessor inboundMsgProcessor;
 
     @Override
     public void connectionLost(Throwable throwable) {
@@ -77,9 +73,9 @@ public class PushCallback implements MqttCallback {
         String gatewayId = topic.split("\\/")[1];
         try {
             if(topic.contains(REAL_TIME))
-                inboundMsgQueue.offer(new RichMqttMessage(gatewayId, mqttMessage));
+                inboundMsgProcessor.processMqttRealtimeMsg(new RichMqttMessage(gatewayId, mqttMessage));
             else if(topic.contains(STOP))
-                inboundStopMsgQueue.offer(new RichMqttMessage(gatewayId, mqttMessage));
+                inboundMsgProcessor.processMqttStopMsg(new RichMqttMessage(gatewayId, mqttMessage));
         } catch (IotException e) {
             logger.error("数据格式错误...");
         } catch (Exception ex) {

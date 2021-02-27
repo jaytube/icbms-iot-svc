@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.common.service.DeviceInfoService;
 import com.icbms.iot.dto.RealtimeMessage;
-import com.icbms.iot.dto.TerminalStatusDto;
 import com.icbms.iot.entity.AlarmDataEntity;
 import com.icbms.iot.entity.DeviceAlarmInfoLog;
 import com.icbms.iot.entity.DeviceBoxInfo;
@@ -15,7 +14,6 @@ import com.icbms.iot.mapper.DeviceBoxInfoMapper;
 import com.icbms.iot.util.CommonUtil;
 import com.icbms.iot.util.DateUtil;
 import com.icbms.iot.util.RestUtil;
-import com.icbms.iot.util.TerminalStatusUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -24,12 +22,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.invoke.MethodHandles;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
@@ -52,9 +50,6 @@ public class AlarmDataServiceImpl implements AlarmDataService {
 
     @Value("${icbms.alarm.url}")
     private String alarmUrl;
-
-    @Autowired
-    private Executor taskExecutor;
 
     @Autowired
     private RestUtil restUtil;
@@ -207,18 +202,17 @@ public class AlarmDataServiceImpl implements AlarmDataService {
         sendAlarm(logs);
     }
 
+    @Async
     private void sendAlarm(List<DeviceAlarmInfoLog> logs) {
         if(CollectionUtils.isNotEmpty(logs)) {
             for (DeviceAlarmInfoLog log : logs) {
                 if(log == null)
                     continue;
-                CompletableFuture.runAsync(() -> {
-                    Map<String, String> map = new HashMap<>();
-                    map.put("id", log.getId());
-                    CommonResponse<Map> resp = restUtil.doPlainPost(alarmUrl, map);
-                    if(resp.getCode() != HttpStatus.OK.value())
-                        logger.error("发送告警数据失败，id: {}", log.getId());
-                }, taskExecutor);
+                Map<String, String> map = new HashMap<>();
+                map.put("id", log.getId());
+                CommonResponse<Map> resp = restUtil.doPlainPost(alarmUrl, map);
+                if(resp.getCode() != HttpStatus.OK.value())
+                    logger.error("发送告警数据失败，id: {}", log.getId());
             }
         }
     }

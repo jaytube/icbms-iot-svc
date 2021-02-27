@@ -46,4 +46,6 @@ public interface LoRaCommandService {
     CommonResponse deleteDevice(String gatewayIp, String deviceSn);
 
     CommonResponse<Map> deleteDevices(String gatewayIp, List<Integer> deviceIds);
+
+    void deleteDevicesByProjectId(String projectId, String gatewayId);
 }
