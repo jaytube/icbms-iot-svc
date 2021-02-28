@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface ProjectInfoMapper {
 
-    @Select("select * from project_info where str_to_date(effective_date, '%Y-%m-%d')  <= #{currentDate} and str_to_date(expire_date, '%Y-%m-%d')  >= #{currentDate}")
+    @Select("select * from project_info where str_to_date(effective_date, '%Y-%m-%d')  <= #{currentDate} and str_to_date(expire_date, '%Y-%m-%d')  >= #{currentDate} and gym_id = 2")
     List<ProjectInfo> findAllEffectiveProjects(Date currentDate);
 }
