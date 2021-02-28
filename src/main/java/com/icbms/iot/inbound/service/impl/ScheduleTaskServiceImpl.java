@@ -7,13 +7,14 @@ import com.icbms.iot.common.service.GatewayConfigService;
 import com.icbms.iot.dto.GatewayDto;
 import com.icbms.iot.dto.GatewayStatusDto;
 import com.icbms.iot.dto.TerminalStatusDto;
-import com.icbms.iot.entity.*;
+import com.icbms.iot.entity.AlarmDataEntity;
+import com.icbms.iot.entity.GatewayDeviceMap;
+import com.icbms.iot.entity.GatewayInfo;
 import com.icbms.iot.enums.GatewayRunType;
 import com.icbms.iot.inbound.service.AlarmDataService;
 import com.icbms.iot.inbound.service.ScheduleTaskService;
 import com.icbms.iot.mapper.GatewayDeviceMapMapper;
 import com.icbms.iot.mapper.GatewayInfoMapper;
-import com.icbms.iot.mapper.ProjectInfoMapper;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.DateUtil;
 import com.icbms.iot.util.TerminalBoxConvertUtil;
@@ -30,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.invoke.MethodHandles;
 import java.util.*;
-import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import static com.icbms.iot.constant.IotConstant.*;
@@ -62,7 +62,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     private GatewayConfigService gatewayConfigService;
 
     @Override
-    @Scheduled(fixedDelay = MONITOR_DEVICE_FREQUENCY)
+    @Scheduled(fixedDelay = MONITOR_DEVICE_FREQUENCY, initialDelay = MONITOR_DEVICE_FREQUENCY)
     @Transactional
     public void monitorDevice() {
         logger.info("开始监测设备状态...");
@@ -114,6 +114,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                             alarmData.setAlarmStatus("0");
                             alarmData.setAlarmContent("第["+TerminalBoxConvertUtil.getTerminalNo(device.getDeviceBoxNum())+"]号终端恢复连接!");
                             alarmData.setReportTime(DateUtil.parseDate(System.currentTimeMillis()));
+                            alarmData.setAlarmType(DEVICE_NO_SIGNAL_RECOVER);
                             alarmDataMap.put(key, JSON.toJSONString(alarmData));
                             list.add(alarmData);
                             TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalOkStatus(gatewayId, alarmData.getTerminalId());
@@ -132,7 +133,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     }
 
     @Override
-    @Scheduled(fixedDelay = MONITOR_GATEWAY_FREQUENCY)
+    @Scheduled(fixedDelay = MONITOR_GATEWAY_FREQUENCY, initialDelay = MONITOR_GATEWAY_FREQUENCY)
     @Transactional
     public void monitorGateway() {
         logger.info("开始监测网关状态...");
@@ -178,7 +179,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     }
 
     @Override
-    @Scheduled(fixedDelay = ROUND_ROBIN_FREQUENCY)
+    @Scheduled(fixedDelay = ROUND_ROBIN_FREQUENCY, initialDelay = ROUND_ROBIN_FREQUENCY)
     @Transactional
     public void roundRobinControl() {
         logger.info("开始网关轮询...");

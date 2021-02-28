@@ -1,6 +1,7 @@
 package com.icbms.iot.mapper;
 
 import com.icbms.iot.entity.DeviceBoxInfo;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -17,4 +18,7 @@ public interface DeviceBoxInfoMapper {
             "</foreach>" +
             "</script>")
     List<DeviceBoxInfo> findByProjectIdList(List<String> projectIds);
+
+    @Delete("delete from device_box_info where project_id = #{projectId}")
+    void deleteByProjectId(String projectId);
 }

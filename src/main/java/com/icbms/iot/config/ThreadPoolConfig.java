@@ -1,19 +1,24 @@
 package com.icbms.iot.config;
 
 import lombok.Data;
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.AsyncConfigurer;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.util.concurrent.Executor;
 
 @Configuration
+@EnableAsync
 @ConfigurationProperties("iot.pool")
 @Data
-public class ThreadPoolConfig {
+public class ThreadPoolConfig implements AsyncConfigurer {
 
     private int coreSize;
     private int maxSize;
@@ -25,7 +30,7 @@ public class ThreadPoolConfig {
     @Bean
     public TaskScheduler taskScheduler() {
         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-        taskScheduler.setPoolSize(5);
+        taskScheduler.setPoolSize(10);
         taskScheduler.setThreadNamePrefix("iot-monitor-");
         return taskScheduler;
     }
@@ -41,5 +46,10 @@ public class ThreadPoolConfig {
         //taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
         taskExecutor.setAwaitTerminationSeconds(waitTerminalSeconds);
         return taskExecutor;
+    }
+
+    @Override
+    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+        return new SimpleAsyncUncaughtExceptionHandler();
     }
 }

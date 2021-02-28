@@ -1,6 +1,7 @@
 package com.icbms.iot.mapper;
 
 import com.icbms.iot.entity.DeviceAlarmInfoLog;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
 
@@ -21,5 +22,8 @@ public interface DeviceAlarmInfoLogMapper {
             "</script>"
     })
     int batchInsert(List<DeviceAlarmInfoLog> alarmInfoLogs);
+
+    @Delete("delete from device_alarm_info_log where project_id = #{projectId}")
+    void deleteByProjectId(String projectId);
 
 }

@@ -1,6 +1,7 @@
 package com.icbms.iot.mapper;
 
 import com.icbms.iot.entity.GatewayDeviceMap;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -20,4 +21,7 @@ public interface GatewayDeviceMapMapper {
 
     @Select("select * from gateway_device_map")
     List<GatewayDeviceMap> findAll();
+
+    @Delete("delete from gateway_device_map where gateway_id = #{gatewayId}")
+    void deleteByGatewayId(String gatewayId);
 }

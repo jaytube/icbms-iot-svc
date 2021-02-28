@@ -1,6 +1,7 @@
 package com.icbms.iot.mapper;
 
 import com.icbms.iot.entity.DeviceSwitchInfoLog;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 
 import java.util.List;
@@ -19,4 +20,6 @@ public interface DeviceSwitchInfoLogMapper {
     })
     void batchInsert(List<DeviceSwitchInfoLog> deviceSwitchInfoLog);
 
+    @Delete("delete from device_switch_info_log where project_id = #{projectId}")
+    void deleteByProjectId(String projectId);
 }
