@@ -312,12 +312,6 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
     public void deleteDevicesByProjectId(String projectId, String gatewayId) {
         GatewayInfo gatewayInfo = gatewayInfoMapper.findById(gatewayId);
         String gatewayIp = gatewayInfo.getIpAddress();
-        CommonResponse<List<DeviceInfoDto>> devicesResp = getDevices(gatewayIp, "");
-        List<DeviceInfoDto> devices = devicesResp.getData();
-        if(CollectionUtils.isEmpty(devices))
-            return;
-
-        List<Integer> ids = devices.stream().map(DeviceInfoDto::getId).distinct().collect(Collectors.toList());
         gatewayDeviceMapMapper.deleteByGatewayId(gatewayId);
         List<DeviceBoxInfo> boxList = deviceBoxInfoMapper.findByProjectIdList(Arrays.asList(projectId));
         List<String> boxIdList = boxList.stream().filter(Objects::nonNull).map(DeviceBoxInfo::getId).distinct().collect(Collectors.toList());
@@ -328,9 +322,14 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
         deviceAlarmInfoLogMapper.deleteByProjectId(projectId);
         deviceSwitchInfoLogMapper.deleteByProjectId(projectId);
         deviceSwitchInfoDetailLogMapper.deleteByProjectId(projectId);
-        CommonResponse<Map> deleteResp = deleteDevices(gatewayIp, ids);
-        if(!"200".equals(deleteResp.getCode()))
-            throw new IotException(ErrorCodeEnum.REMOTE_CALL_FAILED);
+        CommonResponse<List<DeviceInfoDto>> devicesResp = getDevices(gatewayIp, "");
+        List<DeviceInfoDto> devices = devicesResp.getData();
+        if(CollectionUtils.isNotEmpty(devices)) {
+            List<Integer> ids = devices.stream().map(DeviceInfoDto::getId).distinct().collect(Collectors.toList());
+            CommonResponse<Map> deleteResp = deleteDevices(gatewayIp, ids);
+            if(!"200".equals(deleteResp.getCode()))
+                throw new IotException(ErrorCodeEnum.REMOTE_CALL_FAILED);
+        }
     }
 
     private GatewayInfo convertGateWay(String gatewayIp, Map<String, Object> map) {
