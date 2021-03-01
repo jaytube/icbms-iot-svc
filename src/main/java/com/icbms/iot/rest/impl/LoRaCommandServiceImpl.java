@@ -317,7 +317,7 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
         if(CollectionUtils.isEmpty(devices))
             return;
 
-        List<Integer> ids = devices.stream().map(DeviceInfoDto::getApplicationId).distinct().collect(Collectors.toList());
+        List<Integer> ids = devices.stream().map(DeviceInfoDto::getId).distinct().collect(Collectors.toList());
         gatewayDeviceMapMapper.deleteByGatewayId(gatewayId);
         List<DeviceBoxInfo> boxList = deviceBoxInfoMapper.findByProjectIdList(Arrays.asList(projectId));
         List<String> boxIdList = boxList.stream().filter(Objects::nonNull).map(DeviceBoxInfo::getId).distinct().collect(Collectors.toList());
