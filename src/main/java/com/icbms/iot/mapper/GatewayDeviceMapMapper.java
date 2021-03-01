@@ -23,5 +23,5 @@ public interface GatewayDeviceMapMapper {
     List<GatewayDeviceMap> findAll();
 
     @Delete("delete from gateway_device_map where gateway_id = #{gatewayId}")
-    void deleteByGatewayId(String gatewayId);
+    void deleteByGatewayId(Integer gatewayId);
 }

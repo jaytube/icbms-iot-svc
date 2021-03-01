@@ -312,7 +312,7 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
     public void deleteDevicesByProjectId(String projectId, String gatewayId) {
         GatewayInfo gatewayInfo = gatewayInfoMapper.findById(gatewayId);
         String gatewayIp = gatewayInfo.getIpAddress();
-        gatewayDeviceMapMapper.deleteByGatewayId(gatewayId);
+        gatewayDeviceMapMapper.deleteByGatewayId(Integer.parseInt(gatewayId));
         List<DeviceBoxInfo> boxList = deviceBoxInfoMapper.findByProjectIdList(Arrays.asList(projectId));
         List<String> boxIdList = boxList.stream().filter(Objects::nonNull).map(DeviceBoxInfo::getId).distinct().collect(Collectors.toList());
         deviceBoxInfoMapper.deleteByProjectId(projectId);
