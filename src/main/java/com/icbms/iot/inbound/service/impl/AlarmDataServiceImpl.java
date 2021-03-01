@@ -139,6 +139,9 @@ public class AlarmDataServiceImpl implements AlarmDataService {
                 .filter(StringUtils::isNotBlank)
                 .distinct()
                 .collect(Collectors.toList());
+        if(CollectionUtils.isEmpty(projectIdList))
+            return new ArrayList<>();
+
         List<DeviceBoxInfo> deviceBoxes = deviceBoxInfoMapper.findByProjectIdList(projectIdList);
         //List<DeviceBoxInfo> deviceBoxes = Arrays.asList(mockDeviceBoxInfo());
         List<String> deviceBoxNums = list.stream().filter(Objects::nonNull).map(AlarmDataEntity::getTerminalId).distinct().collect(Collectors.toList());

@@ -105,6 +105,9 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
                 .filter(StringUtils::isNotBlank)
                 .distinct()
                 .collect(Collectors.toList());
+        if(CollectionUtils.isEmpty(projectIdList))
+            return;
+
         List<DeviceBoxInfo> deviceBoxes = deviceBoxInfoMapper.findByProjectIdList(projectIdList);
         List<String> deviceBoxNums = list.stream().filter(Objects::nonNull).map(RealDataEntity::getTerminalId).distinct().collect(Collectors.toList());
         deviceBoxes = deviceBoxes.stream().filter(l -> deviceBoxNums.contains(getTerminalNo(l.getDeviceBoxNum())))
