@@ -8,7 +8,7 @@ public interface DeviceLocationInfoMapper {
 
     @Delete({
             "<script>",
-            "delete from device_box_location where device_box_id = (",
+            "delete from device_box_location where device_box_id in (",
             "<foreach collection='list' item='item' index='index' separator=','>",
             "#{item}",
             "</foreach>",
