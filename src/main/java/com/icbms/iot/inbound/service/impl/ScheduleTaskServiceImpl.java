@@ -105,7 +105,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                         String statusKey = alarmData.getTerminalId() + "_LY";
                         terminalStatusMap.put(statusKey, JSON.toJSONString(statusDto));
                     }
-                } else if(lastUpdated != null && (currentTime - Long.parseLong((String) lastUpdated)) <= HEART_BEAT) {
+                } else if(lastUpdated != null && (currentTime - Long.parseLong((String) lastUpdated)) <= HEART_BEAT_RECOVER) {
                     String key = TerminalBoxConvertUtil.getTerminalNo(device.getDeviceBoxNum()) + "_100_16";
                     String alarmStr = (String) stringRedisTemplate.opsForHash().get(ALARM_DATA, key);
                     if(StringUtils.isNotBlank(alarmStr)) {
@@ -187,19 +187,33 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
         if(CollectionUtils.isEmpty(gatewayInfoList))
             return;
 
-        Map<Integer, GatewayDto> gatewayDtoMap = gatewayKeeper.getGatewayMap();
-        Map<Integer, GatewayInfo> gatewayInfoMap = new HashMap<>();
-        gatewayInfoList.stream().forEach(t -> {
-            gatewayInfoMap.put(t.getGatewayId(), t);
+        if(CollectionUtils.isNotEmpty(gatewayInfoList)) {
+            String str = gatewayInfoList.stream().map(t -> Integer.toString(t.getGatewayId())).collect(Collectors.joining(","));
+            logger.info("网关:" + str + "开始轮询");
+        }
+
+        gatewayInfoList.stream().forEach(g -> {
+            //GatewayInfo g = e.getValue();
+            String ip = g.getIpAddress();
+            /*CompletableFuture.runAsync(() -> {
+                loRaCommandService.startRoundRobin(ip);
+            }, taskExecutor);*/
+            loRaCommandService.startRoundRobin(ip);
+            logger.debug("网关: " + ip + "开始轮询");
         });
-        Iterator<Map.Entry<Integer, GatewayDto>> iterator = gatewayDtoMap.entrySet().iterator();
+        //Map<Integer, GatewayDto> gatewayDtoMap = gatewayKeeper.getGatewayMap();
+        //Map<Integer, GatewayInfo> gatewayInfoMap = new HashMap<>();
+        /*gatewayInfoList.stream().forEach(t -> {
+            gatewayInfoMap.put(t.getGatewayId(), t);
+        });*/
+        /*Iterator<Map.Entry<Integer, GatewayDto>> iterator = gatewayDtoMap.entrySet().iterator();
         while(iterator.hasNext()) {
             Map.Entry<Integer, GatewayDto> next = iterator.next();
             int gatewayId = next.getKey();
             if(!gatewayInfoMap.containsKey(gatewayId))
                 iterator.remove();
-        }
-        gatewayInfoMap.entrySet().stream().forEach(e -> {
+        }*/
+        /*gatewayInfoMap.entrySet().stream().forEach(e -> {
             int gatewayId = e.getKey();
             GatewayInfo gatewayInfo = e.getValue();
             GatewayDto dto = gatewayDtoMap.getOrDefault(gatewayInfo.getGatewayId(), null);
@@ -212,17 +226,17 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                 dto.setType(GatewayRunType.SINGLE);
                 gatewayKeeper.getGatewayMap().put(gatewayId, gatewayDto);
             }
-        });
-        gatewayDtoMap.entrySet().stream().forEach(e -> {
-            GatewayDto g = e.getValue();
-            String ip = g.getIp();
-            /*CompletableFuture.runAsync(() -> {
+        });*/
+        /*gatewayInfoMap.entrySet().stream().forEach(e -> {
+            GatewayInfo g = e.getValue();
+            String ip = g.getIpAddress();
+            *//*CompletableFuture.runAsync(() -> {
                 loRaCommandService.startRoundRobin(ip);
-            }, taskExecutor);*/
+            }, taskExecutor);*//*
             loRaCommandService.startRoundRobin(ip);
             logger.debug("网关: " + ip + "开始轮询");
-            g.setFinished(false);
-        });
+            //g.setFinished(false);
+        });*/
         /*loRaCommandService.startRoundRobin("http://10.0.1.71");*/
     }
 

@@ -46,6 +46,8 @@ public class IotConstant {
 
     public static final int HEART_BEAT = 300000;
 
+    public static final int HEART_BEAT_RECOVER = 60000;
+
     public static final int DEVICE_NOT_ONLINE_INTERVAL = 600000;
 
     public static final String GATEWAY_ALL = "GATEWAY_ALL";
