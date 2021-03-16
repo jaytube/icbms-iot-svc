@@ -32,4 +32,5 @@ public class GatewayInfo {
     private int updateUserId;
     private int isDel;
     private String ipAddress;
+    private String online;
 }

@@ -3,6 +3,7 @@ package com.icbms.iot.mapper;
 import com.icbms.iot.entity.GatewayInfo;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -44,4 +45,7 @@ public interface GatewayInfoMapper {
 
     @Select("select * from gateway_info where gateway_id = #{gatewayId}")
     GatewayInfo findById(String gatewayId);
+
+    @Update("update gateway_info set online = #{online} where gateway_id = #{gatewayId}")
+    void updateGatewayOnlineByGatewayId(String gatewayId, String online);
 }

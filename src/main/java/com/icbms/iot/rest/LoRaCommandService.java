@@ -48,4 +48,8 @@ public interface LoRaCommandService {
     CommonResponse<Map> deleteDevices(String gatewayIp, List<Integer> deviceIds);
 
     void deleteDevicesByProjectId(String projectId, String gatewayId);
+
+    CommonResponse stopGateway(String gatewayId);
+
+    CommonResponse startGateway(String gatewayId);
 }

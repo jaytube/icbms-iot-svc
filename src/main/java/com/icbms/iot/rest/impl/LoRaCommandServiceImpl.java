@@ -5,7 +5,6 @@ import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.dto.AddDeviceDto;
 import com.icbms.iot.dto.DeviceInfoDto;
 import com.icbms.iot.dto.TerminalTypeDto;
-import com.icbms.iot.entity.DeviceAlarmInfoLog;
 import com.icbms.iot.entity.DeviceBoxInfo;
 import com.icbms.iot.entity.GatewayInfo;
 import com.icbms.iot.enums.LoRaCommand;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.icbms.iot.util.CommonUtil.hexStringToBytes;
@@ -330,6 +328,31 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
             if(!"200".equals(deleteResp.getCode()))
                 throw new IotException(ErrorCodeEnum.REMOTE_CALL_FAILED);
         }
+    }
+
+    @Override
+    public CommonResponse stopGateway(String gatewayId) {
+        GatewayInfo gatewayInfo = gatewayInfoMapper.findById(gatewayId);
+        CommonResponse<Map> response = stopRoundRobin(gatewayInfo.getIpAddress());
+        Map result = response.getData();
+        Integer code = (Integer) MapUtils.getObject(result, "resp_code");
+        String msg = (String) MapUtils.getObject(result, "resp_msg");
+        if(response.getCode() != 200 || code == 1)
+            return CommonResponse.faild(msg);
+
+        gatewayInfoMapper.updateGatewayOnlineByGatewayId(gatewayId, "0");
+
+        return CommonResponse.success();
+    }
+
+    @Override
+    public CommonResponse startGateway(String gatewayId) {
+        GatewayInfo gatewayInfo = gatewayInfoMapper.findById(gatewayId);
+        if(gatewayInfo != null) {
+            gatewayInfoMapper.updateGatewayOnlineByGatewayId(gatewayId, "1");
+            return startRoundRobin(gatewayInfo.getIpAddress());
+        }
+        return CommonResponse.faild();
     }
 
     private GatewayInfo convertGateWay(String gatewayIp, Map<String, Object> map) {

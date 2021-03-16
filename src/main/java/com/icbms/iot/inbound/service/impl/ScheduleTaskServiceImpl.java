@@ -188,19 +188,28 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
             return;
 
         if(CollectionUtils.isNotEmpty(gatewayInfoList)) {
-            String str = gatewayInfoList.stream().map(t -> Integer.toString(t.getGatewayId())).collect(Collectors.joining(","));
+            List<GatewayInfo> onlineList = gatewayInfoList.stream().filter(g -> "1".equals(g.getOnline())).collect(Collectors.toList());
+            String str = onlineList.stream().map(t -> Integer.toString(t.getGatewayId())).collect(Collectors.joining(","));
             logger.info("网关:" + str + "开始轮询");
-        }
 
-        gatewayInfoList.stream().forEach(g -> {
-            //GatewayInfo g = e.getValue();
-            String ip = g.getIpAddress();
-            /*CompletableFuture.runAsync(() -> {
-                loRaCommandService.startRoundRobin(ip);
-            }, taskExecutor);*/
-            loRaCommandService.startRoundRobin(ip);
-            logger.debug("网关: " + ip + "开始轮询");
-        });
+            List<GatewayInfo> offlineList = gatewayInfoList.stream().filter(g -> "0".equals(g.getOnline())).collect(Collectors.toList());
+
+            if(CollectionUtils.isNotEmpty(offlineList)) {
+                offlineList.stream().forEach(g -> {
+                    String ip = g.getIpAddress();
+                    loRaCommandService.stopRoundRobin(ip);
+                    logger.debug("网关: " + ip + "停止轮询");
+                });
+            }
+
+            if(CollectionUtils.isNotEmpty(onlineList)) {
+                onlineList.stream().forEach(g -> {
+                    String ip = g.getIpAddress();
+                    loRaCommandService.startRoundRobin(ip);
+                    logger.debug("网关: " + ip + "开始轮询");
+                });
+            }
+        }
         //Map<Integer, GatewayDto> gatewayDtoMap = gatewayKeeper.getGatewayMap();
         //Map<Integer, GatewayInfo> gatewayInfoMap = new HashMap<>();
         /*gatewayInfoList.stream().forEach(t -> {

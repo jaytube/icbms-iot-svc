@@ -3,9 +3,11 @@ package com.icbms.iot.controller;
 import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.dto.AddDeviceDto;
 import com.icbms.iot.dto.DeviceInfoDto;
+import com.icbms.iot.entity.GatewayInfo;
 import com.icbms.iot.enums.LoRaCommand;
 import com.icbms.iot.exception.IotException;
 import com.icbms.iot.mapper.GatewayDeviceMapMapper;
+import com.icbms.iot.mapper.GatewayInfoMapper;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.RestUtil;
 import io.swagger.annotations.Api;
@@ -37,6 +39,9 @@ public class LoRaCommandController {
 
     @Autowired
     private RestUtil restUtil;
+
+    @Autowired
+    private GatewayInfoMapper gatewayInfoMapper;
 
     private String REST_IP = "http://10.0.1.73";
 
@@ -147,4 +152,15 @@ public class LoRaCommandController {
         return CommonResponse.success();
     }
 
+    @GetMapping("/stopGateway")
+    @ResponseBody
+    public CommonResponse stopGateway(String gatewayId) {
+        return loRaCommandService.stopGateway(gatewayId);
+    }
+
+    @GetMapping("/startGateway")
+    @ResponseBody
+    public CommonResponse startGateway(String gatewayId) {
+        return loRaCommandService.startGateway(gatewayId);
+    }
 }
