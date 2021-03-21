@@ -101,22 +101,19 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                         if (!"1".equals(oldEntity.getAlarmStatus())) {
                             list.add(alarmData);
                             alarmDataMap.put(key, JSON.toJSONString(alarmData));
-                            TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalBadStatus(gatewayId, alarmData.getTerminalId());
-                            String statusKey = alarmData.getTerminalId() + "_LY";
-                            terminalStatusMap.put(statusKey, JSON.toJSONString(statusDto));
                         }
                     } else {
                         list.add(alarmData);
                         alarmDataMap.put(key, JSON.toJSONString(alarmData));
-                        TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalBadStatus(gatewayId, alarmData.getTerminalId());
-                        String statusKey = alarmData.getTerminalId() + "_LY";
-                        terminalStatusMap.put(statusKey, JSON.toJSONString(statusDto));
                     }
+                    TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalBadStatus(gatewayId, alarmData.getTerminalId());
+                    String statusKey = alarmData.getTerminalId() + "_LY";
+                    terminalStatusMap.put(statusKey, JSON.toJSONString(statusDto));
                 } else if(lastUpdated != null && (currentTime - Long.parseLong((String) lastUpdated)) <= HEART_BEAT_RECOVER) {
                     String key = TerminalBoxConvertUtil.getTerminalNo(device.getDeviceBoxNum()) + "_100_16";
                     String alarmStr = (String) stringRedisTemplate.opsForHash().get(ALARM_DATA, key);
+                    AlarmDataEntity alarmData = JSON.parseObject(alarmStr, AlarmDataEntity.class);
                     if(StringUtils.isNotBlank(alarmStr)) {
-                        AlarmDataEntity alarmData = JSON.parseObject(alarmStr, AlarmDataEntity.class);
                         if("1".equalsIgnoreCase(alarmData.getAlarmStatus())) {
                             alarmData.setAlarmStatus("0");
                             alarmData.setAlarmContent("第["+TerminalBoxConvertUtil.getTerminalNo(device.getDeviceBoxNum())+"]号终端恢复连接!");
@@ -124,11 +121,11 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                             alarmData.setAlarmType(DEVICE_NO_SIGNAL_RECOVER);
                             alarmDataMap.put(key, JSON.toJSONString(alarmData));
                             list.add(alarmData);
-                            TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalOkStatus(gatewayId, alarmData.getTerminalId());
-                            String statusKey = alarmData.getTerminalId() + "_LY";
-                            terminalStatusMap.put(statusKey, JSON.toJSONString(statusDto));
                         }
                     }
+                    TerminalStatusDto statusDto = TerminalStatusUtil.getTerminalOkStatus(gatewayId, alarmData.getTerminalId());
+                    String statusKey = alarmData.getTerminalId() + "_LY";
+                    terminalStatusMap.put(statusKey, JSON.toJSONString(statusDto));
                 } else if(lastUpdated == null) {
                     stringRedisTemplate.opsForHash().put(REAL_HIS_DATA_STORE_UP_TO_DATE, hashKey, Long.toString(currentTime));
                 }

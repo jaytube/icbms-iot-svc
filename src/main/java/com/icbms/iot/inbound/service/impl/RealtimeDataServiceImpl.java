@@ -130,7 +130,7 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
             log.setDeviceBoxId(deviceBoxId);
             log.setAddress(l.getSwitchAddr());
             int deviceSwithAddr = Integer.valueOf(l.getSwitchAddr());
-            log.setDeviceSwitchName(CIRCUIT + deviceSwithAddr);
+            log.setDeviceSwitchName(CIRCUIT + "1");
             log.setDeviceSwitchStatus(l.getSwitchOnoff());
             log.setSwitchElectric(l.getElectricCurrent());
             log.setSwitchElectriCnt(l.getElectricCnt());
