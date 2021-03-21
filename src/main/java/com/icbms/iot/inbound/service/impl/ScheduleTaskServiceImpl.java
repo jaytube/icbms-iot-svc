@@ -4,17 +4,18 @@ import com.alibaba.fastjson.JSON;
 import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.common.component.GatewayKeeper;
 import com.icbms.iot.common.service.GatewayConfigService;
-import com.icbms.iot.dto.GatewayDto;
 import com.icbms.iot.dto.GatewayStatusDto;
 import com.icbms.iot.dto.TerminalStatusDto;
 import com.icbms.iot.entity.AlarmDataEntity;
 import com.icbms.iot.entity.GatewayDeviceMap;
 import com.icbms.iot.entity.GatewayInfo;
-import com.icbms.iot.enums.GatewayRunType;
+import com.icbms.iot.entity.ProjectInfo;
 import com.icbms.iot.inbound.service.AlarmDataService;
 import com.icbms.iot.inbound.service.ScheduleTaskService;
 import com.icbms.iot.mapper.GatewayDeviceMapMapper;
 import com.icbms.iot.mapper.GatewayInfoMapper;
+import com.icbms.iot.mapper.ProjectInfoMapper;
+import com.icbms.iot.mapper.UserProjectMapper;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.DateUtil;
 import com.icbms.iot.util.TerminalBoxConvertUtil;
@@ -60,6 +61,12 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
 
     @Autowired
     private GatewayConfigService gatewayConfigService;
+
+    @Autowired
+    private ProjectInfoMapper projectInfoMapper;
+
+    @Autowired
+    private UserProjectMapper userProjectMapper;
 
     @Override
     @Scheduled(fixedDelay = MONITOR_DEVICE_FREQUENCY, initialDelay = MONITOR_DEVICE_FREQUENCY)
@@ -249,6 +256,21 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
         /*loRaCommandService.startRoundRobin("http://10.0.1.71");*/
     }
 
+    @Override
+    @Scheduled(cron = "0 0 01 * * ?")
+    @Transactional
+    public void dailyBatchRemoveUserProjects() {
+        logger.info("定时删除用户项目关系开始。。。");
+        List<ProjectInfo> projects = projectInfoMapper.findAllUnEffectiveProjects(new Date());
+        if(CollectionUtils.isNotEmpty(projects))
+            return;
+
+        List<String> projectIdList = projects.stream().filter(Objects::nonNull).map(ProjectInfo::getId).distinct().collect(Collectors.toList());
+        if(CollectionUtils.isNotEmpty(projectIdList))
+            logger.info("删除项目ID列表：" + projectIdList.stream().collect(Collectors.joining(", ")));
+        userProjectMapper.deleteByProjectIdList(projectIdList);
+    }
+
     private AlarmDataEntity generateDeviceAlarmData(GatewayDeviceMap deviceNumEuiDto, long delta, String gatewayId) {
         AlarmDataEntity alarmData = new AlarmDataEntity();
         String boxNo = TerminalBoxConvertUtil.getTerminalNo(deviceNumEuiDto.getDeviceBoxNum());
@@ -280,7 +302,8 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
         alarmData.setAlarmStatus("1");
         alarmData.setAlarmType("网关通信中断");
         alarmData.setAlarmLevel("3");
-        alarmData.setProjectId(Integer.toString(gatewayId));
+        String projectId = gatewayConfigService.getProjectIdByGatewayId(Integer.toString(gatewayId));
+        alarmData.setProjectId(projectId);
         alarmData.setGatewayId(Integer.toString(gatewayId));
         alarmData.setReportTime(DateUtil.parseDate(System.currentTimeMillis()));
 
@@ -293,7 +316,8 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
         alarmData.setAlarmStatus("0");
         alarmData.setAlarmType("网关通信中断");
         alarmData.setAlarmLevel("3");
-        alarmData.setProjectId(Integer.toString(gatewayId));
+        String projectId = gatewayConfigService.getProjectIdByGatewayId(Integer.toString(gatewayId));
+        alarmData.setProjectId(projectId);
         alarmData.setGatewayId(Integer.toString(gatewayId));
         alarmData.setReportTime(DateUtil.parseDate(System.currentTimeMillis()));
 

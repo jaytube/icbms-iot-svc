@@ -7,4 +7,6 @@ public interface ScheduleTaskService {
     void monitorGateway();
 
     void roundRobinControl();
+
+    void dailyBatchRemoveUserProjects();
 }

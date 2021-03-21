@@ -11,19 +11,19 @@ public class RealtimeMessage {
 
     private Integer boxNo;
     private Integer circuitVoltage;
-    private Double currentLeak;
+    private String currentLeak;
     private Integer circuitPower;
     private Double modTemp;
-    private Double circuitCurrent;
+    private String circuitCurrent;
     private List<AlarmType> alarmTypes;
-    private Double electric;
+    private String electric;
     private Integer aVoltage;
     private Integer bVoltage;
     private Integer cVoltage;
-    private Double aCurrent;
-    private Double bCurrent;
-    private Double cCurrent;
-    private Double nCurrent;
+    private String aCurrent;
+    private String bCurrent;
+    private String cCurrent;
+    private String nCurrent;
     private Integer aPower;
     private Integer bPower;
     private Integer cPower;

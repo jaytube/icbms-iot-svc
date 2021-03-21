@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.lang.invoke.MethodHandles;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,8 +59,9 @@ public class RealtimeMessageParserImpl implements RealtimeMessageParser {
         int ram2 = CommonUtil.getShort(payload, index);
         index += 2;
         double currentLeak = ram2 * 0.0001;
-        logger.debug("泄漏电流：" + currentLeak);
-        message.setCurrentLeak(currentLeak);
+        String currentLeakStr = BigDecimal.valueOf(currentLeak).setScale(2, RoundingMode.HALF_UP).toString();
+        logger.debug("泄漏电流：" + currentLeakStr);
+        message.setCurrentLeak(currentLeakStr);
 
         int ram3 = CommonUtil.getShort(payload, index);
         index += 2;
@@ -74,8 +77,9 @@ public class RealtimeMessageParserImpl implements RealtimeMessageParser {
         int ram5 = CommonUtil.getShort(payload, index);
         index += 2;
         double circuitCurrent = ram5 * 0.01;
-        logger.debug("电路电流：" + circuitCurrent);
-        message.setCircuitCurrent(circuitCurrent);
+        String circuitCurrentStr = BigDecimal.valueOf(circuitCurrent).setScale(2, RoundingMode.HALF_UP).toString();
+        logger.debug("电路电流：" + circuitCurrentStr);
+        message.setCircuitCurrent(circuitCurrentStr);
 
         short ram6 = CommonUtil.getShort(payload, index);
         index += 2;
@@ -95,8 +99,9 @@ public class RealtimeMessageParserImpl implements RealtimeMessageParser {
         int val = CommonUtil.bytesToInt(elecByteArr);
         double electric = val * 0.001;
         //index += 4;
-        logger.debug("电量：" + electric);
-        message.setElectric(electric);
+        String electricStr = BigDecimal.valueOf(electric).setScale(2, RoundingMode.HALF_UP).toString();
+        logger.debug("电量：" + electricStr);
+        message.setElectric(electricStr);
 
         int ram9 = CommonUtil.getShort(payload, index);
         index += 2;
@@ -116,26 +121,30 @@ public class RealtimeMessageParserImpl implements RealtimeMessageParser {
         int ram12 = CommonUtil.getShort(payload, index);
         index += 2;
         double aCurr = ram12 * 0.01;
-        logger.debug("A箱电流：" + aCurr);
-        message.setACurrent(aCurr);
+        String aCurrStr = BigDecimal.valueOf(aCurr).setScale(2, RoundingMode.HALF_UP).toString();
+        logger.debug("A箱电流：" + aCurrStr);
+        message.setACurrent(aCurrStr);
 
         int ram13 = CommonUtil.getShort(payload, index);
         index += 2;
         double bCurr = ram13 * 0.01;
-        logger.debug("B箱电流：" + bCurr);
-        message.setBCurrent(bCurr);
+        String bCurrStr = BigDecimal.valueOf(bCurr).setScale(2, RoundingMode.HALF_UP).toString();
+        logger.debug("B箱电流：" + bCurrStr);
+        message.setBCurrent(bCurrStr);
 
         int ram14 = CommonUtil.getShort(payload, index);
         index += 2;
         double cCurr = ram14 * 0.01;
-        logger.debug("C箱电流：" + cCurr);
-        message.setCCurrent(cCurr);
+        String cCurrStr = BigDecimal.valueOf(cCurr).setScale(2, RoundingMode.HALF_UP).toString();
+        logger.debug("C箱电流：" + cCurrStr);
+        message.setCCurrent(cCurrStr);
 
         int ram15 = CommonUtil.getShort(payload, index);
         index += 2;
         double nCurr = ram15 * 0.01;
-        logger.debug("N箱电流：" + nCurr);
-        message.setNCurrent(nCurr);
+        String nCurrStr = BigDecimal.valueOf(nCurr).setScale(2, RoundingMode.HALF_UP).toString();
+        logger.debug("N箱电流：" + nCurrStr);
+        message.setNCurrent(nCurrStr);
 
         int ram16 = CommonUtil.getShort(payload, index);
         index += 2;
