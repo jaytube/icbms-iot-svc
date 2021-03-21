@@ -4,10 +4,13 @@ import com.icbms.iot.common.CommonResponse;
 import com.icbms.iot.dto.AddDeviceDto;
 import com.icbms.iot.dto.DeviceInfoDto;
 import com.icbms.iot.entity.GatewayInfo;
+import com.icbms.iot.entity.ProjectInfo;
 import com.icbms.iot.enums.LoRaCommand;
 import com.icbms.iot.exception.IotException;
 import com.icbms.iot.mapper.GatewayDeviceMapMapper;
 import com.icbms.iot.mapper.GatewayInfoMapper;
+import com.icbms.iot.mapper.ProjectInfoMapper;
+import com.icbms.iot.mapper.UserProjectMapper;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.RestUtil;
 import io.swagger.annotations.Api;
@@ -15,10 +18,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -36,6 +36,12 @@ public class LoRaCommandController {
 
     @Autowired
     private LoRaCommandService loRaCommandService;
+
+    @Autowired
+    private ProjectInfoMapper projectInfoMapper;
+
+    @Autowired
+    private UserProjectMapper userProjectMapper;
 
     @Autowired
     private RestUtil restUtil;
@@ -162,5 +168,17 @@ public class LoRaCommandController {
     @ResponseBody
     public CommonResponse startGateway(String gatewayId) {
         return loRaCommandService.startGateway(gatewayId);
+    }
+
+    @GetMapping("/delUserProjects")
+    public CommonResponse deleteUserProjects() {
+        List<ProjectInfo> projects = projectInfoMapper.findAllUnEffectiveProjects(new Date());
+        if(CollectionUtils.isEmpty(projects))
+            return CommonResponse.success();
+
+        List<String> projectIdList = projects.stream().filter(Objects::nonNull).map(ProjectInfo::getId).distinct().collect(Collectors.toList());
+        if(CollectionUtils.isNotEmpty(projectIdList))
+            userProjectMapper.deleteByProjectIdList(projectIdList);
+        return CommonResponse.success();
     }
 }

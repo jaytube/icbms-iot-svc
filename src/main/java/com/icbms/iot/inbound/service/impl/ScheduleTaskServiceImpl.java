@@ -262,7 +262,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     public void dailyBatchRemoveUserProjects() {
         logger.info("定时删除用户项目关系开始。。。");
         List<ProjectInfo> projects = projectInfoMapper.findAllUnEffectiveProjects(new Date());
-        if(CollectionUtils.isNotEmpty(projects))
+        if(CollectionUtils.isEmpty(projects))
             return;
 
         List<String> projectIdList = projects.stream().filter(Objects::nonNull).map(ProjectInfo::getId).distinct().collect(Collectors.toList());
