@@ -7,6 +7,7 @@ import com.icbms.iot.dto.DeviceInfoDto;
 import com.icbms.iot.dto.TerminalTypeDto;
 import com.icbms.iot.entity.DeviceBoxInfo;
 import com.icbms.iot.entity.GatewayInfo;
+import com.icbms.iot.entity.ProjectInfo;
 import com.icbms.iot.enums.LoRaCommand;
 import com.icbms.iot.exception.ErrorCodeEnum;
 import com.icbms.iot.exception.IotException;
@@ -353,6 +354,28 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
             return startRoundRobin(gatewayInfo.getIpAddress());
         }
         return CommonResponse.faild();
+    }
+
+    @Override
+    @Transactional
+    public CommonResponse deleteDeviceInGateway(ProjectInfo projectInfo) {
+        if(projectInfo.getGymId() != 2)
+            return CommonResponse.success("非龙阳馆不删除!");
+
+        String gatewayId = projectInfo.getGatewayAddress();
+        GatewayInfo gatewayInfo = gatewayInfoMapper.findById(gatewayId);
+        String gatewayIp = gatewayInfo.getIpAddress();
+        gatewayDeviceMapMapper.deleteByGatewayId(Integer.parseInt(gatewayId));
+        CommonResponse<List<DeviceInfoDto>> devicesResp = getDevices(gatewayIp, "");
+        List<DeviceInfoDto> devices = devicesResp.getData();
+        if(CollectionUtils.isNotEmpty(devices)) {
+            List<Integer> ids = devices.stream().map(DeviceInfoDto::getId).distinct().collect(Collectors.toList());
+            CommonResponse<Map> deleteResp = deleteDevices(gatewayIp, ids);
+            if(!"200".equals(deleteResp.getCode()))
+                throw new IotException(ErrorCodeEnum.REMOTE_CALL_FAILED);
+        }
+
+        return CommonResponse.success("网关上设备已经删除！");
     }
 
     private GatewayInfo convertGateWay(String gatewayIp, Map<String, Object> map) {

@@ -6,16 +6,10 @@ import com.icbms.iot.common.component.GatewayKeeper;
 import com.icbms.iot.common.service.GatewayConfigService;
 import com.icbms.iot.dto.GatewayStatusDto;
 import com.icbms.iot.dto.TerminalStatusDto;
-import com.icbms.iot.entity.AlarmDataEntity;
-import com.icbms.iot.entity.GatewayDeviceMap;
-import com.icbms.iot.entity.GatewayInfo;
-import com.icbms.iot.entity.ProjectInfo;
+import com.icbms.iot.entity.*;
 import com.icbms.iot.inbound.service.AlarmDataService;
 import com.icbms.iot.inbound.service.ScheduleTaskService;
-import com.icbms.iot.mapper.GatewayDeviceMapMapper;
-import com.icbms.iot.mapper.GatewayInfoMapper;
-import com.icbms.iot.mapper.ProjectInfoMapper;
-import com.icbms.iot.mapper.UserProjectMapper;
+import com.icbms.iot.mapper.*;
 import com.icbms.iot.rest.LoRaCommandService;
 import com.icbms.iot.util.DateUtil;
 import com.icbms.iot.util.TerminalBoxConvertUtil;
@@ -67,6 +61,9 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
 
     @Autowired
     private UserProjectMapper userProjectMapper;
+
+    @Autowired
+    private DeviceBoxInfoMapper deviceBoxInfoMapper;
 
     @Override
     @Scheduled(fixedDelay = MONITOR_DEVICE_FREQUENCY, initialDelay = MONITOR_DEVICE_FREQUENCY)
@@ -254,7 +251,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     }
 
     @Override
-    @Scheduled(cron = "0 0 01 * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
     @Transactional
     public void dailyBatchRemoveUserProjects() {
         logger.info("定时删除用户项目关系开始。。。");
@@ -263,9 +260,24 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
             return;
 
         List<String> projectIdList = projects.stream().filter(Objects::nonNull).map(ProjectInfo::getId).distinct().collect(Collectors.toList());
+        projectInfoMapper.updateExpiredProject(projectIdList);
+        logger.info("更新过期项目");
         if(CollectionUtils.isNotEmpty(projectIdList))
             logger.info("删除项目ID列表：" + projectIdList.stream().collect(Collectors.joining(", ")));
         userProjectMapper.deleteByProjectIdList(projectIdList);
+        logger.info("删除用户与项目关联关系!");
+        /*projects = projects.stream().filter(Objects::nonNull).filter(p -> p.getGymId() == 2).collect(Collectors.toList());
+        if(CollectionUtils.isNotEmpty(projects)) {
+            for (ProjectInfo project : projects) {
+                CommonResponse resp = loRaCommandService.deleteDeviceInGateway(project);
+                if(resp.getCode() == 200) {
+                    logger.info("删除项目：" + project.getProjectName() + ", 网关：" + project.getGatewayAddress() + " 下所有设备!");
+                    String val = (String) stringRedisTemplate.opsForHash().get(GATEWAY_CONFIG, project.getGatewayAddress());
+                    if(StringUtils.isNotBlank(val) && val.equalsIgnoreCase(project.getId()))
+                        stringRedisTemplate.opsForHash().delete(GATEWAY_CONFIG, project.getGatewayAddress());
+                }
+            }
+        }*/
     }
 
     private AlarmDataEntity generateDeviceAlarmData(GatewayDeviceMap deviceNumEuiDto, long delta, String gatewayId) {

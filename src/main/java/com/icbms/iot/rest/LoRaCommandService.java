@@ -5,6 +5,7 @@ import com.icbms.iot.dto.AddDeviceDto;
 import com.icbms.iot.dto.DeviceInfoDto;
 import com.icbms.iot.dto.TerminalTypeDto;
 import com.icbms.iot.entity.GatewayInfo;
+import com.icbms.iot.entity.ProjectInfo;
 import com.icbms.iot.enums.LoRaCommand;
 
 import java.util.List;
@@ -52,4 +53,6 @@ public interface LoRaCommandService {
     CommonResponse stopGateway(String gatewayId);
 
     CommonResponse startGateway(String gatewayId);
+
+    CommonResponse deleteDeviceInGateway(ProjectInfo projectInfo);
 }
