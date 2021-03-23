@@ -88,7 +88,7 @@ public class AlarmDataServiceImpl implements AlarmDataService {
         } else {
             for (AlarmType alarmType : alarmTypes) {
                 int code = alarmType.getCode();
-                String jsonStr = (String) redisTemplate.opsForHash().get(ALARM_DATA, boxNo + "_100_" + (15 - code));
+                String jsonStr = (String) redisTemplate.opsForHash().get(ALARM_DATA, boxNo + "_100_" + code);
                 if (StringUtils.isNotBlank(jsonStr)) {
                     AlarmDataEntity alarmEntity = JSON.parseObject(jsonStr, AlarmDataEntity.class);
                     if (!"1".equals(alarmEntity.getAlarmStatus())) {
@@ -101,7 +101,7 @@ public class AlarmDataServiceImpl implements AlarmDataService {
                         alarmEntity.setAlarmLevel(Objects.toString(alarmType.getLevel(), ""));
                         alarmEntity.setAlarmContent(alarmType.getAlarmContent());
                         alarmEntity.setAlarmType(alarmType.getAlarmContent());
-                        map.put(boxNo + "_100_" + (15 - code), JSON.toJSONString(alarmEntity));
+                        map.put(boxNo + "_100_" + code, JSON.toJSONString(alarmEntity));
                         list.add(alarmEntity);
                     }
                 } else {
@@ -115,7 +115,7 @@ public class AlarmDataServiceImpl implements AlarmDataService {
                     alarmEntity.setAlarmLevel(Objects.toString(alarmType.getLevel(), ""));
                     alarmEntity.setAlarmContent(alarmType.getAlarmContent());
                     alarmEntity.setAlarmType(alarmType.getAlarmContent());
-                    map.put(boxNo + "_100_" + (15 - code), JSON.toJSONString(alarmEntity));
+                    map.put(boxNo + "_100_" + code, JSON.toJSONString(alarmEntity));
                     list.add(alarmEntity);
                 }
             }
