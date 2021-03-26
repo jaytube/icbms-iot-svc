@@ -7,6 +7,8 @@ import com.icbms.iot.common.service.GatewayConfigService;
 import com.icbms.iot.dto.GatewayStatusDto;
 import com.icbms.iot.dto.TerminalStatusDto;
 import com.icbms.iot.entity.*;
+import com.icbms.iot.exception.ErrorCodeEnum;
+import com.icbms.iot.exception.IotException;
 import com.icbms.iot.inbound.service.AlarmDataService;
 import com.icbms.iot.inbound.service.ScheduleTaskService;
 import com.icbms.iot.mapper.*;
@@ -266,18 +268,22 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
             logger.info("删除项目ID列表：" + projectIdList.stream().collect(Collectors.joining(", ")));
         userProjectMapper.deleteByProjectIdList(projectIdList);
         logger.info("删除用户与项目关联关系!");
-        /*projects = projects.stream().filter(Objects::nonNull).filter(p -> p.getGymId() == 2).collect(Collectors.toList());
+        projects = projects.stream().filter(Objects::nonNull).filter(p -> p.getGymId() == 2).collect(Collectors.toList());
         if(CollectionUtils.isNotEmpty(projects)) {
             for (ProjectInfo project : projects) {
+                gatewayDeviceMapMapper.deleteByGatewayId(Integer.parseInt(project.getGatewayAddress()));
+                logger.info("删除网关: {} 下gateway device map表数据", project.getGatewayAddress());
                 CommonResponse resp = loRaCommandService.deleteDeviceInGateway(project);
                 if(resp.getCode() == 200) {
-                    logger.info("删除项目：" + project.getProjectName() + ", 网关：" + project.getGatewayAddress() + " 下所有设备!");
+                    logger.info("删除项目：" + project.getProjectName() + ", 网关：" + project.getGatewayAddress() + " 下所有设备成功!");
                     String val = (String) stringRedisTemplate.opsForHash().get(GATEWAY_CONFIG, project.getGatewayAddress());
                     if(StringUtils.isNotBlank(val) && val.equalsIgnoreCase(project.getId()))
                         stringRedisTemplate.opsForHash().delete(GATEWAY_CONFIG, project.getGatewayAddress());
+                } else {
+                    throw new IotException(ErrorCodeEnum.REMOTE_CALL_FAILED);
                 }
             }
-        }*/
+        }
     }
 
     private AlarmDataEntity generateDeviceAlarmData(GatewayDeviceMap deviceNumEuiDto, long delta, String gatewayId) {

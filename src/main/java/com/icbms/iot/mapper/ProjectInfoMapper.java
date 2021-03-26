@@ -23,5 +23,5 @@ public interface ProjectInfoMapper {
             "</foreach>",
             ")",
             "</script>"})
-    List<ProjectInfo> updateExpiredProject(List<String> projectIdList);
+    void updateExpiredProject(List<String> projectIdList);
 }
