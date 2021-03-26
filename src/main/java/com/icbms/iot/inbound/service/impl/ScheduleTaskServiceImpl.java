@@ -268,7 +268,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
             logger.info("删除项目ID列表：" + projectIdList.stream().collect(Collectors.joining(", ")));
         userProjectMapper.deleteByProjectIdList(projectIdList);
         logger.info("删除用户与项目关联关系!");
-        projects = projects.stream().filter(Objects::nonNull).filter(p -> p.getGymId() == 2).collect(Collectors.toList());
+        /*projects = projects.stream().filter(Objects::nonNull).filter(p -> p.getGymId() == 2).collect(Collectors.toList());
         if(CollectionUtils.isNotEmpty(projects)) {
             for (ProjectInfo project : projects) {
                 gatewayDeviceMapMapper.deleteByGatewayId(Integer.parseInt(project.getGatewayAddress()));
@@ -283,7 +283,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                     throw new IotException(ErrorCodeEnum.REMOTE_CALL_FAILED);
                 }
             }
-        }
+        }*/
     }
 
     private AlarmDataEntity generateDeviceAlarmData(GatewayDeviceMap deviceNumEuiDto, long delta, String gatewayId) {
