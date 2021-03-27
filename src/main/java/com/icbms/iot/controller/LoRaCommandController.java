@@ -172,7 +172,7 @@ public class LoRaCommandController {
 
     @GetMapping("/delUserProjects")
     public CommonResponse deleteUserProjects() {
-        List<ProjectInfo> projects = projectInfoMapper.findAllUnEffectiveProjects(new Date());
+        List<ProjectInfo> projects = projectInfoMapper.findAllUnEffectiveProjects();
         if(CollectionUtils.isEmpty(projects))
             return CommonResponse.success();
 
