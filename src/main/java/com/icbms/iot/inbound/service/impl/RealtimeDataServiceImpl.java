@@ -91,8 +91,9 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
         redisTemplate.opsForHash().putAll(REAL_DATA, realDataMap);
         redisTemplate.opsForHash().putAll(REAL_HIS_DATA_STORE_UP_TO_DATE, realHistDateMap);
         redisTemplate.opsForHash().putAll(TERMINAL_STATUS, terminalStatusMap);
-        if(CollectionUtils.isNotEmpty(result))
+        if(CollectionUtils.isNotEmpty(result)) {
             saveRealHisDataEntities(result);
+        }
 
         logger.debug("处理实时数据===========>结束");
     }
@@ -169,10 +170,10 @@ public class RealtimeDataServiceImpl implements RealtimeDataService {
 
 
         switchInfoLogMapper.batchInsert(logs);
-        logger.debug("插入device_switch_info_log");
+        logger.info("插入device_switch_info_log");
 
         switchInfoDetailLogMapper.batchInsert(detailLogs);
-        logger.debug("插入device_switch_info_detail_log");
+        logger.info("插入device_switch_info_detail_log");
     }
 
 }

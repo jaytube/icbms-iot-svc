@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.invoke.MethodHandles;
@@ -182,7 +183,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     }
 
     @Override
-    @Scheduled(fixedDelay = ROUND_ROBIN_FREQUENCY, initialDelay = ROUND_ROBIN_FREQUENCY)
+    @Scheduled(fixedDelay = ROUND_ROBIN_FREQUENCY, initialDelay = 30000)
     @Transactional
     public void roundRobinControl() {
         logger.info("开始网关轮询...");
@@ -209,7 +210,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                 onlineList.stream().forEach(g -> {
                     String ip = g.getIpAddress();
                     loRaCommandService.startRoundRobin(ip);
-                    logger.debug("网关: " + ip + "开始轮询");
+                    logger.info("网关: " + ip + "开始轮询");
                 });
             }
         }
@@ -254,7 +255,6 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
 
     @Override
     @Scheduled(cron = "0 0 1 * * ?")
-    @Transactional
     public void dailyBatchRemoveUserProjects() {
         logger.info("定时删除用户项目关系开始。。。");
         List<ProjectInfo> projects = projectInfoMapper.findAllUnEffectiveProjects();
@@ -268,22 +268,35 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
             logger.info("删除项目ID列表：" + projectIdList.stream().collect(Collectors.joining(", ")));
         userProjectMapper.deleteByProjectIdList(projectIdList);
         logger.info("删除用户与项目关联关系!");
-        /*projects = projects.stream().filter(Objects::nonNull).filter(p -> p.getGymId() == 2).collect(Collectors.toList());
+        projects = projects.stream().filter(Objects::nonNull).filter(p -> p.getGymId() == 2).collect(Collectors.toList());
         if(CollectionUtils.isNotEmpty(projects)) {
             for (ProjectInfo project : projects) {
-                gatewayDeviceMapMapper.deleteByGatewayId(Integer.parseInt(project.getGatewayAddress()));
-                logger.info("删除网关: {} 下gateway device map表数据", project.getGatewayAddress());
-                CommonResponse resp = loRaCommandService.deleteDeviceInGateway(project);
-                if(resp.getCode() == 200) {
-                    logger.info("删除项目：" + project.getProjectName() + ", 网关：" + project.getGatewayAddress() + " 下所有设备成功!");
-                    String val = (String) stringRedisTemplate.opsForHash().get(GATEWAY_CONFIG, project.getGatewayAddress());
-                    if(StringUtils.isNotBlank(val) && val.equalsIgnoreCase(project.getId()))
-                        stringRedisTemplate.opsForHash().delete(GATEWAY_CONFIG, project.getGatewayAddress());
-                } else {
-                    throw new IotException(ErrorCodeEnum.REMOTE_CALL_FAILED);
-                }
+                unbindDevicesFromGateway(project);
             }
-        }*/
+        }
+    }
+
+    /*@Override
+    @Scheduled(cron = "0 32 9 * * ?")
+    public void tmpJob() {
+        logger.info("实行临时任务开始。。。");
+        List<ProjectInfo> projects = projectInfoMapper.findIneffectiveProjectsByStatus();
+        if(CollectionUtils.isEmpty(projects))
+            return;
+
+        for (ProjectInfo project : projects) {
+            unbindDevicesFromGateway(project);
+        }
+    }*/
+
+    public void unbindDevicesFromGateway(ProjectInfo project) {
+        try {
+            CommonResponse resp = loRaCommandService.deleteDeviceInGateway(project);
+            if (resp.getCode() == 200)
+                logger.info("删除项目：" + project.getProjectName() + ", 网关：" + project.getGatewayAddress() + " 下所有设备成功!");
+        } catch (Exception e) {
+            logger.error("error, {}", e);
+        }
     }
 
     private AlarmDataEntity generateDeviceAlarmData(GatewayDeviceMap deviceNumEuiDto, long delta, String gatewayId) {

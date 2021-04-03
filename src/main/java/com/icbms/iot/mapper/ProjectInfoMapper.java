@@ -12,8 +12,11 @@ public interface ProjectInfoMapper {
     @Select("select * from project_info p join gateway_info g on p.gateway_address = g.gateway_id where str_to_date(p.effective_date, '%Y-%m-%d')  <= str_to_date(#{currentDate}, '%Y-%m-%d') and str_to_date(p.expire_date, '%Y-%m-%d')  >= str_to_date(#{currentDate}, '%Y-%m-%d') and p.gym_id = 2")
     List<ProjectInfo> findAllEffectiveProjects(Date currentDate);
 
-    @Select("select * from project_info p where str_to_date(p.expire_date, '%Y-%m-%d')  < str_to_date(sysdate(), '%Y-%m-%d')")
+    @Select("select * from project_info p where str_to_date(p.expire_date, '%Y-%m-%d')  < str_to_date(sysdate(), '%Y-%m-%d') and p.status = 0")
     List<ProjectInfo> findAllUnEffectiveProjects();
+
+    @Select("select * from project_info where status = 1 and gym_id = 2")
+    List<ProjectInfo> findIneffectiveProjectsByStatus();
 
     @Update({
             "<script>",

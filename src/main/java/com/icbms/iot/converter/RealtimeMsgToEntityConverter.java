@@ -6,10 +6,13 @@ import com.icbms.iot.dto.RealtimeMessage;
 import com.icbms.iot.entity.RealDataEntity;
 import com.icbms.iot.util.DateUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.lang.invoke.MethodHandles;
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -18,6 +21,7 @@ import static com.icbms.iot.constant.IotConstant.REAL_STAT_LAST_DATA;
 @Service
 public class RealtimeMsgToEntityConverter {
 
+    private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
     private DeviceInfoService deviceInfoService;

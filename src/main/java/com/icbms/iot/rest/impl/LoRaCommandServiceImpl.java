@@ -357,7 +357,6 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
     }
 
     @Override
-    @Transactional
     public CommonResponse deleteDeviceInGateway(ProjectInfo projectInfo) {
         if(projectInfo.getGymId() != 2)
             return CommonResponse.success("非龙阳馆不删除!");
@@ -365,17 +364,21 @@ public class LoRaCommandServiceImpl implements LoRaCommandService {
         String gatewayId = projectInfo.getGatewayAddress();
         GatewayInfo gatewayInfo = gatewayInfoMapper.findById(gatewayId);
         String gatewayIp = gatewayInfo.getIpAddress();
-        gatewayDeviceMapMapper.deleteByGatewayId(Integer.parseInt(gatewayId));
         CommonResponse<List<DeviceInfoDto>> devicesResp = getDevices(gatewayIp, "");
         List<DeviceInfoDto> devices = devicesResp.getData();
         if(CollectionUtils.isNotEmpty(devices)) {
             List<Integer> ids = devices.stream().map(DeviceInfoDto::getId).distinct().collect(Collectors.toList());
             CommonResponse<Map> deleteResp = deleteDevices(gatewayIp, ids);
-            if(!"200".equals(deleteResp.getCode()))
+            if(!"200".equals(deleteResp.getCode())) {
+                log.info("错误代码: {}, 网关ID: {}", deleteResp.getMsg(), gatewayId);
                 throw new IotException(ErrorCodeEnum.REMOTE_CALL_FAILED);
+            } else {
+                gatewayDeviceMapMapper.deleteByGatewayIdAndProjectId(Integer.parseInt(gatewayId), projectInfo.getId());
+                log.info("删除网关: {}, 项目 {} 下gateway device map表数据", gatewayId, projectInfo.getProjectName());
+            }
         }
 
-        return CommonResponse.success("网关上设备已经删除！");
+        return CommonResponse.success("网关上设备删除成功！");
     }
 
     private GatewayInfo convertGateWay(String gatewayIp, Map<String, Object> map) {

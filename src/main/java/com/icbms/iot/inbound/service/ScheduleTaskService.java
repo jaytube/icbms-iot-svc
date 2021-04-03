@@ -9,4 +9,6 @@ public interface ScheduleTaskService {
     void roundRobinControl();
 
     void dailyBatchRemoveUserProjects();
+
+    //void tmpJob();
 }

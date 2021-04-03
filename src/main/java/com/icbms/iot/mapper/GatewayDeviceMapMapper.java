@@ -24,4 +24,7 @@ public interface GatewayDeviceMapMapper {
 
     @Delete("delete from gateway_device_map where gateway_id = #{gatewayId}")
     void deleteByGatewayId(Integer gatewayId);
+
+    @Delete("delete from gateway_device_map where gateway_id = #{gatewayId} and project_id = #{projectId}")
+    void deleteByGatewayIdAndProjectId(Integer gatewayId, String projectId);
 }
